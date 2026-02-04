@@ -1,0 +1,9 @@
+<svg width="80" height="80" xmlns="http://www.w3.org/2000/svg">
+  <rect width="80" height="80" fill="#f3f4f6" rx="8"/>
+  <rect x="22" y="25" width="36" height="22" fill="#ef4444" rx="3"/>
+  <circle cx="32" cy="36" r="3" fill="#d4af37"/>
+  <circle cx="40" cy="36" r="3" fill="#d4af37"/>
+  <circle cx="48" cy="36" r="3" fill="#d4af37"/>
+  <rect x="28" y="52" width="24" height="2" fill="#374151"/>
+  <text x="40" y="75" text-anchor="middle" font-family="Arial" font-size="8" fill="#374151">ورشة</text>
+</svg>

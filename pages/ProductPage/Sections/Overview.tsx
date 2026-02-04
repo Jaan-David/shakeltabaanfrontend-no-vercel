@@ -1,0 +1,740 @@
+"use client";
+import React, { useState, useEffect, useMemo } from "react";
+import { Heart, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
+import { CustomImage } from "@/components/UI/Image/Images";
+import { cartService, checkProductUnitConflict } from "@/services/api/cart";
+import { useRouter } from "next/navigation";
+import { isAuthenticated } from "@/utils/auth";
+import Alert from "@/components/UI/Alert/alert";
+
+// Import the FavoritesContext directly but mark it as client-side only
+let FavoritesContext: any;
+
+if (typeof window !== 'undefined') {
+  FavoritesContext = require('@/services/favorites/FavoritesContext');
+}
+
+type Props = {
+  id?: number | string;
+  title?: string;
+  description?: string;
+  price?: number;
+  imageList?: string[]; 
+  rating?: number;
+  ratingCount?: number;
+  category?: string;
+  stockQty?: number;
+  isUNIT?: boolean;
+  isKG?: boolean;
+  isTON?: boolean;
+  isLITER?: boolean;
+  isCUBIC_METER?: boolean;
+  // Marble/Granite specific fields
+  pricePerLinearMeter?: number;
+  pricePerCubicMeter?: number;
+  offerLinearPrice?: number | null;
+  offerCubicPrice?: number | null;
+  color?: string;
+  qualityGrade?: string;
+  isOffer?: boolean;
+  advProduct?: string[];
+  organizationId?: string;
+  organizationName?: string;
+  createdBy?: string;
+  averageRate?: number;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+// Helper function to calculate price based on unit conversion
+const calculatePriceForUnit = (basePrice: number, baseUnit: string, targetUnit: string): number => {
+  // Define conversion rules
+  const conversions: { [key: string]: { [key: string]: number } } = {
+    'kg': {
+      'kg': 1,
+      'ton': 1000,  // 1 ton = 1000 kg, so price * 1000
+    },
+    'liter': {
+      'liter': 1,
+      'cubic_meter': 1000,  // 1 cubic meter = 1000 liters, so price * 1000
+    },
+  };
+
+  // If same unit, return base price
+  if (baseUnit === targetUnit) {
+    return basePrice;
+  }
+
+  // Check if conversion exists
+  if (conversions[baseUnit] && conversions[baseUnit][targetUnit]) {
+    return basePrice * conversions[baseUnit][targetUnit];
+  }
+
+  // Default: return base price if no conversion rule exists
+  return basePrice;
+};
+
+// Helper function to get base unit (the smallest unit available)
+const getBaseUnit = (props: {
+  isUNIT?: boolean;
+  isKG?: boolean;
+  isTON?: boolean;
+  isLITER?: boolean;
+  isCUBIC_METER?: boolean;
+}): string => {
+  // Prioritize smaller units as base
+  if (props.isKG || props.isTON) return 'kg'; // KG is the base for weight
+  if (props.isLITER || props.isCUBIC_METER) return 'liter'; // Liter is the base for volume
+  if (props.isUNIT) return 'unit';
+  return 'unit';
+};
+
+const Overview: React.FC<Props> = ({
+  id = 0,
+  title = "Product Title",
+  description = "",
+  price = 0,
+  imageList = ["/placeholder-product.jpg"],
+  rating = 0,
+  ratingCount = 0,
+  category = "غير محدد",
+  stockQty = 0,
+  isUNIT = false,
+  isKG = false,
+  isTON = false,
+  isLITER = false,
+  isCUBIC_METER = false,
+  pricePerLinearMeter,
+  pricePerCubicMeter,
+  offerLinearPrice = null,
+  offerCubicPrice = null,
+  color,
+  qualityGrade,
+  isOffer = false,
+  advProduct = [],
+  organizationId,
+  organizationName,
+  createdBy,
+  averageRate,
+  createdAt,
+  updatedAt,
+}) => {
+  console.log('🔍 Overview component props:', { organizationName, organizationId });
+  
+  const [quantity, setQuantity] = useState(1);
+  const [isAdding, setIsAdding] = useState(false);
+  const hasLinearPrice = pricePerLinearMeter !== null && pricePerLinearMeter !== undefined;
+  const hasCubicPrice = pricePerCubicMeter !== null && pricePerCubicMeter !== undefined;
+  const hasMarbleUnits = hasLinearPrice || hasCubicPrice;
+  const [selectedUnitType, setSelectedUnitType] = useState<'linear' | 'cubic'>(
+    hasLinearPrice ? 'linear' : 'cubic'
+  );
+  
+  // Define available units based on props - show related units together
+  const unitOptions = React.useMemo(() => {
+    const options: Array<{key: string, label: string}> = [];
+    
+    // If KG is available, also add TON option
+    if (isKG) {
+      options.push({ key: 'kg', label: 'كيلو' });
+      options.push({ key: 'ton', label: 'طن' });
+    }
+    // If TON is available without KG, still add both
+    else if (isTON) {
+      options.push({ key: 'kg', label: 'كيلو' });
+      options.push({ key: 'ton', label: 'طن' });
+    }
+    
+    // If LITER is available, also add CUBIC_METER option
+    if (isLITER) {
+      options.push({ key: 'liter', label: 'لتر' });
+      options.push({ key: 'cubic_meter', label: 'متر مكعب' });
+    }
+    // If CUBIC_METER is available without LITER, still add both
+    else if (isCUBIC_METER) {
+      options.push({ key: 'liter', label: 'لتر' });
+      options.push({ key: 'cubic_meter', label: 'متر مكعب' });
+    }
+    
+    // Add UNIT if specified
+    if (isUNIT) {
+      options.push({ key: 'unit', label: 'قطعة' });
+    }
+    
+    return options.length > 0 ? options : [{ key: 'unit', label: 'قطعة' }];
+  }, [isUNIT, isKG, isTON, isLITER, isCUBIC_METER]);
+
+  // Get the base unit for price calculation
+  const baseUnit = useMemo(() => getBaseUnit({ isUNIT, isKG, isTON, isLITER, isCUBIC_METER }), 
+    [isUNIT, isKG, isTON, isLITER, isCUBIC_METER]);
+
+  const [selectedUnit, setSelectedUnit] = useState<string>(unitOptions[0]?.key || 'unit');
+  
+  // Calculate displayed price based on selected unit
+  const displayedPrice = useMemo(() => {
+    return calculatePriceForUnit(price, baseUnit, selectedUnit);
+  }, [price, baseUnit, selectedUnit]);
+
+  // Update selected unit if the first unit changes
+  useEffect(() => {
+    if (unitOptions.length > 0 && !unitOptions.some(u => u.key === selectedUnit)) {
+      setSelectedUnit(unitOptions[0].key);
+    }
+  }, [unitOptions, selectedUnit]);
+
+  useEffect(() => {
+    if (hasLinearPrice) {
+      setSelectedUnitType('linear');
+    } else if (hasCubicPrice) {
+      setSelectedUnitType('cubic');
+    }
+  }, [hasLinearPrice, hasCubicPrice]);
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isHovering, setIsHovering] = useState(false);
+  const [isManualNavigation, setIsManualNavigation] = useState(false);
+  const [showLoginAlert, setShowLoginAlert] = useState(false);
+  const router = useRouter();
+
+  const [isMounted, setIsMounted] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const [loved, setLoved] = useState(false);
+  const [isFavoriteState, setIsFavoriteState] = useState(false);
+  
+  useEffect(() => {
+    setIsMounted(true);
+    setIsClient(true);
+    
+    cartService.getCart().catch(error => {
+      console.error("Failed to fetch cart for validation:", error);
+    });
+  }, []);
+  
+  const favoritesContext = FavoritesContext ? FavoritesContext.useFavorites() : null;
+  
+  useEffect(() => {
+    if (isClient && favoritesContext && id) {
+      const { isFavorite } = favoritesContext;
+      const favoriteStatus = isFavorite(id);
+      setIsFavoriteState(favoriteStatus);
+      setLoved(favoriteStatus);
+    }
+  }, [id, isClient, favoritesContext]);
+
+  const availableUnits = React.useMemo(() => {
+    const units: { [key: string]: string } = {};
+    
+    // If KG is available, also add TON option
+    if (isKG) {
+      units.kg = 'كيلو';
+      units.ton = 'طن';
+    }
+    // If TON is available without KG, still add both
+    else if (isTON) {
+      // units.kg = 'كيلو';
+      units.ton = 'طن';
+    }
+    
+    // If LITER is available, also add CUBIC_METER option
+    if (isLITER) {
+      units.liter = 'لتر';
+      units.cubic_meter = 'متر مكعب';
+    }
+    // If CUBIC_METER is available without LITER, still add both
+    else if (isCUBIC_METER) {
+      // units.liter = 'لتر';
+      units.cubic_meter = 'متر مكعب';
+    }
+    
+    // Add UNIT if specified
+    if (isUNIT) {
+      units.unit = 'قطعة';
+    }
+    
+    return Object.keys(units).length > 0 ? units : { unit: 'قطعة' };
+  }, [isUNIT, isKG, isTON, isLITER, isCUBIC_METER]);
+
+  const handleUnitSelect = (key: string) => {
+    if (key in availableUnits) {
+      setSelectedUnit(key);
+    }
+  };
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % imageList.length);
+    setIsManualNavigation(true);
+    setTimeout(() => setIsManualNavigation(false), 5000);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex(
+      (prev) => (prev - 1 + imageList.length) % imageList.length
+    );
+    setIsManualNavigation(true);
+    setTimeout(() => setIsManualNavigation(false), 5000);
+  };
+
+  const goToImage = (index: number) => {
+    setCurrentImageIndex(index);
+    setIsManualNavigation(true);
+    setTimeout(() => setIsManualNavigation(false), 5000);
+  };
+
+  useEffect(() => {
+    if (imageList.length <= 1 || isHovering || isManualNavigation) return;
+
+    const autoPlayInterval = setInterval(() => {
+      nextImage();
+    }, 3000);
+
+    return () => clearInterval(autoPlayInterval);
+  }, [imageList.length, isHovering, isManualNavigation]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (imageList.length <= 1) return;
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        prevImage();
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        nextImage();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [imageList.length]);
+
+  const handleAddToCart = async () => {
+    if (stockQty === 0 || isAdding) return;
+    
+    const unitTypeToSend = hasMarbleUnits ? selectedUnitType : 'linear';
+    const hasConflict = checkProductUnitConflict(String(id), unitTypeToSend);
+    if (hasConflict) {
+      return;
+    }
+
+    try {
+      setIsAdding(true);
+      if (!isAuthenticated()) {
+        router.push("/login");
+        return;
+      }
+
+      const cartItemKey = `cart_item_${id}`;
+      localStorage.setItem(cartItemKey, JSON.stringify({
+        unitType: unitTypeToSend,
+        unit: selectedUnit,
+        quantity: quantity
+      }));
+
+      await cartService.addToCart({
+        productId: String(id),
+        itemQty: quantity,
+        unitType: unitTypeToSend
+      });
+      
+      await cartService.getCart();
+      router.push("/cart");
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  const toggleFavorite = async () => {
+    if (!isMounted) return;
+    
+    if (!isAuthenticated()) {
+      setShowLoginAlert(true);
+      return;
+    }
+    
+    if (!favoritesContext) {
+      setShowLoginAlert(true);
+      return;
+    }
+    
+    const newLovedState = !loved;
+    setLoved(newLovedState);
+    
+    try {
+      const { toggle } = favoritesContext;
+      toggle({ 
+        id, 
+        name: title, 
+        price, 
+        image: imageList[0] || '/acessts/NoImage.jpg' 
+      });
+    } catch (err) {
+      console.error('Failed to toggle favorite:', err);
+      setLoved(!newLovedState);
+    }
+  };
+
+  const handleLoginConfirm = () => {
+    setShowLoginAlert(false);
+    router.push(
+      "/login?redirect=" + encodeURIComponent(window.location.pathname)
+    );
+  };
+
+  const handleLoginCancel = () => {
+    setShowLoginAlert(false);
+  };
+
+  return (
+    <section className="bg-white max-w-[95%] mx-auto rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="lg:col-span-4">
+          <div
+            className="w-full max-w-sm mx-auto lg:mx-0 aspect-square bg-card rounded-xl overflow-hidden flex items-center justify-center relative animate-in fade-in duration-500"
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
+          >
+            <CustomImage
+              src={imageList[currentImageIndex] || "/acessts/placeholder.svg"}
+              alt={`${title} - Image ${currentImageIndex + 1}`}
+              fill
+              objectFit="contain"
+              priority={true}
+              fallbackSrc="/acessts/placeholder.svg"
+              className="w-full h-full transition-all duration-700 ease-in-out"
+            />
+
+            {imageList.length > 1 && (
+              <>
+                <button
+                  onClick={prevImage}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-primary/80 hover:bg-primary text-white p-2 rounded-full transition-all duration-300 hover:scale-110 shadow-lg hover:shadow-xl z-10"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-primary/80 hover:bg-primary text-white p-2 rounded-full transition-all duration-300 hover:scale-110 shadow-lg hover:shadow-xl z-10"
+                  aria-label="Next image"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </>
+            )}
+
+            {imageList.length > 1 && (
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                {imageList.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToImage(index)}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 hover:scale-125 ${
+                      index === currentImageIndex
+                        ? "bg-white scale-125 animate-pulse"
+                        : "bg-white/50 hover:bg-white/75"
+                    } ${
+                      !isHovering && !isManualNavigation && imageList.length > 1
+                        ? "animate-pulse"
+                        : ""
+                    }`}
+                    aria-label={`Go to image ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="lg:col-span-8 w-full">
+          {/* Offer Badge - Top Center */}
+          {isOffer && (
+            <div className="flex justify-center mb-4">
+              <span className="inline-flex items-center px-4 py-2 rounded-md text-base font-extrabold bg-red-600 text-black border-2 border-red-700 shadow-lg">
+                عرض خاص
+              </span>
+            </div>
+          )}
+          
+          <div className="flex items-start justify-between gap-3 mb-2">
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 leading-snug flex-1">
+              {title}
+            </h1>
+            <button
+              aria-label={loved ? "remove from wishlist" : "add to wishlist"}
+              onClick={toggleFavorite}
+              className={`p-2 rounded-full border hover:border-primary transition-colors ${
+                loved ? "text-primary border-primary" : "text-slate-500"
+              }`}
+            >
+              <Heart className={`w-5 h-5 ${loved ? "fill-current" : ""}`} />
+            </button>
+          </div>
+
+          <div className="flex flex-col items-start justify-between gap-4 mb-3">
+            <span className="px-3 py-1 rounded-full  border text-sm hover:border-primary hover:text-primary">
+              {category}
+            </span>
+            
+            {/* Organization Info */}
+            {(organizationName || organizationId) && (
+              <div className="flex flex-col gap-2 bg-blue-50 border border-blue-200 rounded-lg p-3 w-full">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-blue-900">المنظمة:</span>
+                  <span className="text-sm font-bold text-blue-700">
+                    {organizationName || organizationId}
+                  </span>
+                </div>
+                {organizationId && organizationName && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-blue-700">معرف المنظمة:</span>
+                    <span className="text-xs font-mono bg-white px-2 py-1 rounded border border-blue-300 text-blue-800">
+                      {organizationId}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Quality Grade & Color */}
+            <div className="flex flex-wrap gap-3">
+              {qualityGrade && (
+                <span className="text-sm">
+                  <span className="font-semibold text-slate-900">جودة:</span>{" "}
+                  <span className="font-semibold text-blue-700">
+                    {qualityGrade === 'first' ? 'أولى' : qualityGrade}
+                  </span>
+                </span>
+              )}
+              {color && (
+                <span className="text-sm">
+                  <span className="font-semibold text-slate-900">لون:</span>{" "}
+                  <span className="font-semibold text-blue-700">{color}</span>
+                </span>
+              )}
+            </div>
+
+            {/* Marble/Granite Prices - Cubic and Linear Meter */}
+            {(pricePerCubicMeter || pricePerLinearMeter) && (
+              <div className="flex flex-col gap-4 w-full">
+                {pricePerCubicMeter && (
+                  <div className="flex flex-col gap-2">
+                    <span className="text-slate-700 text-base font-bold">سعر المتر المكعب:</span>
+                    {offerCubicPrice !== null && offerCubicPrice !== undefined && Number(offerCubicPrice) > 0 ? (
+                      <div className="flex flex-col gap-2">
+                        <span className="text-xl font-semibold text-slate-400 line-through decoration-2">
+                          {pricePerCubicMeter.toLocaleString()} ج.م
+                        </span>
+                        <span className="text-4xl font-extrabold text-red-600">
+                          {Number(offerCubicPrice).toLocaleString()} ج.م
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-4xl font-extrabold text-blue-600">
+                        {pricePerCubicMeter.toLocaleString()} ج.م
+                      </span>
+                    )}
+                  </div>
+                )}
+                {pricePerLinearMeter && (
+                  <div className="flex flex-col gap-2">
+                    <span className="text-slate-700 text-base font-bold">سعر المتر الطولي:</span>
+                    {offerLinearPrice !== null && offerLinearPrice !== undefined && Number(offerLinearPrice) > 0 ? (
+                      <div className="flex flex-col gap-2">
+                        <span className="text-xl font-semibold text-slate-400 line-through decoration-2">
+                          {pricePerLinearMeter.toLocaleString()} ج.م
+                        </span>
+                        <span className="text-4xl font-extrabold text-red-600">
+                          {Number(offerLinearPrice).toLocaleString()} ج.م
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-4xl font-extrabold text-blue-600">
+                        {pricePerLinearMeter.toLocaleString()} ج.م
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+          </div>
+
+          {description && (
+            <p className="text-slate-600 text-sm sm:text-base leading-relaxed mb-3">
+              {description}
+            </p>
+          )}
+
+          {/* Product Advantages */}
+          {advProduct && advProduct.length > 0 && (
+            <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <h3 className="text-blue-900 font-bold text-sm mb-2">مميزات المنتج:</h3>
+              <ul className="list-disc list-inside space-y-1">
+                {advProduct.map((advantage, index) => (
+                  <li key={index} className="text-slate-600 text-sm">
+                    {advantage}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Product Details */}
+          {(averageRate !== undefined || createdAt || updatedAt) && (
+            <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <h3 className="text-blue-900 font-bold text-sm mb-2">معلومات إضافية:</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                {averageRate !== undefined && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">متوسط التقييم:</span>
+                    <span className="text-blue-900 font-semibold">{averageRate.toFixed(1)} / 5</span>
+                  </div>
+                )}
+                {createdAt && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">تاريخ الإضافة:</span>
+                    <span className="text-blue-900 font-semibold">
+                      {new Date(createdAt).toLocaleDateString('ar-EG')}
+                    </span>
+                  </div>
+                )}
+                {updatedAt && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">آخر تحديث:</span>
+                    <span className="text-blue-900 font-semibold">
+                      {new Date(updatedAt).toLocaleDateString('ar-EG')}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div
+            className="flex items-center gap-2 text-amber-500 mb-4"
+            aria-label={`التقييم ${rating} من 5`}
+          >
+            {Array.from({ length: 5 }).map((_, i) => (
+              <span
+                key={i}
+                className={
+                  i < Math.round(rating) ? "text-amber-500" : "text-gray-600"
+                }
+              >
+                ★
+              </span>
+            ))}
+            <span className="text-slate-600 text-sm">({ratingCount})</span>
+          </div>
+
+          <div className="flex flex-row justify-between flex-wrap items-center gap-3">
+            {/* Only show unit selector for non-marble/granite products */}
+            {!pricePerLinearMeter && !pricePerCubicMeter && (
+              <div className="flex items-center gap-2 order-1">
+                {Object.entries(availableUnits).map(([key, label]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => handleUnitSelect(key)}
+                    className={`w-[90px] h-[35px] px-4 py-1 rounded-full border text-sm transition-colors ${
+                      selectedUnit === key
+                        ? "border-primary text-primary bg-primary/10"
+                        : "hover:border-primary hover:text-primary hover:bg-blue-50"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {(hasLinearPrice || hasCubicPrice) && (
+              <div className="flex items-center gap-3 order-1">
+                {hasLinearPrice && (
+                  <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={selectedUnitType === 'linear'}
+                      onChange={() => setSelectedUnitType('linear')}
+                      className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                    />
+                    المتر الطولي
+                  </label>
+                )}
+                {hasCubicPrice && (
+                  <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={selectedUnitType === 'cubic'}
+                      onChange={() => setSelectedUnitType('cubic')}
+                      className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                    />
+                    المتر المكعب
+                  </label>
+                )}
+              </div>
+            )}
+
+            <div className="flex items-center gap-2 order-2">
+              <div className="flex items-center gap-3 border rounded-full px-3 py-1 order-2">
+                <button
+                  aria-label="decrease"
+                  onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                  className="p-1 rounded-full hover:bg-blue-50"
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+                <span className="min-w-[1.5rem] text-center">{quantity}</span>
+                <button
+                  aria-label="increase"
+                  onClick={() =>
+                    setQuantity((prev) => Math.min(stockQty, prev + 1))
+                  }
+                  className="p-1 rounded-full hover:bg-blue-50"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="order-3 sm:ml-auto">
+                <button
+                  className="px-5 py-2 rounded-full bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-2"
+                  disabled={stockQty === 0 || isAdding}
+                  onClick={handleAddToCart}
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                  أضف إلى سلة التسوق
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {showLoginAlert && (
+        <Alert
+          message="يجب عليك تسجيل الدخول أولاً لإضافة المنتجات إلى المفضلة."
+          setClose={handleLoginCancel}
+          buttons={[
+            {
+              label: "إلغاء",
+              onClick: handleLoginCancel,
+              variant: "ghost",
+            },
+            {
+              label: "تسجيل الدخول",
+              onClick: handleLoginConfirm,
+              variant: "primary",
+            },
+          ]}
+          type="warning"
+        />
+      )}
+    </section>
+  );
+};
+
+export default React.memo(Overview);

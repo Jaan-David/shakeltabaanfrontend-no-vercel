@@ -1,0 +1,323 @@
+/* ProductSlider.module.css */
+.sliderContainer {
+  width: 100%;
+  margin-bottom: 2rem;
+  height: fit-content;
+  padding: 1.5rem 0;
+}
+
+.sliderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.sliderTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #0B1F33;
+  margin: 0;
+}
+
+.sliderControls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sliderButton {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(10, 30, 51, 0.08);
+  background: #F7F9FC;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #0A1E33;
+}
+
+.sliderButton:hover:not(.disabled) {
+  background: #F9FAFB;
+  border-color: #E5E7EB;
+}
+
+.sliderButton.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #EEF2F7;
+}
+
+.gridWrapper {
+  width: 100%;
+  overflow: hidden;
+  height: fit-content;
+}
+
+/* ✅ FIXED: Define grid for all screen sizes */
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Desktop default */
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 2rem;
+  height: fit-content;
+}
+
+.gridItem {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  height: 100%;
+}
+
+.emptySlot {
+  min-height: 1px;
+}
+
+/* Loading States */
+.loadingContainer,
+.errorContainer,
+.emptyContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 1rem;
+  min-height: 300px;
+}
+
+.loadingGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+.skeletonCard {
+  background: #F9FAFB;
+  border-radius: 12px;
+  overflow: hidden;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.skeletonImage {
+  width: 100%;
+  height: 200px;
+  background: #F3F4F6;
+}
+
+.skeletonContent {
+  padding: 1rem;
+}
+
+.skeletonTitle,
+.skeletonCategory,
+.skeletonPrice {
+  height: 12px;
+  background: #F3F4F6;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.skeletonTitle {
+  width: 80%;
+}
+
+.skeletonCategory {
+  width: 50%;
+}
+
+.skeletonPrice {
+  width: 40%;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.errorContainer,
+.emptyContainer {
+  flex-direction: column;
+  text-align: center;
+}
+
+.errorIcon,
+.emptyIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.errorMessage,
+.emptyTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0B1F33;
+  margin-bottom: 0.5rem;
+}
+
+.errorSubtext,
+.emptyMessage {
+  color: #8B95A5;
+  font-size: 0.875rem;
+}
+
+/* Bottom Pagination Styles */
+.bottomPagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-top: 1px solid #DDE3EA;
+  margin-top: 2rem;
+}
+
+.paginationInfo {
+  color: #8B95A5;
+  font-size: 0.875rem;
+}
+
+.paginationControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.paginationArrow {
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(10, 30, 51, 0.08);
+  background: #F7F9FC;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #0A1E33;
+}
+
+.paginationArrow:hover:not(.disabled) {
+  background: #F9FAFB;
+  border-color: #E5E7EB;
+}
+
+.paginationArrow.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pageNumbers {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0 1rem;
+}
+
+.pageNumber {
+  min-width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  color: var(--black60);
+}
+
+.pageNumber:hover {
+  background: #F9FAFB;
+  color: #3E4B5C;
+}
+
+.pageNumber.active {
+  background: var(--background);
+  border: 1px solid var(--black8);
+}
+
+.ellipsis {
+  padding: 0 0.5rem;
+  color: #8B95A5;
+  font-size: 0.875rem;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN - MOBILE BREAKPOINTS
+   ======================================== */
+
+/* Tablets and smaller laptops */
+@media (max-width: 1024px) {
+  .productGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .loadingGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Large phones and small tablets */
+@media (max-width: 768px) {
+  .productGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .loadingGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+ 
+  .sliderHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+ 
+  .bottomPagination {
+    flex-direction: column;
+    gap: 1rem;
+  }
+ 
+  .pageNumbers {
+    margin: 0;
+  }
+  
+  .sliderContainer {
+    padding: 1rem 0;
+  }
+}
+
+/* All mobile phones */
+@media (max-width: 480px) {
+  .productGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  
+  .loadingGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .sliderContainer {
+    padding: 0.75rem 0;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 375px) {
+  .productGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+}
+

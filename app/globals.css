@@ -1,0 +1,590 @@
+/* Self-hosted Beiruti font - FIXED format declarations */
+@font-face {
+  font-family: 'Beiruti';
+  src: url('/fonts/beiruti/static/Beiruti-Regular.ttf') format('truetype');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Beiruti';
+  src: url('/fonts/beiruti/static/Beiruti-Medium.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Beiruti';
+  src: url('/fonts/beiruti/static/Beiruti-SemiBold.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Beiruti';
+  src: url('/fonts/beiruti/static/Beiruti-Bold.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Tailwind CSS Base */
+*,
+::before,
+::after {
+  box-sizing: border-box;
+  border-width: 0;
+  border-style: solid;
+  border-color: currentColor;
+}
+
+::before,
+::after {
+  --tw-content: '';
+}
+
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  tab-size: 4;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  overflow-x: hidden; /* Remove horizontal scroll */
+}
+
+body {
+  margin: 0;
+  line-height: inherit;
+  background-color: #FFFFFF;  /* White background */
+  color: #0F172A;             /* Dark text */
+  overflow-x: hidden;
+}
+
+hr {
+  height: 0;
+  color: inherit;
+  border-top-width: 1px;
+}
+
+abbr:where([title]) {
+  text-decoration: underline dotted;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+b,
+strong {
+  font-weight: bolder;
+}
+
+code,
+kbd,
+samp,
+pre {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 1em;
+}
+
+small {
+  font-size: 80%;
+}
+
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+sup {
+  top: -0.5em;
+}
+
+table {
+  text-indent: 0;
+  border-color: inherit;
+  border-collapse: collapse;
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 100%;
+  font-weight: inherit;
+  line-height: inherit;
+  color: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+button,
+select {
+  text-transform: none;
+}
+
+button,
+[type='button'],
+[type='reset'],
+[type='submit'] {
+  -webkit-appearance: button;
+  background-color: transparent;
+  background-image: none;
+}
+
+:-moz-focusring {
+  outline: auto;
+}
+
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+
+progress {
+  vertical-align: baseline;
+}
+
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+
+[type='search'] {
+  -webkit-appearance: textfield;
+  outline-offset: -2px;
+}
+
+::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+::-webkit-file-upload-button {
+  -webkit-appearance: button;
+  font: inherit;
+}
+
+summary {
+  display: list-item;
+}
+
+blockquote,
+dl,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+figure,
+p,
+pre {
+  margin: 0;
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+}
+
+legend {
+  padding: 0;
+}
+
+ol,
+ul,
+menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input::placeholder,
+textarea::placeholder {
+  opacity: 1;
+  color: #9ca3af;
+}
+
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+:disabled {
+  cursor: default;
+}
+
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  display: block;
+  vertical-align: middle;
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+[hidden] {
+  display: none;
+}
+
+/* Tailwind CSS Utilities */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('/acessts/marble/marble-ui.css');
+
+:root {
+  /* ========================================
+     BLUE & WHITE THEME - ShakElTaaban Frontend
+     ======================================== */
+  
+  /* PRIMARY COLORS (Blue) */
+  --brand: #2563EB;              /* Primary Blue (blue-600) */
+  --brand-2: #1D4ED8;            /* Primary Hover (blue-700) */
+  --brand-3: #1E40AF;            /* Primary Active (blue-800) */
+  --accent: #2563EB;             /* Accent = Primary Blue */
+
+  /* SURFACES (White) */
+  --surface: #FFFFFF;            /* Main background */
+  --surface-2: #FFFFFF;          /* Card/section background */
+  --surface-3: #F8FAFC;          /* Subtle backgrounds */
+  --border: #E5E7EB;             /* Borders/dividers (gray-200) */
+  --ring: rgba(37, 99, 235, 0.5); /* Focus ring (blue) */
+  
+  /* TEXT COLORS */
+  --text-1: #0F172A;             /* Primary text (slate-900) */
+  --text-2: #475569;             /* Secondary text (slate-600) */
+  --text-3: #94A3B8;             /* Muted text (slate-400) */
+  --text-invert: #FFFFFF;        /* Inverted text (white on blue) */
+
+  /* LEGACY TOKENS (mapped to blue/white theme) */
+  --dark: #0F172A;
+  --light: #FFFFFF;
+  --gray: #475569;
+  --gold: #FACC15;
+  --glass: rgba(255, 255, 255, 0.9);
+  --disabled: #CBD5E1;
+  --background: #FFFFFF;
+  --card: #FFFFFF;
+  --cardblur: rgba(255, 255, 255, 0.95);
+  --onPrimary: var(--text-invert);
+  --black87: var(--text-1);
+  --black60: var(--text-2);
+  --black37: var(--text-3);
+  --black16: var(--border);
+  --black8: rgba(15, 23, 42, 0.05);
+  --error: #EF4444;
+  --star: #FACC15;
+
+  /* MODERN BRAND COLORS */
+  --primary: var(--brand);
+  --secondary1: var(--brand-2);
+  --secondary2: var(--brand-3);
+
+  --font-primary: 'Beiruti', 'Cairo', system-ui, -apple-system, sans-serif;
+}
+
+.dark {
+  /* Dark mode (optional - currently not used) */
+  --surface: #0F172A;
+  --surface-2: #1E293B;
+  --surface-3: #334155;
+  --border: rgba(255, 255, 255, 0.1);
+  --ring: rgba(37, 99, 235, 0.6);
+  --text-1: #F1F5F9;
+  --text-2: #CBD5E1;
+  --text-3: #94A3B8;
+  --text-invert: #0F172A;
+  --glass: rgba(15, 23, 42, 0.7);
+  --background: var(--surface);
+  --card: #122A44;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    font-family: var(--font-primary);
+    line-height: 1.6;
+    direction: rtl;
+  }
+  
+  body {
+    @apply bg-surface text-text-1;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  h1 {
+    @apply text-4xl font-bold text-text-1;
+    letter-spacing: -0.02em;
+  }
+  
+  h2 {
+    @apply text-3xl font-semibold text-text-1;
+    letter-spacing: -0.01em;
+  }
+  
+  h3 {
+    @apply text-2xl font-medium text-text-1;
+  }
+  
+  h4 {
+    @apply text-xl font-medium text-text-1;
+  }
+  
+  h5 {
+    @apply text-lg font-normal text-text-1;
+  }
+  
+  h6 {
+    @apply text-base font-normal text-text-2;
+  }
+
+  a,
+  button,
+  input,
+  textarea,
+  select {
+    @apply transition-colors duration-200 ease-out;
+  }
+
+  a {
+    @apply text-brand hover:text-brand-2;
+  }
+  
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-surface-2;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-brand opacity-70 rounded-full hover:opacity-100;
+  }
+  
+  ::selection {
+    @apply bg-brand text-white;
+  }
+  
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-2 ring-offset-2 ring-offset-surface;
+  }
+  
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-text-3;
+    text-align: right;
+  }
+}
+
+input[type='password']::-ms-reveal,
+input[type='password']::-ms-clear {
+  display: none;
+}
+
+@layer components {
+  .container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Premium Button Styles */
+  .btn {
+    @apply px-6 py-3 rounded-lg shadow-soft transition-all duration-300 font-medium focus:outline-none focus:ring-2 focus:ring-brand-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply bg-brand hover:bg-primary-700 text-white shadow-soft hover:shadow-soft-md active:shadow-soft;
+  }
+  
+  .btn-secondary {
+    @apply bg-brand-2 hover:bg-secondary-400 text-white shadow-soft hover:shadow-soft-md;
+  }
+  
+  .btn-accent {
+    @apply bg-accent hover:bg-accent-600 text-dark shadow-soft hover:shadow-soft-md;
+  }
+  
+  .btn-outline {
+    @apply border-2 border-brand text-brand hover:bg-primary-50 transition-colors;
+  }
+  
+  .btn-ghost {
+    @apply text-brand hover:bg-primary-50 transition-colors;
+  }
+  
+  /* Premium Card Styles */
+  .card {
+    @apply bg-white rounded-panel shadow-soft border border-surface-2 transition-all duration-300;
+  }
+  
+  .card:hover {
+    @apply shadow-soft-md;
+  }
+  
+  .card-elevated {
+    @apply bg-white rounded-panel shadow-elevated border border-surface-2;
+  }
+  
+  /* Input Field Styles */
+  .input-field {
+    @apply w-full px-4 py-3 border border-surface-2 rounded-lg bg-white text-text-1 focus:outline-none focus:ring-2 focus:ring-brand-2 focus:border-transparent transition-all duration-200;
+    text-align: right;
+  }
+  
+  .input-field::placeholder {
+    @apply text-text-3;
+  }
+  
+  .input-field:hover {
+    @apply border-surface-3;
+  }
+  
+  /* Text Direction Utilities */
+  .ltr-text {
+    direction: ltr;
+    text-align: left;
+  }
+  
+  /* Badge & Chip Styles */
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-pill bg-primary-100 text-brand text-sm font-medium;
+  }
+  
+  .badge-secondary {
+    @apply inline-flex items-center px-3 py-1 rounded-pill bg-secondary-100 text-brand-2 text-sm font-medium;
+  }
+  
+  .badge-accent {
+    @apply inline-flex items-center px-3 py-1 rounded-pill bg-accent-100 text-accent-600 text-sm font-medium;
+  }
+}
+
+@layer utilities {
+  /* Text Gradient */
+  .text-gradient {
+    @apply bg-gradient-to-r from-accent to-brand-2 bg-clip-text text-transparent;
+  }
+  
+  /* Background Gradients */
+  .bg-gradient-brand {
+    @apply bg-gradient-to-br from-brand via-brand-2 to-accent;
+  }
+  
+  .bg-gradient-subtle {
+    @apply bg-gradient-to-br from-white to-surface-2;
+  }
+  
+  /* Shadow Utilities */
+  .shadow-brand {
+    box-shadow: 0 4px 14px 0 rgba(10, 30, 51, 0.12);
+  }
+  
+  .shadow-accent {
+    box-shadow: 0 4px 14px 0 rgba(201, 162, 63, 0.12);
+  }
+  
+  /* Glass Morphism */
+  .glass {
+    @apply bg-white/80 backdrop-blur-glass border border-white/20 rounded-panel;
+  }
+  
+  .glass-dark {
+    @apply bg-brand/5 backdrop-blur-glass border border-brand/10 rounded-panel;
+  }
+  
+  /* Luxury Spacing */
+  .gap-luxury {
+    @apply gap-6 md:gap-8;
+  }
+  
+  .p-luxury {
+    @apply p-6 md:p-8 lg:p-10;
+  }
+  
+  /* Smooth Transitions */
+  .smooth {
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .smooth-fast {
+    @apply transition-all duration-200 ease-out;
+  }
+  
+  .smooth-slow {
+    @apply transition-all duration-500 ease-out;
+  }
+  
+  /* Hover Effects */
+  .hover-lift {
+    @apply hover:shadow-soft-md hover:-translate-y-1 smooth;
+  }
+  
+  .hover-glow {
+    @apply hover:shadow-glow smooth;
+  }
+}
+
+#__next {
+  isolation: isolate;
+}
+
+body.translating * {
+  transition: none !important;
+  animation: none !important;
+}
+
+body {
+  top: 0 !important;
+  position: static !important;
+}
+
+.goog-te-banner-frame,
+.skiptranslate,
+body > .skiptranslate {
+  display: none !important;
+}
+

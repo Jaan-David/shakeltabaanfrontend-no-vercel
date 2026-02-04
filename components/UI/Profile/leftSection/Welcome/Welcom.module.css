@@ -1,0 +1,138 @@
+.welcomeContainer {
+  background: var(--background);
+  border: 1.5px solid var(--black8);
+  min-width: 800px;
+  min-height: 70vh;
+  border-radius: 24px;
+  padding: 20px 24px;
+  margin: -5.9% 2%;
+  font-family: var(--font-primary);
+  direction: rtl;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.welcomeContainer:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 147, 67, 0.15);
+}
+
+.welcomeContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  flex-direction: row-reverse; /* RTL layout: emoji on right, text on left */
+  flex-wrap: nowrap;
+}
+
+.welcomeText {
+  font-size: 7rem;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.nameText {
+  font-size: 7rem;
+  font-weight: 700;
+  color: var(--black87);
+}
+
+.waveEmoji {
+  font-size: 10rem;
+  line-height: 1;
+  animation: wave 2s ease-in-out infinite;
+  transform-origin: 70% 70%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.waveEmoji span {
+  display: inline-block;
+}
+
+@keyframes wave {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  10%, 30% {
+    transform: rotate(14deg);
+  }
+  20% {
+    transform: rotate(-8deg);
+  }
+  40% {
+    transform: rotate(14deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .welcomeContainer {
+    min-width: 90%;
+    min-height: 50vh;
+    margin: 12px 2%;
+  }
+  
+  .welcomeText,
+  .nameText {
+    font-size: 5rem;
+  }
+  
+  .waveEmoji {
+    font-size: 7rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .welcomeContainer {
+    min-width: 95%;
+    padding: 16px 20px;
+  }
+  
+  .welcomeContent {
+    gap: 12px;
+  }
+  
+  .welcomeText,
+  .nameText {
+    font-size: 3.5rem;
+  }
+  
+  .waveEmoji {
+    font-size: 5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcomeContainer {
+    padding: 16px 20px;
+    margin: 12px 0;
+    min-width: 100%;
+  }
+  
+  .welcomeContent {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  
+  .welcomeText,
+  .nameText {
+    font-size: 2rem;
+  }
+  
+  .waveEmoji {
+    font-size: 3rem;
+  }
+}
+

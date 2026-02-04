@@ -1,0 +1,37 @@
+/* Marble background pattern for sections */
+.marble-bg {
+  background-image: url('/acessts/marble/marble-bg-1.jpg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  position: relative;
+}
+
+/* Optional: overlay for readability */
+.marble-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(2px);
+  z-index: 0;
+}
+
+/* For cards and sections */
+.marble-card {
+  background: rgba(255,255,255,0.85);
+  box-shadow: 0 4px 24px 0 rgba(60,60,60,0.08), 0 1.5px 8px 0 rgba(60,60,60,0.04);
+  border-radius: 1.5rem;
+  border: 1.5px solid #e5e7eb;
+  position: relative;
+  overflow: hidden;
+}
+
+/* For headings */
+.marble-heading {
+  background: linear-gradient(90deg, #e0e0e0 0%, #f5f5f5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
