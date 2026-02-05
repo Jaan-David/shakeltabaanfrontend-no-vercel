@@ -11,6 +11,14 @@ import Background from './../../../components/UI/Background/Background';
 import Alert from '@/components/UI/Alert/alert';
 import styles from './../auth.module.css';
 import { AuthService, AuthError, LoginCredentials, UserStorage } from './../../../services/auth/login';
+import { hasAcceptedPolicies } from '@/utils/policyConsent';
+
+interface PendingAuthData {
+  token: string;
+  user: Record<string, unknown>;
+}
+
+const PENDING_AUTH_KEY = 'policy_pending_auth';
 
 function LoginFormContent() {
   const router = useRouter();
@@ -42,6 +50,32 @@ function LoginFormContent() {
     }
     return false;
   });
+
+  const normalizeUserRecord = (user: unknown): Record<string, unknown> => {
+    if (user && typeof user === 'object') {
+      return user as Record<string, unknown>;
+    }
+    return {};
+  };
+
+  const hasLocalPolicyAcceptance = (): boolean => {
+    if (typeof window === 'undefined') return false;
+    const flag = localStorage.getItem('policy_accepted');
+    if (flag === 'true') return true;
+    const storedUser = localStorage.getItem('user_data');
+    if (!storedUser) return false;
+    try {
+      const user = JSON.parse(storedUser) as Record<string, unknown>;
+      return hasAcceptedPolicies(user);
+    } catch {
+      return false;
+    }
+  };
+
+  const storePendingAuth = (token: string, user: Record<string, unknown>) => {
+    const payload: PendingAuthData = { token, user };
+    sessionStorage.setItem(PENDING_AUTH_KEY, JSON.stringify(payload));
+  };
 // Complete fixed useEffect for OAuth handling in your LoginForm component
 
 useEffect(() => {
@@ -119,6 +153,15 @@ useEffect(() => {
         });
         
         if (allowAutoLogin && freshSession?.backendToken && freshSession?.user?.backendUser) {
+          const backendUserRecord = normalizeUserRecord(freshSession.user.backendUser);
+          if (!hasAcceptedPolicies(backendUserRecord) && !hasLocalPolicyAcceptance()) {
+            storePendingAuth(freshSession.backendToken, backendUserRecord);
+            sessionStorage.removeItem('oauth_initiated');
+            setAllowAutoLogin(false);
+            setIsLoading(false);
+            router.push('/accept-policies');
+            return;
+          }
           console.log('✅ [LoginForm] Fresh session has required data!');
           
           // Check for session error
@@ -210,6 +253,15 @@ useEffect(() => {
       
       // Check if we have the required data
       if (session?.backendToken && session?.user?.backendUser) {
+        const backendUserRecord = normalizeUserRecord(session.user.backendUser);
+        if (!hasAcceptedPolicies(backendUserRecord) && !hasLocalPolicyAcceptance()) {
+          storePendingAuth(session.backendToken, backendUserRecord);
+          sessionStorage.removeItem('oauth_initiated');
+          setAllowAutoLogin(false);
+          setIsLoading(false);
+          router.push('/accept-policies');
+          return;
+        }
         console.log('✅ [LoginForm] Session has required data');
         
         try {
@@ -362,6 +414,15 @@ useEffect(() => {
       const response = await AuthService.login(formData);
       
       if (response.status === 'success') {
+        const userRecord = normalizeUserRecord(response.data.user);
+        if (!hasAcceptedPolicies(userRecord) && !hasLocalPolicyAcceptance()) {
+          storePendingAuth(response.data.token, userRecord);
+          AuthService.clearAuthData();
+          localStorage.removeItem('authToken');
+          setIsLoading(false);
+          router.push('/accept-policies');
+          return;
+        }
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('authUpdated'));
         }
@@ -560,19 +621,6 @@ const handleFacebookLogin = async () => {
                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                  </svg>
-                </button>
-
-                <button
-                  type="button"
-                  className={styles.socialButton}
-                  onClick={handleFacebookLogin}
-                  disabled={isLoading}
-                  title="تسجيل الدخول باستخدام Facebook"
-                  aria-label="تسجيل الدخول باستخدام Facebook"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                   </svg>
                 </button>
               </div>

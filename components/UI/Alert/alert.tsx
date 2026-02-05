@@ -50,6 +50,7 @@ const Alert: React.FC<AlertProps> = ({
   };
 
   const handleClose = setClose || onCancel;
+  const handleConfirm = onConfirm || handleClose;
 
   if (!isOpen) return null;
 
@@ -91,7 +92,7 @@ const Alert: React.FC<AlertProps> = ({
                 {cancelText}
               </Button>
               <Button
-                onClick={onConfirm}
+                onClick={handleConfirm}
                 variant={type === 'error' ? 'danger' : 'primary'}
                 size="sm"
                 className={styles.confirmButton}

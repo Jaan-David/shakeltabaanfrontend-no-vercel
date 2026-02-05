@@ -10,6 +10,7 @@ import Background from "./../../../components/UI/Background/Background";
 import Alert from "@/components/UI/Alert/alert";
 import styles from "./../auth.module.css";
 import { registerUser, RegisterRequest } from "../../../services/auth/register";
+import PolicyConsent from "@/components/Auth/PolicyConsent";
 
 export default function RegistrationForm() {
   const router = useRouter();
@@ -22,6 +23,8 @@ export default function RegistrationForm() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasAcceptedPolicies, setHasAcceptedPolicies] = useState(false);
+  const [policyError, setPolicyError] = useState('');
   const [errors, setErrors] = useState<{
     firstName?: string;
     lastName?: string;
@@ -154,7 +157,11 @@ export default function RegistrationForm() {
     // Validate form first
     const newErrors = validateForm();
 
-    if (Object.keys(newErrors).length > 0) {
+    if (!hasAcceptedPolicies) {
+      setPolicyError("يجب الموافقة على سياسات المنصة قبل إنشاء الحساب");
+    }
+
+    if (Object.keys(newErrors).length > 0 || !hasAcceptedPolicies) {
       //console.log("❌ Form validation failed:", newErrors);
       setErrors(newErrors);
       return;
@@ -410,6 +417,21 @@ export default function RegistrationForm() {
               )}
             </div>
 
+            <div className="mt-4">
+              <PolicyConsent
+                id="register-policy-consent"
+                checked={hasAcceptedPolicies}
+                onChange={(checked) => {
+                  setHasAcceptedPolicies(checked);
+                  if (checked) {
+                    setPolicyError('');
+                  }
+                }}
+                errorMessage={policyError}
+                disabled={isLoading}
+              />
+            </div>
+
             {/* Submit Button */}
             <div className={styles.submitButtonWrapper}>
               <Button
@@ -421,9 +443,9 @@ export default function RegistrationForm() {
                   isFormValid()
                     ? styles.submitButtonValid
                     : styles.submitButtonInvalid
-                }`}
+                } disabled:bg-gray-300 disabled:border-gray-300 disabled:text-slate-500`}
                 onClick={handleSubmit}
-                disabled={!isFormValid() || isLoading}
+                disabled={!isFormValid() || !hasAcceptedPolicies || isLoading}
               >
                 {isLoading ? "جاري إنشاء الحساب..." : "إنشاء حساب"}
               </Button>

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Header from "@/components/Layout/Nav/Header";
 import Footer from "@/pages/HomePage/sections/FooterSection/Footer";
@@ -12,6 +12,11 @@ interface Props {
 
 const AppShell: React.FC<Props> = ({ children }) => {
   const pathname = usePathname();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const noHeaderFooterPaths = [
     "/login",
@@ -33,7 +38,7 @@ const AppShell: React.FC<Props> = ({ children }) => {
 
   return (
     <>
-      {shouldShowHeaderFooter && <Header />}
+      {shouldShowHeaderFooter && isMounted && <Header />}
       {children}
       {shouldShowHeaderFooter && <Footer />}
       {shouldShowFloatingChat && <FloatingChat />}

@@ -89,7 +89,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang={seoConfig.defaultLanguage} dir="rtl">
+    <html lang={seoConfig.defaultLanguage} dir="rtl" suppressHydrationWarning>
       <head>
         {/* Preconnect to improve performance */}
        <link 

@@ -38,7 +38,7 @@
 ## 🌐 تحديثات المنتجات المرتبطة
 
 **ملف**: `components/UI/RelatedProducts/RelatedProducts.tsx`
-- ✅ تحديث `BASE_IMAGE_URL` من `https://a2z-backend.fly.dev` إلى `process.env.NEXT_PUBLIC_API_BASE_URL || 'https://shk2t-t3ban.fly.dev/app/v1'`
+- ✅ تحديث `BASE_IMAGE_URL` من `https://shakeltabaan-backend.fly.dev` إلى `process.env.NEXT_PUBLIC_API_BASE_URL || 'https://shk2t-t3ban.fly.dev/app/v1'`
 - ✅ استخدام API الجديد لجميع روابط الصور
 
 **الفائدة**:

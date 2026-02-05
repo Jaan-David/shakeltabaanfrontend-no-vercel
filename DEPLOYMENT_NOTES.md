@@ -44,7 +44,7 @@
 
 #### التحديث:
 ```diff
-- const BASE_IMAGE_URL = 'https://a2z-backend.fly.dev';
+- const BASE_IMAGE_URL = 'https://shakeltabaan-backend.fly.dev';
 + const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://shk2t-t3ban.fly.dev/app/v1';
 ```
 

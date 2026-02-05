@@ -23,12 +23,12 @@ const Footer = () => {
   };
 
   return (
-    <footer className="relative w-full min-h-[300px] md:min-h-[400px] overflow-hidden bg-[#0F172A]">
-      {/* Background - Deep Navy Blue for strong luxury contrast */}
+    <footer className="relative w-full min-h-[300px] md:min-h-[400px] overflow-hidden bg-[#1e293b]">
+      {/* Background */}
       <div className="absolute inset-0 flex items-center justify-center z-0">
-        <div className="relative w-full h-full bg-[#0F172A]"></div>
+        <div className="relative w-full h-full bg-[#1e293b]"></div>
       </div>
-      <div className="absolute top-0 left-1/2 w-[90%] h-px bg-white/10 -translate-x-1/2 -translate-y-1/2"></div>
+      <div className="absolute top-0 left-1/2 w-[90%] h-px bg-[#f1f5f9]/20 -translate-x-1/2 -translate-y-1/2"></div>
 
       <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col mt-[-20px]" >
         
@@ -41,12 +41,12 @@ const Footer = () => {
         </div>
            
         {/* Copyright */}
-        <div className="w-full py-4 border-t border-white/10 text-center mb-[120px] relative">
-          <div className="absolute top-0 left-1/2 w-[90%] h-px bg-white/10 -translate-x-1/2 -translate-y-1/2"></div>
-          <p className="text-white font-beiruti font-medium text-sm">
+        <div className="w-full py-4 border-t border-[#f1f5f9]/20 text-center mb-[120px] relative">
+          <div className="absolute top-0 left-1/2 w-[90%] h-px bg-[#f1f5f9]/20 -translate-x-1/2 -translate-y-1/2"></div>
+          <p className="text-[#f1f5f9] font-beiruti font-medium text-sm">
             2026 جميع الحقوق محفوظة
           </p>
-          <p className="text-white font-beiruti font-medium text-sm mt-2">
+          <p className="text-[#f1f5f9] font-beiruti font-medium text-sm mt-2">
             رقم التسجيل الضريبى: ٧٧٣٩٠٢٦٥١
           </p>
         </div>

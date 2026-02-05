@@ -18,6 +18,13 @@ type Product = {
   PurchasePrice?: number;
   averageRate?: number;
   productReview?: unknown[];
+  isOffer?: boolean;
+  pricePerLinearMeter?: number;
+  pricePerCubicMeter?: number;
+  offerLinearPrice?: number | null;
+  offerCubicPrice?: number | null;
+  organizationName?: string;
+  organizationId?: string;
 };
 
 type PreviousWork = {
@@ -227,6 +234,11 @@ export default async function OrganizationProfilePage({
                     key={id}
                     className="group marble-card p-6 hover:border-blue-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/20 transform hover:-translate-y-2"
                   >
+                    {product.isOffer && (
+                      <div className="absolute top-2 left-2 z-10 bg-red-600 text-black text-xs font-extrabold px-3 py-1 rounded-md border-2 border-red-700 shadow-lg">
+                        عرض خاص
+                      </div>
+                    )}
                     <div className="relative overflow-hidden rounded-xl mb-4">
                       <img
                         src={image}
@@ -236,6 +248,13 @@ export default async function OrganizationProfilePage({
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
                     <div className="space-y-3">
+                      {(product.organizationName || product.organizationId) && (
+                        <div className="flex items-center justify-center gap-2 bg-blue-50 border border-blue-200 rounded-lg p-2">
+                          <span className="text-xs font-semibold text-blue-700">
+                            {product.organizationName || product.organizationId}
+                          </span>
+                        </div>
+                      )}
                       <h3 className="text-slate-900 font-bold text-lg leading-tight line-clamp-2 group-hover:text-blue-600 transition-colors">
                         {name}
                       </h3>
@@ -247,8 +266,39 @@ export default async function OrganizationProfilePage({
                           </span>
                           <span className="text-slate-500 text-sm">({ratingCount})</span>
                         </div>
+                      </div>
+                      {(product.pricePerCubicMeter || product.pricePerLinearMeter) ? (
+                        <div className="flex flex-col gap-2 text-right">
+                          {product.pricePerLinearMeter && (
+                            <div className="flex flex-col">
+                              <span className="text-xs text-slate-600">المتر الطولي:</span>
+                              {product.offerLinearPrice !== null && product.offerLinearPrice !== undefined && Number(product.offerLinearPrice) > 0 ? (
+                                <>
+                                  <span className="text-sm text-slate-500 line-through">{Number(product.pricePerLinearMeter).toLocaleString("ar-EG")} ج.م</span>
+                                  <span className="text-xl font-bold text-red-600">{Number(product.offerLinearPrice).toLocaleString("ar-EG")} ج.م</span>
+                                </>
+                              ) : (
+                                <span className="text-xl font-bold text-green-400">{Number(product.pricePerLinearMeter).toLocaleString("ar-EG")} ج.م</span>
+                              )}
+                            </div>
+                          )}
+                          {product.pricePerCubicMeter && (
+                            <div className="flex flex-col">
+                              <span className="text-xs text-slate-600">المتر المكعب:</span>
+                              {product.offerCubicPrice !== null && product.offerCubicPrice !== undefined && Number(product.offerCubicPrice) > 0 ? (
+                                <>
+                                  <span className="text-sm text-slate-500 line-through">{Number(product.pricePerCubicMeter).toLocaleString("ar-EG")} ج.م</span>
+                                  <span className="text-xl font-bold text-red-600">{Number(product.offerCubicPrice).toLocaleString("ar-EG")} ج.م</span>
+                                </>
+                              ) : (
+                                <span className="text-xl font-bold text-green-400">{Number(product.pricePerCubicMeter).toLocaleString("ar-EG")} ج.م</span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
                         <div className="text-right">
-                          <p className="text-2xl font-bold text-blue-700">
+                          <p className="text-2xl font-bold text-green-400">
                             {Number(product.price ?? 0).toLocaleString("ar-EG")} ج.م
                           </p>
                           {typeof product.PurchasePrice === "number" &&
@@ -258,7 +308,7 @@ export default async function OrganizationProfilePage({
                             </p>
                           ) : null}
                         </div>
-                      </div>
+                      )}
                       <Link
                         href={`/product/${encodeURIComponent(id)}`}
                         className="w-full inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"

@@ -13,13 +13,14 @@ const QuickLinks = ({ onContactClick }: QuickLinksProps) => {
     // { href: "/services", label: "الخدمات" },
     { href: "/", label: "المنتجات" },
     { href: "/about", label: "من نحن" },
+    { href: "/policies", label: "السياسات الخاصة بالمنصة" },
   ]);
 
   return (
     <div className="w-full sm:w-[80%] md:w-[60%] lg:w-[23%] min-h-0 sm:min-h-[160px] md:min-h-[140px] lg:h-[20vh]">
       <div className="w-full">
         <h3 
-          className="text-secondary1 text-right"
+          className="text-[#f1f5f9] text-right"
           style={{
             fontFamily: 'Beiruti',
             fontWeight: 600,
@@ -44,14 +45,14 @@ const QuickLinks = ({ onContactClick }: QuickLinksProps) => {
                   e.preventDefault();
                   onContactClick?.();
                 }}
-                className="text-slate-200 hover:text-blue-300 transition-colors text-sm sm:text-sm cursor-pointer  block py-1 sm:py-0 w-full text-right"
+                className="text-[#38bdf8] hover:text-[#7dd3fc] transition-colors text-sm sm:text-sm cursor-pointer  block py-1 sm:py-0 w-full text-right"
               >
                 {link.label}
               </button>
             ) : (
               <Link
                 href={link.href}
-                className="text-slate-200 hover:text-blue-300 transition-colors text-sm sm:text-sm cursor-pointer text-left block py-1 sm:py-0"
+                className="text-[#38bdf8] hover:text-[#7dd3fc] transition-colors text-sm sm:text-sm cursor-pointer text-left block py-1 sm:py-0"
               >
                 {link.label}
               </Link>

@@ -6,21 +6,20 @@ export default function AboutPage() {
     <div
       dir="rtl"
       className="
-        w-full max-w-[380px] sm:max-w-[768px] lg:max-w-[1024px] xl:max-w-[1360px]
-        min-h-[2741px]
-        mx-auto mt-[250px] sm:mt-[80px] lg:mt-[185px]
-        mb-[30px] sm:mb-[40px] lg:mb-[50px]
-        rounded-[24px]
-        border border-slate-700
-        p-4 sm:p-6 lg:p-10 xl:p-[40px]
-        flex flex-col gap-6 sm:gap-8 lg:gap-[40px]
-        bg-slate-900 text-slate-100
+        w-full
+        mx-auto mt-24
+        mb-10
+        rounded-3xl
+        border border-gray-200
+        p-6 sm:p-8 lg:p-12
+        flex flex-col gap-6 sm:gap-8 lg:gap-10
+        bg-white text-slate-900 shadow-sm
       "
     >
       {/* ===== Header ===== */}
       <section className="flex flex-col items-center text-center gap-4">
-        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-br from-slate-800 via-blue-900/40 to-purple-900/40 p-3 shadow-xl">
-          <div className="w-full h-full bg-slate-900 rounded-xl flex items-center justify-center">
+        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 p-3 shadow-sm">
+          <div className="w-full h-full bg-white rounded-xl flex items-center justify-center">
             <Image
               src="/logo/logo1.png"
               alt="منصة شق الثعبان"
@@ -30,38 +29,38 @@ export default function AboutPage() {
           </div>
         </div>
 
-        <span className="px-4 py-1 text-sm rounded-full bg-blue-900/40 text-blue-300 font-semibold">
+        <span className="px-4 py-1 text-sm rounded-full bg-blue-100 text-blue-700 font-semibold">
           من نحن
         </span>
 
-        <h1 className="text-3xl sm:text-4xl font-bold text-slate-100">
+        <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">
           منصة شق تعبان
         </h1>
 
-        <p className="text-base sm:text-lg text-slate-300 max-w-3xl leading-relaxed">
+        <p className="text-base sm:text-lg text-slate-600 max-w-3xl leading-relaxed">
           منصة إلكترونية مصرية متخصصة في تنظيم وتطوير سوق الرخام والجرانيت والكوارتز داخل جمهورية مصر العربية، وتهدف إلى ربط جميع أطراف السوق في نظام رقمي واحد شفاف وموثوق.
         </p>
       </section>
 
       {/* ===== Intro ===== */}
-      <section className="bg-slate-800/90 border border-slate-700 rounded-2xl p-6 sm:p-8">
-        <p className="text-slate-300 leading-relaxed text-base sm:text-lg">
+      <section className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 shadow-sm">
+        <p className="text-slate-600 leading-relaxed text-base sm:text-lg">
           انطلقت فكرة المنصة من واقع عملي حقيقي، بعد ملاحظة التحديات الكبيرة التي يواجهها سوق الرخام في مصر، سواء من ناحية المصانع والمعارض أو من ناحية العملاء النهائيين، مثل الاعتماد على الوسطاء، غياب الشفافية في الأسعار، وصعوبة وصول العميل إلى معلومات صحيحة عن أنواع الرخام وجودته وطرق استخدامه.
         </p>
       </section>
 
       {/* ===== Vision & Mission ===== */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <section className="rounded-2xl border border-slate-700 p-6 sm:p-8 bg-slate-800/90 shadow-sm">
-          <h2 className="text-2xl font-bold text-slate-100 mb-3">رؤيتنا</h2>
-          <p className="text-slate-300 leading-relaxed">
+        <section className="rounded-2xl border border-gray-200 p-6 sm:p-8 bg-white shadow-sm">
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">رؤيتنا</h2>
+          <p className="text-slate-600 leading-relaxed">
             نسعى إلى أن تكون منصة شق تعبان المرجع الرقمي الأول لسوق الرخام في مصر، وأن نُحدث نقلة نوعية من سوق تقليدي غير منظم إلى سوق إلكتروني ذكي يعتمد على البيانات، الشفافية، والتكنولوجيا الحديثة.
           </p>
         </section>
 
-        <section className="rounded-2xl border border-slate-700 p-6 sm:p-8 bg-slate-800/90 shadow-sm">
-          <h2 className="text-2xl font-bold text-slate-100 mb-3">رسالتنا</h2>
-          <ul className="list-disc pr-5 space-y-2 text-slate-300">
+        <section className="rounded-2xl border border-gray-200 p-6 sm:p-8 bg-white shadow-sm">
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">رسالتنا</h2>
+          <ul className="list-disc pr-5 space-y-2 text-slate-600">
             <li>تمكين المصانع والمعارض من الوصول المباشر إلى العملاء بدون وسطاء.</li>
             <li>مساعدة العملاء على اتخاذ قرارات شراء واعية مبنية على معلومات دقيقة.</li>
             <li>تنظيم عمليات البيع والشراء من خلال نظام موحد وآمن.</li>
@@ -71,8 +70,8 @@ export default function AboutPage() {
       </div>
 
       {/* ===== Services ===== */}
-      <section className="rounded-2xl border border-slate-700 p-6 sm:p-8 bg-slate-800/90 shadow-sm">
-        <h2 className="text-2xl font-bold text-slate-100 mb-4">ماذا نقدم؟</h2>
+      <section className="rounded-2xl border border-gray-200 p-6 sm:p-8 bg-white shadow-sm">
+        <h2 className="text-2xl font-bold text-slate-900 mb-4">ماذا نقدم؟</h2>
 
         <div className="space-y-6">
           {[
@@ -106,11 +105,11 @@ export default function AboutPage() {
             },
             
           ].map((section, index) => (
-            <div key={index} className="bg-slate-900 rounded-xl p-5 border border-slate-700">
-              <h3 className="text-xl font-semibold text-slate-100 mb-2">
+            <div key={index} className="bg-slate-50 rounded-xl p-5 border border-gray-200">
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">
                 {section.title}
               </h3>
-              <ul className="list-disc pr-5 space-y-2 text-slate-300">
+              <ul className="list-disc pr-5 space-y-2 text-slate-600">
                 {section.items.map((item, i) => (
                   <li key={i}>{item}</li>
                 ))}
@@ -122,11 +121,11 @@ export default function AboutPage() {
 
       {/* ===== Why & Values ===== */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <section className="rounded-2xl border border-slate-700 p-6 sm:p-8 bg-slate-800/90 shadow-sm">
-          <h2 className="text-2xl font-bold text-slate-100 mb-3">
+        <section className="rounded-2xl border border-gray-200 p-6 sm:p-8 bg-white shadow-sm">
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">
             لماذا منصة شق تعبان؟
           </h2>
-          <ul className="list-disc pr-5 space-y-2 text-slate-300">
+          <ul className="list-disc pr-5 space-y-2 text-slate-600">
             <li>تقليل الغش التجاري.</li>
             <li>معلومات موثوقة ومبسطة.</li>
             <li>منافسة عادلة بين الموردين.</li>
@@ -135,9 +134,9 @@ export default function AboutPage() {
           </ul>
         </section>
 
-        <section className="rounded-2xl border border-slate-700 p-6 sm:p-8 bg-slate-800/90 shadow-sm">
-          <h2 className="text-2xl font-bold text-slate-100 mb-3">قيمنا</h2>
-          <ul className="list-disc pr-5 space-y-2 text-slate-300">
+        <section className="rounded-2xl border border-gray-200 p-6 sm:p-8 bg-white shadow-sm">
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">قيمنا</h2>
+          <ul className="list-disc pr-5 space-y-2 text-slate-600">
             <li>الشفافية</li>
             <li>المصداقية</li>
             <li>الاحترافية</li>
@@ -148,11 +147,11 @@ export default function AboutPage() {
       </div>
 
       {/* ===== Future ===== */}
-      <section className="rounded-2xl border border-slate-700 p-6 sm:p-8 bg-gradient-to-br from-slate-800 to-blue-900/40">
-        <h2 className="text-2xl font-bold text-slate-100 mb-3">
+      <section className="rounded-2xl border border-blue-100 p-6 sm:p-8 bg-blue-50">
+        <h2 className="text-2xl font-bold text-slate-900 mb-3">
           طموحنا المستقبلي
         </h2>
-        <ul className="list-disc pr-5 space-y-2 text-slate-300">
+        <ul className="list-disc pr-5 space-y-2 text-slate-700">
           <li>التوسع داخل مصر ثم إقليميًا</li>
           <li>إطلاق تطبيقات موبايل</li>
           <li>إضافة مواد بناء أخرى</li>

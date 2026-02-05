@@ -10,6 +10,8 @@ export interface RegisterRequest {
   password: string;
   phoneNumber: string;
   organizationId?: string;
+  acceptedPolicies?: boolean;
+  acceptedPoliciesAt?: string;
 }
 
 export interface User {
@@ -25,6 +27,10 @@ export interface User {
   salary: number | null;
   dateOfSubmission: string | null;
   isVerified: boolean;
+  acceptedPolicies?: boolean;
+  acceptedPoliciesAt?: string | null;
+  policyAccepted?: boolean;
+  policyAcceptedAt?: string | null;
   address: any[];
   createdAt: string;
   updatedAt: string;

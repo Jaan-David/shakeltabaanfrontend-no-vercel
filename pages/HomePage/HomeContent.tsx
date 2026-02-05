@@ -22,10 +22,12 @@ export default function HomeContent() {
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [userName, setUserName] = useState<string>('منصة شق الثعبان');
   const [productSearch, setProductSearch] = useState('');
+  const [hasHydrated, setHasHydrated] = useState(false);
   const isMounted = useRef(false);
 
   useEffect(() => {
     isMounted.current = true;
+    setHasHydrated(true);
     
     // Fetch user profile
     const fetchUserProfile = async () => {
@@ -112,6 +114,10 @@ export default function HomeContent() {
       })
     : products;
 
+  if (!hasHydrated) {
+    return <div className="min-h-screen bg-white" />;
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* Slider */}
@@ -140,6 +146,23 @@ export default function HomeContent() {
                 لمعرفة المزيد عن الرخام
               </button>
             </div>
+          </div>
+        </div>
+      </section>
+      {/* Custom Order CTA */}
+      <section className="px-4">
+        <div className="max-w-5xl mx-auto mb-16">
+          <div className="rounded-2xl border border-blue-100 bg-white p-8 sm:p-10 text-center shadow-sm">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary mb-6">
+              اطلب طلبك على مزاجك
+            </h2>
+            <button
+              onClick={() => router.push('/inquiries')}
+              aria-label="إنشئ طلبك الخاص"
+              className="inline-flex items-center justify-center rounded-xl bg-primary px-8 py-3 text-white text-base sm:text-lg font-semibold transition-colors hover:bg-secondary"
+            >
+              إنشئ طلبك الخاص
+            </button>
           </div>
         </div>
       </section>

@@ -6,7 +6,7 @@ const Logo = () => {
 			{/* logo */}
 			<div className="w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28">
 				<img
-				src="/acessts/Logo-picsart.png"
+				src="/logo/logo2.png"
 				alt="ShakElTaaban Logo"
 				className="w-full h-full object-contain"
 				/>

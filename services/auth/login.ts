@@ -23,6 +23,10 @@ export interface User {
   dateOfSubmission?: string | null;
   isVerified?: boolean;
   isEmailVerified: boolean;
+  acceptedPolicies?: boolean;
+  acceptedPoliciesAt?: string | null;
+  policyAccepted?: boolean;
+  policyAcceptedAt?: string | null;
   address?: any[];
   createdAt?: string;
   updatedAt?: string;

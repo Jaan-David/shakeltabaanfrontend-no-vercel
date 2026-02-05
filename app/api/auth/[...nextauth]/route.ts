@@ -5,6 +5,7 @@ import FacebookProvider from "next-auth/providers/facebook";
 import { JWT } from "next-auth/jwt";
 
 import { socialLogin } from "@/services/auth/login";
+import { getPolicyAcceptanceInfo } from "@/utils/policyConsent";
 
 export const runtime = "nodejs";
 
@@ -13,6 +14,8 @@ declare module "next-auth" {
     accessToken?: string;
     provider?: string;
     backendToken?: string;
+    policyAccepted?: boolean;
+    policyAcceptedAt?: string | null;
     user?: {
       name?: string | null;
       email?: string | null;
@@ -27,6 +30,8 @@ declare module "next-auth/jwt" {
     accessToken?: string;
     provider?: string;
     backendToken?: string;
+    policyAccepted?: boolean;
+    policyAcceptedAt?: string | null;
     backendUser?: any;
   }
 }
@@ -134,12 +139,18 @@ const authOptions: NextAuthOptions = {
           
           if (backendResult.success) {
             token.backendToken = backendResult.token;
+
+            const policyInfo = getPolicyAcceptanceInfo(backendResult.user);
+            token.policyAccepted = policyInfo.accepted;
+            token.policyAcceptedAt = policyInfo.acceptedAt ?? null;
             
             token.backendUser = {
               id: backendResult.user?.id,
               email: backendResult.user?.email,
               name: backendResult.user?.name,
               phone: backendResult.user?.phone,
+              policyAccepted: policyInfo.accepted,
+              policyAcceptedAt: policyInfo.acceptedAt ?? null,
             };
             
             console.log('✅ [NextAuth] Backend authentication successful');
@@ -167,6 +178,11 @@ const authOptions: NextAuthOptions = {
       if (token.backendToken) {
         session.backendToken = token.backendToken as string;
         console.log('✅ [NextAuth] Backend token added to session');
+      }
+
+      if (typeof token.policyAccepted === 'boolean') {
+        session.policyAccepted = token.policyAccepted;
+        session.policyAcceptedAt = token.policyAcceptedAt ?? null;
       }
       
       // Add backend user data to session

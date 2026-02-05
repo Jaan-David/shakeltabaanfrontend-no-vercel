@@ -91,9 +91,11 @@ function Header({
   const [unreadCount, setUnreadCount] = useState(0);
   const [chat, setChat] = useState(false);
   const [open, setOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   // Handle session-based auth (for social login)
   useEffect(() => {
+    setIsMounted(true);
     const handleSocialAuth = async () => {
       if (session?.backendToken && session?.user?.backendUser) {
         UserStorage.saveUser(session.user.backendUser);
@@ -294,6 +296,10 @@ function Header({
   } ${getVariantClass()} ${className}`.trim();
 
   const isAuthenticated = user !== null && !isLoading;
+
+  if (!isMounted) {
+    return null;
+  }
 
   if ((isLoading || status === "loading") && showUserActions) {
     return (

@@ -24,7 +24,7 @@ const EditProfileSection = dynamic(
 );
 
 // Services
-import { getCurrentUser } from "../../services/auth/login";
+import { getAuthToken, getCurrentUser, isUserAuthenticated } from "../../services/auth/login";
 import { ProfileService } from "../../services/profile/profile";
 
 // Icons
@@ -99,6 +99,11 @@ const ProfilePage = () => {
    */
   const fetchUserProfile = useCallback(async () => {
     try {
+      if (!isUserAuthenticated() || !getAuthToken()) {
+        setError("يرجى تسجيل الدخول لعرض الملف الشخصي");
+        setIsLoading(false);
+        return;
+      }
       setIsLoading(true);
       setError(null);
 
