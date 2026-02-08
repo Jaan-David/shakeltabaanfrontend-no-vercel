@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import styles from './PartnersSection.module.css';
 import { organizationService, Organization } from '@/services/api/organizations';
+import { Api } from '@/services/api/endpoints';
 
 interface Partner {
   id: string;
@@ -12,11 +13,7 @@ interface Partner {
   organizationId: string;
 }
 
-const imageBaseUrl = (
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  process.env.NEXT_PUBLIC_API_URL ||
-  'http://localhost:3002/app/v1'
-).replace(/\/app\/v1\/?$/, '');
+const imageBaseUrl = Api.replace(/\/app\/v1\/?$/, '');
 
 const normalizeApiImage = (path?: string | null): string => {
   if (!path) return '/acessts/placeholder.svg';

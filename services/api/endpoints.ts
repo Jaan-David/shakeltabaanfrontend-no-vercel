@@ -202,8 +202,9 @@ export const buildUrl = (endpoint: string, params: Record<string, string | numbe
   return url;
 };
 
-// API Base URL according to official documentation
-export const Api = 'https://shk2t-t3ban.fly.dev/app/v1';
+// API Base URL (single source of truth)
+export const Api =
+  process.env.NEXT_PUBLIC_API_URL || 'https://shk2t-t3ban.fly.dev/app/v1';
 
 export type ApiEndpoint = typeof API_ENDPOINTS;
 export type EndpointPath = string; 

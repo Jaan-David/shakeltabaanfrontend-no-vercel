@@ -8,12 +8,12 @@ export interface Organization {
   photo?: string;
 }
 
+import { Api } from './endpoints';
+
 export const organizationService = {
   async getOrganizations(): Promise<Organization[]> {
     try {
-      // Keep BASE_URL explicit (similar to products service) to avoid undefined client
-      const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/app/v1';
-      const response = await fetch(`${BASE_URL}/organizations`, {
+      const response = await fetch(`${Api}/organizations`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
