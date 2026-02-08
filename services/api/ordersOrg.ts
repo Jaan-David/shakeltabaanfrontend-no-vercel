@@ -1,4 +1,5 @@
 import apiClient from './client';
+import { Api } from './endpoints';
 
 export interface OrgSummary {
   _id: string;
@@ -33,7 +34,7 @@ export interface OrgItemsResponse {
   message?: string;
 }
 
-const BASE = 'https://shk2t-t3ban.fly.dev/app/v1';
+const BASE = Api;
 
 export const ordersOrgService = {
   async listOrganizations() {

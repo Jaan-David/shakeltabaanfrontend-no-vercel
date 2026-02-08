@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import styles from './PartnersSection.module.css';
 import { organizationService, Organization } from '@/services/api/organizations';
@@ -11,11 +12,17 @@ interface Partner {
   organizationId: string;
 }
 
+const imageBaseUrl = (
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  'http://localhost:3002/app/v1'
+).replace(/\/app\/v1\/?$/, '');
+
 const normalizeApiImage = (path?: string | null): string => {
   if (!path) return '/acessts/placeholder.svg';
   if (path.startsWith('http://') || path.startsWith('https://')) return path;
   const cleaned = path.startsWith('/') ? path.slice(1) : path;
-  return `https://shk2t-t3ban.fly.dev/${cleaned}`;
+  return `${imageBaseUrl}/${cleaned}`;
 };
 
 export default function PartnersSection() {
@@ -82,9 +89,13 @@ export default function PartnersSection() {
               className={styles.partnerCard}
             >
               <div className={styles.partnerLogo}>
-                <img
+                <Image
                   src={partner.logo}
                   alt={partner.name}
+                  width={120}
+                  height={120}
+                  sizes="(max-width: 768px) 96px, 120px"
+                  loading="lazy"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.src = '/acessts/placeholder.svg';

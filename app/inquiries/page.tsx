@@ -160,7 +160,7 @@ export default function InquiriesPage() {
     : inquiries.filter(i => i.status === activeStatus);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900/20 to-purple-900/20 py-12 px-4 rtl">
+    <div className="min-h-screen bg-white py-12 px-4 rtl">
       {/* Alerts */}
       {successMessage && (
         <Alert
@@ -180,7 +180,7 @@ export default function InquiriesPage() {
 
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8 bg-slate-50/90 backdrop-blur-sm border border-slate-200 rounded-2xl shadow-sm p-6">
+        <div className="mb-8 bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
           <h1 className="text-3xl font-bold text-slate-900 mb-2">طلباتي</h1>
           <p className="text-slate-600">عرض وإدارة الطلبات الخاصة بك والعروض من الشركات</p>
         </div>
@@ -231,12 +231,12 @@ export default function InquiriesPage() {
 
             {/* Inquiries List */}
             {isLoading ? (
-              <div className="text-center py-12 bg-slate-50 border border-slate-200 rounded-2xl shadow-sm">
+              <div className="text-center py-12 bg-white border border-slate-200 rounded-2xl shadow-sm">
                 <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
                 <p className="text-slate-600 mt-4">جاري التحميل...</p>
               </div>
             ) : filteredInquiries.length === 0 ? (
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-12 text-center shadow-sm">
+              <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-sm">
                 <p className="text-slate-600 text-lg mb-4">لا توجد طلبات</p>
                 <button
                   onClick={() => setActiveTab('create')}
@@ -249,7 +249,7 @@ export default function InquiriesPage() {
               filteredInquiries.map((inquiry) => (
                 <div
                   key={inquiry._id}
-                  className="bg-slate-50 border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden cursor-pointer"
+                  className="bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden cursor-pointer"
                   onClick={() => setSelectedInquiry(inquiry)}
                 >
                   <div className="p-6 border-r-4 border-blue-500">

@@ -177,7 +177,7 @@ export const wishlistService = {
         
       } catch (error: any) {
         // Check if this is a network error (no response from server)
-        const isNetworkError = !error.response && (error.request || error.message);
+        const isNetworkError = !error?.response;
 
         if (isNetworkError) {
           console.warn('Network error - unable to connect to server');
@@ -226,7 +226,7 @@ export const wishlistService = {
         console.error('Error fetching wishlist:', {
           status: error?.response?.status,
           data: error?.response?.data,
-          message: error.message
+          message: error?.message || String(error)
         });
 
         // Return empty data for other errors

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRef } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import CategoriesGrid from "@/pages/CategoriesPage/CategoriesGrid";
 import { fetchCategories, Category as CategoryType } from '@/services/product/categories';
@@ -10,6 +11,12 @@ import { productService } from '@/services/api/products';
 
 export default function HomeContent() {
   const router = useRouter();
+  const apiBaseUrl =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002/app/v1";
+  const imageBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || apiBaseUrl).replace(
+    /\/app\/v1\/?$/,
+    ""
+  );
   const heroImage = {
     src: "/slider/1.jpg",
     alt: "صورة الرخام الرئيسية",
@@ -25,6 +32,13 @@ export default function HomeContent() {
   const [hasHydrated, setHasHydrated] = useState(false);
   const isMounted = useRef(false);
 
+  const normalizeProductImage = (src?: string) => {
+    if (!src) return "/acessts/NoImage.jpg";
+    if (src.startsWith("http://") || src.startsWith("https://")) return src;
+    if (src.startsWith("/")) return src;
+    return `${imageBaseUrl}/${src.replace(/^\//, "")}`;
+  };
+
   useEffect(() => {
     isMounted.current = true;
     setHasHydrated(true);
@@ -34,7 +48,7 @@ export default function HomeContent() {
       try {
         const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
         if (token) {
-          const response = await fetch('https://shk2t-t3ban.fly.dev/app/v1/users/user', {
+          const response = await fetch(`${apiBaseUrl}/users/user`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -124,14 +138,17 @@ export default function HomeContent() {
       <section className="relative w-full mb-16 bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400 rounded-b-3xl overflow-hidden shadow-2xl border-b border-blue-200">
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-white/10"></div>
         <div className="relative w-full h-[240px] sm:h-[380px] md:h-[520px]">
-          <img
+          <Image
             src={heroImage.src}
             alt={heroImage.alt}
-            className="w-full h-full object-cover"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
           />
 
           {/* Text Overlay Box */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center z-10 w-11/12 max-w-3xl backdrop-blur-sm bg-white/95 p-8 rounded-2xl border-2 border-blue-300 shadow-2xl">
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center z-10 w-11/12 max-w-3xl backdrop-blur-sm bg-white/85 p-8 rounded-2xl border-2 border-blue-300 shadow-2xl">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent mb-4 drop-shadow-2xl leading-tight">
             {userName}
             </h1>
@@ -152,17 +169,21 @@ export default function HomeContent() {
       {/* Custom Order CTA */}
       <section className="px-4">
         <div className="max-w-5xl mx-auto mb-16">
-          <div className="rounded-2xl border border-blue-100 bg-white p-8 sm:p-10 text-center shadow-sm">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary mb-6">
-              اطلب طلبك على مزاجك
-            </h2>
-            <button
-              onClick={() => router.push('/inquiries')}
-              aria-label="إنشئ طلبك الخاص"
-              className="inline-flex items-center justify-center rounded-xl bg-primary px-8 py-3 text-white text-base sm:text-lg font-semibold transition-colors hover:bg-secondary"
-            >
-              إنشئ طلبك الخاص
-            </button>
+          <div className="rounded-2xl border border-blue-100 inquiries-cta-bg p-8 sm:p-10 shadow-sm">
+            <div className="flex flex-col justify-between min-h-[180px]">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 text-right">
+                طلبك دلوقتي
+              </h2>
+              <div className="flex justify-end">
+                <button
+                  onClick={() => router.push('/inquiries')}
+                  aria-label="إنشئ طلبك الخاص"
+                  className="inline-flex items-center justify-center rounded-xl bg-primary px-8 py-3 text-white text-base sm:text-lg font-semibold transition-colors hover:bg-secondary"
+                >
+                  إنشئ طلبك الخاص
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -228,16 +249,20 @@ export default function HomeContent() {
                   className="group marble-card p-6 hover:border-blue-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/20 transform hover:-translate-y-2 cursor-pointer relative"
                 >
                   {/* Offer Badge */}
-                  {product.isOffer && (
+                  {(product.isOffer || (product.offerLinearPrice !== null && product.offerLinearPrice !== undefined && Number(product.offerLinearPrice) > 0) || (product.offerCubicPrice !== null && product.offerCubicPrice !== undefined && Number(product.offerCubicPrice) > 0)) && (
                     <div className="absolute top-2 left-2 z-10 bg-red-600 text-black text-xs font-extrabold px-3 py-1 rounded-md border-2 border-red-700 shadow-lg">
                       عرض خاص
                     </div>
                   )}
                   
                   <div className="relative overflow-hidden rounded-xl mb-4">
-                    <img
-                      src={product.imageList?.[0] || product.image || '/acessts/NoImage.jpg'}
-                      alt={product.name}
+                    <Image
+                      src={normalizeProductImage(product.imageList?.[0] || product.image)}
+                      alt={product.name || "صورة المنتج"}
+                      width={420}
+                      height={240}
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                      loading="lazy"
                       className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -285,7 +310,7 @@ export default function HomeContent() {
                         )}
                         {product.pricePerCubicMeter && (
                           <div className="flex flex-col">
-                            <span className="text-xs text-slate-600">المتر المكعب:</span>
+                            <span className="text-xs text-slate-600">المتر مربع:</span>
                             {product.offerCubicPrice !== null && product.offerCubicPrice !== undefined && Number(product.offerCubicPrice) > 0 ? (
                               <>
                                 <span className="text-sm text-slate-500 line-through">{Number(product.pricePerCubicMeter).toLocaleString()} ج.م</span>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from 'react';
+import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn, useSession, getSession } from 'next-auth/react';
 import { Eye, EyeOff } from 'lucide-react';
@@ -502,7 +503,15 @@ const handleFacebookLogin = async () => {
         <div className={styles.container}>
           <div className={styles.formWrapper}>
             <div className={styles.header}>
-              <img src={Logo.src} alt="Logo" className={styles.logo} />
+              <Image
+                src={Logo}
+                alt="Logo"
+                width={160}
+                height={48}
+                sizes="160px"
+                className={styles.logo}
+                priority
+              />
               
               <h2 className={styles.title}>جاري التحميل...</h2>
             </div>
@@ -519,7 +528,15 @@ const handleFacebookLogin = async () => {
       <div className={styles.container}>
         <div className={styles.formWrapper}>
           <div className={styles.header}>
-            <img src={Logo.src} alt="Logo" className={styles.logo} />
+            <Image
+              src={Logo}
+              alt="Logo"
+              width={160}
+              height={48}
+              sizes="160px"
+              className={styles.logo}
+              priority
+            />
             <h2 className={styles.title}>تسجيل الدخول</h2>
           </div>
 

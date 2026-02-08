@@ -4,12 +4,75 @@ import { fetchProductByIdISR } from "@/services/api/products";
 import { reviewService } from "@/services/api/reviews";
 
 import { generateSEO } from "@/config/seo.config";
+import {
+  buildBreadcrumbJsonLd,
+  buildProductJsonLd,
+  buildProductKeywords,
+} from "@/utils/seo";
 
-export const metadata = generateSEO({
-  title: " صفحة المنتج",
-  description: "منصة شق الثعبان متخصصة في جميع أنواع الرخام والجرانيت",
-  keywords: ["كيماويات", "تجارة"],
-});
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const decodedId = decodeURIComponent(id);
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const apiImageBaseUrl = (
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://localhost:3002/app/v1"
+  ).replace(/\/app\/v1\/?$/, "");
+
+  try {
+    const response = await fetchProductByIdISR(decodedId, 3600);
+    const responseRecord = response as unknown as Record<string, unknown>;
+    const dataRecord = responseRecord?.data as Record<string, unknown> | undefined;
+    const apiProduct =
+      (dataRecord?.product as Record<string, unknown> | undefined) ||
+      (responseRecord?.product as Record<string, unknown> | undefined);
+
+    if (!apiProduct) {
+      return generateSEO({
+        title: "منتج غير متاح",
+        description: "هذا المنتج غير متاح حاليًا على منصة شق الثعبان.",
+        noIndex: true,
+      });
+    }
+
+    const title =
+      (apiProduct.name as string | undefined) ||
+      (apiProduct.nameAr as string | undefined) ||
+      "منتج رخام";
+    const description =
+      (apiProduct.description as string | undefined) ||
+      (apiProduct.descriptionAr as string | undefined) ||
+      "اكتشف تفاصيل المنتج من مصانع ومعارض شق الثعبان في مصر.";
+    const rawImage =
+      (apiProduct.image as string | undefined) ||
+      ((apiProduct.imageList as string[] | undefined) || [])[0];
+    const image = rawImage
+      ? rawImage.startsWith("http")
+        ? rawImage
+        : `${apiImageBaseUrl}/${rawImage.replace(/^\//, "")}`
+      : `${baseUrl}/acessts/NoImage.jpg`;
+
+    return generateSEO({
+      title,
+      description,
+      keywords: buildProductKeywords({ name: title }),
+      image,
+      url: `/product/${encodeURIComponent(id)}`,
+      type: "product",
+    });
+  } catch {
+    return generateSEO({
+      title: "منتج غير متاح",
+      description: "هذا المنتج غير متاح حاليًا على منصة شق الثعبان.",
+      noIndex: true,
+    });
+  }
+}
 
 function getImageList(
   p?: { imageList?: string[]; images?: string[]; image?: string } | null
@@ -25,6 +88,26 @@ function getImageList(
   return ["/acessts/NoImage.jpg"]; // Fixed placeholder path
 }
 
+const resolveProductImageForSchema = (image: string, baseUrl: string) => {
+  if (!image) return `${baseUrl}/acessts/NoImage.jpg`;
+  if (image.startsWith("http://") || image.startsWith("https://")) return image;
+  if (image.startsWith("/")) return `${baseUrl}${image}`;
+  const apiImageBaseUrl = (
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://localhost:3002/app/v1"
+  ).replace(/\/app\/v1\/?$/, "");
+  return `${apiImageBaseUrl}/${image.replace(/^\//, "")}`;
+};
+
+const resolveMaterialFromCategory = (category?: string) => {
+  const normalized = (category || "").toLowerCase();
+  if (normalized.includes("granite") || normalized.includes("جرانيت")) return "Granite";
+  if (normalized.includes("quartz") || normalized.includes("كوارتز")) return "Quartz";
+  if (normalized.includes("marble") || normalized.includes("رخام")) return "Marble";
+  return "Marble";
+};
+
 export default async function ProductByIdPage({
   params,
 }: {
@@ -32,6 +115,7 @@ export default async function ProductByIdPage({
 }) {
   const { id } = await params; // Await params in Next.js 15
   const decodedId = decodeURIComponent(id);
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
   try {
     //console.log(`🔄 Loading product page for ID: ${decodedId}`);
@@ -144,10 +228,51 @@ export default async function ProductByIdPage({
       name: "",
     };
 
+    const productImages = getImageList(apiProduct);
+    const schemaImages = productImages.map((image) =>
+      resolveProductImageForSchema(image, baseUrl)
+    );
+    const productUrl = `${baseUrl}/product/${encodeURIComponent(data.id)}`;
+    const productSchema = buildProductJsonLd({
+      id: data.id,
+      title: data.title,
+      description: data.description,
+      images: schemaImages,
+      price: data.price,
+      rating,
+      ratingCount,
+      url: productUrl,
+      category: data.category || "رخام",
+      material: resolveMaterialFromCategory(data.category),
+      brand: apiProduct.brand || apiProduct.organizationName || "شق الثعبان",
+    });
+
+    const breadcrumbSchema = buildBreadcrumbJsonLd([
+      { name: "الرئيسية", url: "/" },
+      { name: data.category || "المنتجات", url: "/categories" },
+      { name: data.title, url: `/product/${encodeURIComponent(data.id)}` },
+    ]);
+
     console.log(`📤 Data being passed to ProductPage:`, JSON.stringify(data, null, 2));
 
     //console.log(`✅ Product page data prepared successfully`);
-    return <ProductPage data={data} />;
+    return (
+      <>
+        <ProductPage data={data} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(productSchema),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(breadcrumbSchema),
+          }}
+        />
+      </>
+    );
   } catch (e: any) {
     console.error("❌ Error fetching product:", e.message);
 

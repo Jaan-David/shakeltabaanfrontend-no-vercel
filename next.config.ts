@@ -34,8 +34,23 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
+        protocol: 'http',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
+      {
         protocol: 'https',
         hostname: 'marble-bajco.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'shk2t-t3ban.fly.dev',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
         pathname: '/**',
       },
     ],

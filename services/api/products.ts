@@ -1,4 +1,5 @@
 import apiClient from './client';
+import { Api } from './endpoints';
 
 const isServer = typeof window === 'undefined';
 
@@ -193,7 +194,7 @@ async function fetchWithRetry<T>(requestFn: () => Promise<T>, maxRetries = 3): P
 const getProductsClient = async (filters: ProductFilters) => {
   try {
     // Always use the required API endpoint for products
-    const BASE_URL = 'https://shk2t-t3ban.fly.dev/app/v1';
+    const BASE_URL = Api;
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
@@ -255,7 +256,7 @@ export async function fetchProductsISR(
   filters: ProductFilters = {},
   revalidate: number = 60
 ): Promise<ApiResponse<Product[]>> {
-  const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://shk2t-t3ban.fly.dev/app/v1';
+  const BASE_URL = Api;
   
   const params = new URLSearchParams();
   params.set('lang', 'en');
@@ -319,7 +320,7 @@ export async function fetchProductByIdISR(
     throw new Error('Product ID is required');
   }
 
-  const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://shk2t-t3ban.fly.dev/app/v1/';
+  const BASE_URL = Api;
   const url = `${BASE_URL}/products/${id}?lang=en`;
 
   try {

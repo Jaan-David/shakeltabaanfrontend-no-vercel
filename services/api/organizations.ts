@@ -12,7 +12,7 @@ export const organizationService = {
   async getOrganizations(): Promise<Organization[]> {
     try {
       // Keep BASE_URL explicit (similar to products service) to avoid undefined client
-      const BASE_URL = 'https://shk2t-t3ban.fly.dev/app/v1';
+      const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/app/v1';
       const response = await fetch(`${BASE_URL}/organizations`, {
         method: 'GET',
         headers: {

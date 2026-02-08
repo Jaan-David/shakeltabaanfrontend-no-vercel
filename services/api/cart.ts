@@ -1,6 +1,6 @@
 import apiClient from './client';
 import { toast } from 'react-toastify';
-import { buildUrl } from './endpoints';
+import { Api, buildUrl } from './endpoints';
 
 export type UnitType = 'linear' | 'cubic';
 
@@ -22,6 +22,8 @@ interface ClientCartItem extends CartItem {
 }
 
 let clientCartItems: ClientCartItem[] = [];
+
+const BASE_URL = Api;
 
 export const setClientCartItems = (items: ClientCartItem[]) => {
   clientCartItems = items;
@@ -89,7 +91,7 @@ export const cartService = {
         };
       }
 
-        const response = await apiClient.get('https://shk2t-t3ban.fly.dev/app/v1/carts');
+        const response = await apiClient.get(`${BASE_URL}/carts`);
       
       const items = response.data?.data?.cart?.items || [];
       
@@ -178,7 +180,7 @@ export const cartService = {
         originalItem: item,
         payload
       });
-        const response = await apiClient.post('https://shk2t-t3ban.fly.dev/app/v1/cartItems', payload);
+        const response = await apiClient.post(`${BASE_URL}/cartItems`, payload);
       
       toast.success('تم إضافة المنتج إلى عربة التسوق', {
         position: "top-center",
@@ -253,7 +255,7 @@ export const cartService = {
         dbQuantity = safeQuantity * 1000;
       }
       
-        const url = `https://shk2t-t3ban.fly.dev/app/v1/cartItems/${cartItemId}`;
+        const url = `${BASE_URL}/cartItems/${cartItemId}`;
       console.log('Cart Service - Updating cart item:', {
         cartItemId,
         originalQuantity: quantity,
@@ -288,7 +290,7 @@ export const cartService = {
         return null;
       }
 
-        const url = `https://shk2t-t3ban.fly.dev/app/v1/cartItems/${cartItemId}`;
+        const url = `${BASE_URL}/cartItems/${cartItemId}`;
       const response = await apiClient.delete(url);
       
       toast.success('تم حذف المنتج من عربة التسوق', {

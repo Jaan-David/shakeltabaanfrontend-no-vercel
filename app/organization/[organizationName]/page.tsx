@@ -1,17 +1,48 @@
 import Link from "next/link";
-import { generateSEO } from "@/config/seo.config";
+import Image from "next/image";
+import { generateSEO, seoConfig } from "@/config/seo.config";
+import {
+  buildAltText,
+  buildBreadcrumbJsonLd,
+  buildLocalBusinessJsonLd,
+  buildOrganizationKeywords,
+  buildOrganizationJsonLd,
+} from "@/utils/seo";
 
-export const metadata = generateSEO({
-  title: "ملف الشريك",
-  description: "عرض منتجات الشريك",
-  keywords: ["شركاء", "منتجات", "رخام", "جرانيت"],
-});
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002/app/v1";
+const API_IMAGE_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || API_BASE_URL).replace(
+  /\/app\/v1\/?$/,
+  ""
+);
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ organizationName: string }>;
+}) {
+  const resolvedParams = await params;
+  const organizationId = decodeURIComponent(resolvedParams.organizationName || "");
+  const orgData = await fetchOrganizationProfile(organizationId);
+  const title = orgData?.name || organizationId || "ملف الشريك";
+  const description =
+    orgData?.description ||
+    "تعرف على مصنع أو معرض الشريك ومنتجات الرخام والجرانيت والكوارتز في منصة شق الثعبان.";
+
+  return generateSEO({
+    title,
+    description,
+    keywords: buildOrganizationKeywords(title, orgData?.location),
+    url: `/organization/${encodeURIComponent(resolvedParams.organizationName || "")}`,
+  });
+}
 
 type Product = {
   _id?: string;
   id?: string;
   name?: string;
   nameAr?: string;
+  category?: string;
   imageList?: string[];
   image?: string;
   price?: number;
@@ -47,9 +78,8 @@ type OrganizationProfile = {
 };
 
 async function fetchOrganizationProducts(organizationId: string): Promise<Product[]> {
-  const BASE_URL = "https://shk2t-t3ban.fly.dev/app/v1";
   const safeId = encodeURIComponent(organizationId);
-  const response = await fetch(`${BASE_URL}/products/organization/${safeId}`, {
+  const response = await fetch(`${API_BASE_URL}/products/organization/${safeId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -77,9 +107,8 @@ async function fetchOrganizationProducts(organizationId: string): Promise<Produc
 async function fetchOrganizationPreviousWork(
   organizationId: string
 ): Promise<PreviousWork[]> {
-  const BASE_URL = "https://shk2t-t3ban.fly.dev/app/v1";
   const safeId = encodeURIComponent(organizationId);
-  const response = await fetch(`${BASE_URL}/previous-work/organization/${safeId}`, {
+  const response = await fetch(`${API_BASE_URL}/previous-work/organization/${safeId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -106,9 +135,8 @@ async function fetchOrganizationPreviousWork(
 async function fetchOrganizationProfile(
   organizationId: string
 ): Promise<OrganizationProfile | null> {
-  const BASE_URL = "https://shk2t-t3ban.fly.dev/app/v1";
   const safeId = encodeURIComponent(organizationId);
-  const response = await fetch(`${BASE_URL}/organizations/${safeId}`, {
+  const response = await fetch(`${API_BASE_URL}/organizations/${safeId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -129,7 +157,7 @@ const normalizeApiImage = (path?: string | null): string => {
   if (!path) return "/acessts/NoImage.jpg";
   if (path.startsWith("http://") || path.startsWith("https://")) return path;
   const cleaned = path.startsWith("/") ? path.slice(1) : path;
-  return `https://shk2t-t3ban.fly.dev/${cleaned}`;
+  return `${API_IMAGE_BASE_URL}/${cleaned}`;
 };
 
 export default async function OrganizationProfilePage({
@@ -159,8 +187,58 @@ export default async function OrganizationProfilePage({
     logo,
   };
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const organizationUrl = `${baseUrl}/organization/${encodeURIComponent(organizationId)}`;
+  const areaServed = ["EG", "SA", "AE", "KW", "LY", "JO"];
+  const sameAs = Object.values(seoConfig.socialLinks);
+  const organizationSchema = buildOrganizationJsonLd({
+    name: orgProfile.name,
+    description: orgProfile.description,
+    url: organizationUrl,
+    logo: orgProfile.logo,
+    address: orgProfile.location,
+    areaServed,
+    sameAs,
+  });
+
+  const localBusinessSchema = buildLocalBusinessJsonLd({
+    name: orgProfile.name,
+    description: orgProfile.description,
+    image: orgProfile.logo,
+    url: organizationUrl,
+    address: orgProfile.location,
+    rating: orgProfile.rating,
+    ratingCount: orgProfile.reviewsCount,
+    areaServed,
+    sameAs,
+  });
+
+  const breadcrumbSchema = buildBreadcrumbJsonLd([
+    { name: "الرئيسية", url: "/" },
+    { name: "المصانع والمعارض", url: "/factories" },
+    { name: orgProfile.name, url: `/organization/${encodeURIComponent(organizationId)}` },
+  ]);
+
   return (
     <div className="min-h-screen bg-white font-beiruti mt-[93px]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(organizationSchema),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(localBusinessSchema),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema),
+        }}
+      />
       <div className="mx-auto max-w-[95%] px-4 py-10 space-y-8">
         <div className="flex items-center justify-between">
           <Link
@@ -180,10 +258,14 @@ export default async function OrganizationProfilePage({
 
         <div className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 shadow-sm">
           <div className="w-28 h-28 md:w-32 md:h-32 rounded-2xl bg-white border border-gray-200 flex items-center justify-center overflow-hidden">
-            <img
+            <Image
               src={orgProfile.logo}
               alt={orgProfile.name}
+              width={128}
+              height={128}
+              sizes="(max-width: 768px) 112px, 128px"
               className="w-full h-full object-contain p-3"
+              priority
             />
           </div>
           <div className="flex-1 text-center md:text-right space-y-3">
@@ -223,26 +305,35 @@ export default async function OrganizationProfilePage({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products.map((product) => {
+              {products.map((product, index) => {
                 const id = product._id || product.id || "";
                 const name = product.nameAr || product.name || "منتج";
                 const rawImage = product.imageList?.[0] || product.image || "";
                 const image = rawImage ? normalizeApiImage(rawImage) : "/acessts/NoImage.jpg";
                 const ratingCount = Array.isArray(product.productReview) ? product.productReview.length : 0;
+                const altText = buildAltText({
+                  productName: name,
+                  stoneType: product.category || "رخام",
+                  usage: "مطابخ",
+                  includeDialect: index === 0,
+                });
                 return (
                   <div
                     key={id}
                     className="group marble-card p-6 hover:border-blue-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/20 transform hover:-translate-y-2"
                   >
-                    {product.isOffer && (
+                    {(product.isOffer || (product.offerLinearPrice !== null && product.offerLinearPrice !== undefined && Number(product.offerLinearPrice) > 0) || (product.offerCubicPrice !== null && product.offerCubicPrice !== undefined && Number(product.offerCubicPrice) > 0)) && (
                       <div className="absolute top-2 left-2 z-10 bg-red-600 text-black text-xs font-extrabold px-3 py-1 rounded-md border-2 border-red-700 shadow-lg">
                         عرض خاص
                       </div>
                     )}
                     <div className="relative overflow-hidden rounded-xl mb-4">
-                      <img
+                      <Image
                         src={image}
-                        alt={name}
+                        alt={altText}
+                        width={420}
+                        height={240}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                         className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -284,7 +375,7 @@ export default async function OrganizationProfilePage({
                           )}
                           {product.pricePerCubicMeter && (
                             <div className="flex flex-col">
-                              <span className="text-xs text-slate-600">المتر المكعب:</span>
+                              <span className="text-xs text-slate-600">المتر مربع:</span>
                               {product.offerCubicPrice !== null && product.offerCubicPrice !== undefined && Number(product.offerCubicPrice) > 0 ? (
                                 <>
                                   <span className="text-sm text-slate-500 line-through">{Number(product.pricePerCubicMeter).toLocaleString("ar-EG")} ج.م</span>
@@ -345,9 +436,12 @@ export default async function OrganizationProfilePage({
                     className="group bg-white border border-gray-200 rounded-2xl p-6 hover:border-blue-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/20"
                   >
                     <div className="relative overflow-hidden rounded-xl mb-4">
-                      <img
+                      <Image
                         src={image}
                         alt={work.title || "عمل سابق"}
+                        width={420}
+                        height={240}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

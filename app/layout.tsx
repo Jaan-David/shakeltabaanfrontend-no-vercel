@@ -11,8 +11,8 @@ import { seoConfig, organizationSchema, websiteSchema } from "@/config/seo.confi
 // ============================================
 export const metadata: Metadata = {
   title: {
-    default: `${seoConfig.siteName} | ${seoConfig.siteDescription.substring(0, 60)}...`,
-    template: `%s | ${seoConfig.siteName}`
+    default: seoConfig.defaultTitle,
+    template: `%s | ${seoConfig.siteName}`,
   },
   description: seoConfig.siteDescription,
   keywords: seoConfig.defaultKeywords,
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     locale: 'ar_EG',
     url: '/',
     siteName: seoConfig.siteName,
-    title: seoConfig.siteName,
+    title: seoConfig.defaultTitle,
     description: seoConfig.siteDescription,
     images: [
       {
@@ -50,19 +50,19 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: seoConfig.siteName,
+    title: seoConfig.defaultTitle,
     description: seoConfig.siteDescription,
     images: [seoConfig.images.twitterImage],
     site: seoConfig.twitter.site,
     creator: seoConfig.twitter.creator,
   },
-  // robots: seoConfig.robots,
+  robots: seoConfig.robots,
   icons: {
     icon: seoConfig.images.favicon,
     shortcut: seoConfig.images.favicon,
-    apple: '/apple-touch-icon.png',
+    apple: '/logo/logo2.png',
   },
-  // manifest: '/site.webmanifest',
+  manifest: '/site.webmanifest',
   verification: seoConfig.verification,
 };
 
@@ -160,6 +160,7 @@ export default function RootLayout({
               'sameAs': Object.values(seoConfig.socialLinks),
               'priceRange': '$$',
               'openingHours': 'Mo-Su 09:00-18:00',
+              'areaServed': ['EG', 'SA', 'AE', 'KW', 'LY', 'JO'],
             })
           }}
         />

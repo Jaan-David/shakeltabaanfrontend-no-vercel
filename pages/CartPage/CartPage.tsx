@@ -232,27 +232,27 @@ const CartPage = () => {
   
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900/20 to-purple-900/20 font-beiruti mt-[93px] flex items-center justify-center">
-        <div className="text-slate-100">جاري التحميل...</div>
+      <div className="min-h-screen bg-white font-beiruti mt-[93px] flex items-center justify-center">
+        <div className="text-slate-600">جاري التحميل...</div>
       </div>
     );
   }
 
 return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900/20 to-purple-900/20 font-beiruti">
+    <div className="min-h-screen bg-white font-beiruti">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 md:py-6">
         {/* Main Grid Layout */}
         <div className={`grid ${cartItems.length > 0 ? 'lg:grid-cols-12' : 'w-full'} gap-4 md:gap-6`}>
           {/* Cart Items Section */}
           <div className={`${cartItems.length > 0 ? 'lg:col-span-8 xl:col-span-9' : 'w-full'}`}>
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg shadow-sm border border-slate-700 p-3 sm:p-4 md:p-6">
+            <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-3 sm:p-4 md:p-6">
               <CartHeader itemCount={cartItems.length} />
               <div className="mt-4 space-y-6">
                 {orgGroups.map(group => (
-                  <div key={group.organizationId} className="border border-slate-700 rounded-lg p-3 bg-slate-900/30">
+                  <div key={group.organizationId} className="border border-slate-200 rounded-lg p-3 bg-slate-50">
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-lg font-semibold text-slate-100">{group.organizationName || 'منظمة'}</h3>
-                      <span className="text-slate-400 text-sm">{group.items.length} منتج</span>
+                      <h3 className="text-lg font-semibold text-slate-900">{group.organizationName || 'منظمة'}</h3>
+                      <span className="text-slate-500 text-sm">{group.items.length} منتج</span>
                     </div>
                     <CartItemsList 
                       items={group.items} 

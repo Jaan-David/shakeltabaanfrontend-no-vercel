@@ -18,8 +18,9 @@ export interface SocialLoginData {
 }
 
 async socialLogin(socialData: SocialLoginData) {
+   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/app/v1';
   const response = await apiClient.post(
-    'https://shk2t-t3ban.fly.dev/app/v1/users/signWithSocial',
+      `${apiBaseUrl}/users/signWithSocial`,
     socialData
   );
   if (typeof window !== 'undefined' && response.data.data?.token) {
@@ -89,7 +90,7 @@ export interface InquiryReply {
 - ✅ `endInquiry()` - إنهاء الطلب
 - ✅ `deleteInquiry()` - حذف الطلب
 
-**API Base URL**: `https://shk2t-t3ban.fly.dev/app/v1`
+**API Base URL**: `process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/app/v1'`
 
 ---
 

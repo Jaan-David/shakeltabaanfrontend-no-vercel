@@ -83,7 +83,7 @@ export const fetchCategories = async (): Promise<string[]> => {
   try {
     // console.log('🔄 Fetching categories from API...');
 
-    const response = await fetch(`https://shk2t-t3ban.fly.dev/app/v1/products/categories`, {
+    const response = await fetch(`${Api}${API_ENDPOINTS.PRODUCTS.CATEGORY}`, {
       method: 'GET',
       ...getRequestConfig(),
     });

@@ -306,7 +306,15 @@ function Header({
       <header className={headerClasses} style={customStyles}>
         <div className={styles.left}>
           <Link href="/" className={styles.logoLink}>
-            <img src="/logo/logo1.png" alt="Logo" className={styles.logo} />
+            <Image
+              src="/logo/logo1.png"
+              alt="Logo"
+              width={140}
+              height={40}
+              sizes="140px"
+              className={styles.logo}
+              priority
+            />
           </Link>
           {/* <LanguageSelector /> */}
         </div>
@@ -334,7 +342,15 @@ function Header({
       <header className={headerClasses} style={customStyles}>
         <div className={styles.left}>
           <Link href="/" className={styles.logoLink}>
-            <img src={Logo.src} alt="Logo" className={styles.logo} />
+            <Image
+              src={Logo}
+              alt="Logo"
+              width={140}
+              height={40}
+              sizes="140px"
+              className={styles.logo}
+              priority
+            />
 
           </Link>
 {/* <LanguageSelector /> */}

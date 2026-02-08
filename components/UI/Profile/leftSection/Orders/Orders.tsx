@@ -27,41 +27,29 @@ const Orders: React.FC<OrdersProps> = ({orders}) => {
   // console.log('📦 Orders received in Orders component:', orders);
   
   const filterOptions: FilterOption[] = [
-    { 
-      id: '1', 
-      label: 'قيد المراجعة', 
-      value: 'Under review', 
-      count: orders.filter(order => order.status === 'Under review').length 
+    {
+      id: '1',
+      label: 'تحت المراجعة',
+      value: 'تحت المراجعة',
+      count: orders.filter(order => order.status === 'تحت المراجعة').length
     },
-    { 
-      id: '2', 
-      label: 'تمت المراجعة', 
-      value: 'reviewed', 
-      count: orders.filter(order => order.status === 'reviewed').length 
+    {
+      id: '2',
+      label: 'تم التواصل',
+      value: 'تم التواصل',
+      count: orders.filter(order => order.status === 'تم التواصل').length
     },
-    { 
-      id: '3', 
-      label: 'تم التجهيز', 
-      value: 'prepared', 
-      count: orders.filter(order => order.status === 'prepared').length 
+    {
+      id: '3',
+      label: 'تم الإلغاء',
+      value: 'تم الإلغاء',
+      count: orders.filter(order => order.status === 'تم الإلغاء').length
     },
-    { 
-      id: '4', 
-      label: 'تم الشحن', 
-      value: 'shipped', 
-      count: orders.filter(order => order.status === 'shipped').length 
-    },
-    { 
-      id: '5', 
-      label: 'تم التسليم', 
-      value: 'delivered', 
-      count: orders.filter(order => order.status === 'delivered').length 
-    },
-    { 
-      id: '6', 
-      label: 'ملغي', 
-      value: 'cancelled', 
-      count: orders.filter(order => order.status === 'cancelled').length 
+    {
+      id: '4',
+      label: 'تم البيع',
+      value: 'تم البيع',
+      count: orders.filter(order => order.status === 'تم البيع').length
     }
   ];
 
@@ -82,18 +70,14 @@ const Orders: React.FC<OrdersProps> = ({orders}) => {
 
   const getStatusClass = (status: string) => {
     switch (status) {
-      case 'delivered':
+      case 'تم البيع':
         return styles.statusDelivered;
-      case 'Under review':
+      case 'تحت المراجعة':
         return styles.statusProcessing;
-      case 'shipped':
-        return styles.statusShipped;
-      case 'prepared':
-        return styles.statusPending;
-      case 'cancelled':
-        return styles.statusCancelled;
-      case 'reviewed':
+      case 'تم التواصل':
         return styles.statusReviewed;
+      case 'تم الإلغاء':
+        return styles.statusCancelled;
       default:
         return styles.statusPending;
     }
@@ -101,13 +85,13 @@ const Orders: React.FC<OrdersProps> = ({orders}) => {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'Under review': return 'قيد المراجعة';
-      case 'reviewed': return 'تمت المراجعة';
-      case 'prepared': return 'تم التجهيز';
-      case 'shipped': return 'تم الشحن';
-      case 'delivered': return 'تم التسليم';
-      case 'cancelled': return 'ملغي';
-      default: return status;
+      case 'تحت المراجعة':
+      case 'تم التواصل':
+      case 'تم الإلغاء':
+      case 'تم البيع':
+        return status;
+      default:
+        return 'تحت المراجعة';
     }
   };
 

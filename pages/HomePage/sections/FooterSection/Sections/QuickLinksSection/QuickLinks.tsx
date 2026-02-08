@@ -10,10 +10,10 @@ interface QuickLinksProps {
 const QuickLinks = ({ onContactClick }: QuickLinksProps) => {
   const [links] = useState([
     { href: "/", label: "الرئيسية" },
-    // { href: "/services", label: "الخدمات" },
-    { href: "/", label: "المنتجات" },
+    { href: "/categories", label: "المنتجات" },
     { href: "/about", label: "من نحن" },
     { href: "/policies", label: "السياسات الخاصة بالمنصة" },
+    { href: "/inquiries", label: "اعمل طلبك علي مزاجك" },
   ]);
 
   return (

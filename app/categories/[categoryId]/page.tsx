@@ -2,6 +2,7 @@ import CategoryProductsPage from "@/pages/CategoryProductsPage/CategoryProductsP
 
 import style from "./page.module.css";
 import { generateSEO } from "@/config/seo.config";
+import { buildBreadcrumbJsonLd, buildCategoryKeywords } from "@/utils/seo";
 
 interface CategoryPageProps {
   params: Promise<{
@@ -10,28 +11,43 @@ interface CategoryPageProps {
 }
 
 const categoryNames: Record<string, string> = {
-  'كيميائيات مبيدات': 'كيميائيات مبيدات',
-  'كيميائيات الخضراء': 'كيميائيات الخضراء'
+  marble: 'رخام',
+  granite: 'جرانيت',
+  quartz: 'كوارتز',
 };
 
 export async function generateMetadata({ params }: CategoryPageProps) {
   const { categoryId } = await params;
-  const categoryName = categoryNames[categoryId] || 'فئة غير معروفة';
+  const categoryName = categoryNames[categoryId] || decodeURIComponent(categoryId);
 
   return generateSEO({
     title: categoryName,
-    description: `تصفح ${categoryName} في منصة شق الثعبان`,
-    keywords: [categoryName, "كيماويات", "منتجات"],
+    description: `تصفح منتجات ${categoryName} من الرخام والجرانيت والكوارتز في منصة شق الثعبان بمصر.`,
+    keywords: buildCategoryKeywords(categoryName),
+    url: `/categories/${encodeURIComponent(categoryId)}`,
   });
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { categoryId } = await params;
-  const categoryName = categoryNames[categoryId] || 'فئة غير معروفة';
+  const categoryName = categoryNames[categoryId] || decodeURIComponent(categoryId);
+  const breadcrumbSchema = buildBreadcrumbJsonLd([
+    { name: "الرئيسية", url: "/" },
+    { name: "الفئات", url: "/categories" },
+    { name: categoryName, url: `/categories/${encodeURIComponent(categoryId)}` },
+  ]);
 
   return (
-    <div className={style.container}>
-      <CategoryProductsPage categoryId={categoryId} categoryName={categoryName} />
-    </div>
+    <>
+      <div className={style.container}>
+        <CategoryProductsPage categoryId={categoryId} categoryName={categoryName} />
+      </div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema),
+        }}
+      />
+    </>
   );
 }

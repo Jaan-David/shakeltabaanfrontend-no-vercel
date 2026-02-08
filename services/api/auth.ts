@@ -1,4 +1,5 @@
 import apiClient from './client';
+import { API_ENDPOINTS, Api } from './endpoints';
 
 export interface LoginCredentials {
   email: string;
@@ -23,7 +24,7 @@ export interface SocialLoginData {
 
 export const authService = {
   async login(credentials: LoginCredentials) {
-    const response = await apiClient.post('https://shk2t-t3ban.fly.dev/app/v1/users/login', credentials);
+    const response = await apiClient.post(`${Api}${API_ENDPOINTS.AUTH.LOGIN}`, credentials);
     if (typeof window !== 'undefined' && response.data.token) {
       localStorage.setItem('authToken', response.data.token);
     }
@@ -31,13 +32,13 @@ export const authService = {
   },
 
   async register(userData: RegisterData) {
-    const response = await apiClient.post('https://shk2t-t3ban.fly.dev/app/v1/users/signup', userData);
+    const response = await apiClient.post(`${Api}${API_ENDPOINTS.AUTH.REGISTER}`, userData);
     return response.data;
   },
 
   async logout() {
     try {
-      await apiClient.post('https://shk2t-t3ban.fly.dev/app/v1/users/logout');
+      await apiClient.post(`${Api}/users/logout`);
     } finally {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('authToken');
@@ -46,27 +47,27 @@ export const authService = {
   },
 
   async getCurrentUser() {
-    const response = await apiClient.get('https://shk2t-t3ban.fly.dev/app/v1/users/me');
+    const response = await apiClient.get(`${Api}/users/me`);
     return response.data;
   },
 
   async forgotPassword(email: string) {
-    const response = await apiClient.post('https://shk2t-t3ban.fly.dev/app/v1/users/forgetPassword', { email });
+    const response = await apiClient.post(`${Api}${API_ENDPOINTS.AUTH.FORGOT_PASSWORD}`, { email });
     return response.data;
   },
 
   async verifyCode(code: string, email: string) {
-    const response = await apiClient.post('https://shk2t-t3ban.fly.dev/app/v1/users/OTPVerification', { code, email });
+    const response = await apiClient.post(`${Api}${API_ENDPOINTS.AUTH.VERIFY_EMAIL}`, { code, email });
     return response.data;
   },
 
   async resetPassword(passwordData: ResetPasswordData) {
-    const response = await apiClient.patch('https://shk2t-t3ban.fly.dev/app/v1/users/ResetPassword', passwordData);
+    const response = await apiClient.patch(`${Api}${API_ENDPOINTS.AUTH.RESET_PASSWORD}`, passwordData);
     return response.data;
   },
 
   async socialLogin(socialData: SocialLoginData) {
-    const response = await apiClient.post('https://shk2t-t3ban.fly.dev/app/v1/users/signWithSocial', socialData);
+    const response = await apiClient.post(`${Api}${API_ENDPOINTS.AUTH.LOGIN_SOCIAL}`, socialData);
     if (typeof window !== 'undefined' && response.data.data?.token) {
       localStorage.setItem('authToken', response.data.data.token);
     }

@@ -63,9 +63,19 @@ function ProductSlider({
     );
   }
 
+  const normalizeImageUrl = (url: string): string => {
+    if (url.startsWith('http://res.cloudinary.com')) {
+      return url.replace('http://', 'https://');
+    }
+    return url;
+  };
+
   const getProductImage = (product: Product): string => {
-    if (product.image) return product.image;
-    if (product.images && product.images.length > 0) return product.images[0];
+    if (Array.isArray(product.imageList) && product.imageList.length > 0) {
+      return normalizeImageUrl(product.imageList[0]);
+    }
+    if (product.image) return normalizeImageUrl(product.image);
+    if (product.images && product.images.length > 0) return normalizeImageUrl(product.images[0]);
     return '/acessts/NoImage.jpg';
   };
 
@@ -85,11 +95,12 @@ function ProductSlider({
           {products.map((product, index) => (
             <div key={`${product.id || product.name}-${index}`} className={styles.gridItem}>
               <Card
-                productId={product.id?.toString() || index.toString()}
+                productId={(product._id || product.id || index).toString()}
                 productImg={getProductImage(product)}
                 productName={getProductName(product)}
                 productCategory={product.category || 'غير محدد'}
                 productPrice={product.price?.toString() || '0'}
+                hasOffer={Boolean((product as { hasOffer?: boolean }).hasOffer || product.isOffer)}
                 available={getProductStatus(product)}
                 originalPrice={product.originalPrice?.toString()}
                 discount={product.discount}

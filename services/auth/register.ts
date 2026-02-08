@@ -125,7 +125,8 @@ class UserStorage {
   }
 }
 
-const API_BASE_URL = 'https://shk2t-t3ban.fly.dev/app/v1';
+const API_BASE_URL = Api;
+const API_ROOT_URL = API_BASE_URL.replace(/\/app\/v1\/?$/, '');
 
 export const registerUser = async (userData: RegisterRequest): Promise<RegisterResponse> => {
   //console.log('🚀 Starting registration...');
@@ -457,7 +458,7 @@ class APIError extends Error {
 }
 
 const API_CONFIG = {
-  baseUrl: 'https://shk2t-t3ban.fly.dev',
+  baseUrl: API_ROOT_URL,
   endpoints: {
     primary: '/app/v1/users/OTPResend'
   }

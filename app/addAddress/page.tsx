@@ -4,8 +4,9 @@ import { generateSEO } from "@/config/seo.config";
 
 export const metadata = generateSEO({
   title: "إضافة عنوان جديد ",
-  description: "منصة شق الثعبان متخصصة في جميع أنواع الرخام والجرانيت",
-  keywords: ["كيماويات", "تجارة"],
+  description: "إضافة عنوان الاستلام لطلبات الرخام والجرانيت والكوارتز عبر منصة شق الثعبان.",
+  keywords: ["إضافة عنوان", "طلبات الرخام", "شق الثعبان"],
+  noIndex: true,
 });
 export default function AddAddressPage() {
   return (

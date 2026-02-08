@@ -1,0 +1,20 @@
+{
+  "name": "شق الثعبان",
+  "short_name": "شق الثعبان",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#2563EB",
+  "icons": [
+    {
+      "src": "/logo/logo2.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo/logo2.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

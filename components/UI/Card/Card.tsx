@@ -51,6 +51,11 @@ interface CardProps {
     isOffer?: boolean;
     organizationName?: string;
     organizationId?: string;
+    showOrganizationInline?: boolean;
+    showQualityGrade?: boolean;
+    showMinimalMarbleInfo?: boolean;
+    showActionButton?: boolean;
+    hasOffer?: boolean;
 }
 
 // Helper function to format price
@@ -97,7 +102,12 @@ function Card({
     qualityGrade,
     isOffer = false,
     organizationName,
-    organizationId
+    organizationId,
+    showOrganizationInline = false,
+    showQualityGrade = true,
+    showMinimalMarbleInfo = false,
+    showActionButton = true,
+    hasOffer = false
 }: CardProps) {
     const { toggle, isFavorite } = useFavorites();
     const router = useRouter();
@@ -129,6 +139,14 @@ function Card({
         }
         return 0;
     }, [discount, numericOriginalPrice, numericPrice]);
+
+    const hasOfferBadge = useMemo(() => {
+        if (isOffer || hasOffer) return true;
+        if (discountPercentage > 0) return true;
+        const linearOffer = offerLinearPrice !== null && offerLinearPrice !== undefined && Number(offerLinearPrice) > 0;
+        const cubicOffer = offerCubicPrice !== null && offerCubicPrice !== undefined && Number(offerCubicPrice) > 0;
+        return linearOffer || cubicOffer;
+    }, [isOffer, hasOffer, discountPercentage, offerLinearPrice, offerCubicPrice]);
 
     // Get unit label using helper function
     const unitLabel = useMemo(() => {
@@ -205,18 +223,6 @@ function Card({
                     </div>
                 )}
                 
-                {isOffer && (
-                    <div className={styles.offerBadge}>
-                        عرض خاص
-                    </div>
-                )}
-                
-                {discountPercentage > 0 && (
-                    <div className={styles.discountBadge}>
-                        -{discountPercentage}%
-                    </div>
-                )}
-
                 <div className={styles.cardHeader}>
                     <div className={styles.icon}>
                         {loved ? (
@@ -251,6 +257,17 @@ function Card({
                             }
                         }}
                     >
+                        {hasOfferBadge && (
+                            <div className={styles.offerBadge}>
+                                عرض خاص
+                            </div>
+                        )}
+
+                        {discountPercentage > 0 && (
+                            <div className={styles.discountBadge}>
+                                -{discountPercentage}%
+                            </div>
+                        )}
                         <CustomImage
                             src={imageSrc}
                             alt={productName || 'صورة المنتج'}
@@ -271,110 +288,168 @@ function Card({
                 </div>
                 
                 <div className={styles.cardBody}>
-                    <div className={styles.category}>
-                        <span className={styles.categoryText}>{productCategory || 'غير محدد'}</span>
-                    </div>
+                    {!showMinimalMarbleInfo && (
+                        <div className={styles.category}>
+                            <span className={styles.categoryText}>{productCategory || 'غير محدد'}</span>
+                        </div>
+                    )}
                     
-                    {(organizationName || organizationId) && (
+                    {!showMinimalMarbleInfo && !showOrganizationInline && (organizationName || organizationId) && (
                         <div className={styles.organizationName}>
                             <span className={styles.organizationText}>
                                 {organizationName || organizationId}
                             </span>
                         </div>
                     )}
-                    
-                    <h2 
-                        className={styles.productName}
-                        title={productName}
-                        onClick={handleCardClick}
-                    >
-                        {productName || 'اسم المنتج'} 
-                    </h2>
 
-                    {/* Quality Grade Badge */}
-                    {qualityGrade && (
-                        <div className={styles.qualityBadge}>
-                            <span className={styles.qualityText}>
-                                <span className={styles.qualityLabel}>جودة:</span>{" "}
-                                <span className={styles.qualityValue}>{qualityGrade}</span>
-                            </span>
-                        </div>
-                    )}
-
-                    {/* Color Display */}
-                    {color && (
-                        <div className={styles.colorDisplay}>
-                            <span className={styles.colorText}>
-                                <span className={styles.colorLabel}>لون:</span>{" "}
-                                <span className={styles.colorValue}>{color}</span>
+                    {!showMinimalMarbleInfo && showOrganizationInline && (organizationName || organizationId) && (
+                        <div className={styles.organizationInline}>
+                            <span className={styles.organizationInlineText}>
+                                {organizationName || organizationId}
+                                {organizationName && organizationId ? ` • ${organizationId}` : ''}
                             </span>
                         </div>
                     )}
                     
-                    {/* Price section - Only pricePerLinearMeter and pricePerCubicMeter */}
-                    {(pricePerLinearMeter || pricePerCubicMeter) && (
-                        <div className={styles.marblePriceSection}>
-                            {/* Linear Meter Price */}
-                            {pricePerLinearMeter && (
-                                <div className={styles.marblePrice}>
-                                    <span className={styles.priceLabel}>سعر المتر الطولي:</span>
-                                    {offerLinearPrice !== null && offerLinearPrice !== undefined && Number(offerLinearPrice) > 0 ? (
-                                        <>
+                    <div className={styles.cardInfo}>
+                        <h2 
+                            className={styles.productName}
+                            title={productName}
+                            onClick={handleCardClick}
+                        >
+                            {productName || 'اسم المنتج'} 
+                        </h2>
+
+                        {showMinimalMarbleInfo && organizationId && (
+                            <div className={styles.minimalOrganization}>
+                                {organizationId}
+                            </div>
+                        )}
+
+                        {/* Quality Grade Badge */}
+                        {!showMinimalMarbleInfo && showQualityGrade && qualityGrade && (
+                            <div className={styles.qualityBadge}>
+                                <span className={styles.qualityText}>
+                                    <span className={styles.qualityLabel}>جودة:</span>{" "}
+                                    <span className={styles.qualityValue}>{qualityGrade}</span>
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Color Display */}
+                        {!showMinimalMarbleInfo && color && (
+                            <div className={styles.colorDisplay}>
+                                <span className={styles.colorText}>
+                                    <span className={styles.colorLabel}>لون:</span>{" "}
+                                    <span className={styles.colorValue}>{color}</span>
+                                </span>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className={styles.cardPrices}>
+                        {showMinimalMarbleInfo && (pricePerLinearMeter || pricePerCubicMeter) && (
+                            <div className={styles.minimalPriceList}>
+                                {pricePerCubicMeter && (
+                                    <div className={styles.minimalPriceRow}>
+                                        <span className={styles.minimalPriceLabel}>سعر المتر مربع:</span>
+                                        <span className={styles.minimalPriceValue}>
+                                            {formatPrice(offerCubicPrice && Number(offerCubicPrice) > 0 ? offerCubicPrice : pricePerCubicMeter)} ج.م
+                                        </span>
+                                    </div>
+                                )}
+                                {pricePerLinearMeter && (
+                                    <div className={styles.minimalPriceRow}>
+                                        <span className={styles.minimalPriceLabel}>سعر المتر الطولي:</span>
+                                        <span className={styles.minimalPriceValue}>
+                                            {formatPrice(offerLinearPrice && Number(offerLinearPrice) > 0 ? offerLinearPrice : pricePerLinearMeter)} ج.م
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {!showMinimalMarbleInfo && (pricePerLinearMeter || pricePerCubicMeter) && (
+                            <div className={styles.marblePriceSection}>
+                                {/* Linear Meter Price */}
+                                {pricePerLinearMeter && (
+                                    <div className={styles.marblePrice}>
+                                        <span className={styles.priceLabel}>سعر المتر الطولي:</span>
+                                        {offerLinearPrice !== null && offerLinearPrice !== undefined && Number(offerLinearPrice) > 0 ? (
+                                            <>
+                                                <div className={styles.marblePriceValue}>
+                                                    <span className={`${styles.priceAmount} ${styles.strikethrough}`}>
+                                                        {formatPrice(pricePerLinearMeter)}
+                                                    </span>
+                                                    <span className={styles.currency}> ج.م</span>
+                                                </div>
+                                                <div className={styles.offerPriceValue}>
+                                                    <span className={styles.offerAmount}>
+                                                        {formatPrice(offerLinearPrice)}
+                                                    </span>
+                                                    <span className={styles.currency}> ج.م</span>
+                                                </div>
+                                            </>
+                                        ) : (
                                             <div className={styles.marblePriceValue}>
-                                                <span className={`${styles.priceAmount} ${styles.strikethrough}`}>
+                                                <span className={styles.priceAmount}>
                                                     {formatPrice(pricePerLinearMeter)}
                                                 </span>
                                                 <span className={styles.currency}> ج.م</span>
                                             </div>
-                                            <div className={styles.offerPriceValue}>
-                                                <span className={styles.offerAmount}>
-                                                    {formatPrice(offerLinearPrice)}
-                                                </span>
-                                                <span className={styles.currency}> ج.م</span>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <div className={styles.marblePriceValue}>
-                                            <span className={styles.priceAmount}>
-                                                {formatPrice(pricePerLinearMeter)}
-                                            </span>
-                                            <span className={styles.currency}> ج.م</span>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                                        )}
+                                    </div>
+                                )}
 
-                            {/* Cubic Meter Price */}
-                            {pricePerCubicMeter && (
-                                <div className={styles.marblePrice}>
-                                    <span className={styles.priceLabel}>سعر المتر المكعب:</span>
-                                    {offerCubicPrice !== null && offerCubicPrice !== undefined && Number(offerCubicPrice) > 0 ? (
-                                        <>
+                                {/* Cubic Meter Price */}
+                                {pricePerCubicMeter && (
+                                    <div className={styles.marblePrice}>
+                                        <span className={styles.priceLabel}>سعر المتر مربع:</span>
+                                        {offerCubicPrice !== null && offerCubicPrice !== undefined && Number(offerCubicPrice) > 0 ? (
+                                            <>
+                                                <div className={styles.marblePriceValue}>
+                                                    <span className={`${styles.priceAmount} ${styles.strikethrough}`}>
+                                                        {formatPrice(pricePerCubicMeter)}
+                                                    </span>
+                                                    <span className={styles.currency}> ج.م</span>
+                                                </div>
+                                                <div className={styles.offerPriceValue}>
+                                                    <span className={styles.offerAmount}>
+                                                        {formatPrice(offerCubicPrice)}
+                                                    </span>
+                                                    <span className={styles.currency}> ج.م</span>
+                                                </div>
+                                            </>
+                                        ) : (
                                             <div className={styles.marblePriceValue}>
-                                                <span className={`${styles.priceAmount} ${styles.strikethrough}`}>
+                                                <span className={styles.priceAmount}>
                                                     {formatPrice(pricePerCubicMeter)}
                                                 </span>
                                                 <span className={styles.currency}> ج.م</span>
                                             </div>
-                                            <div className={styles.offerPriceValue}>
-                                                <span className={styles.offerAmount}>
-                                                    {formatPrice(offerCubicPrice)}
-                                                </span>
-                                                <span className={styles.currency}> ج.م</span>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <div className={styles.marblePriceValue}>
-                                            <span className={styles.priceAmount}>
-                                                {formatPrice(pricePerCubicMeter)}
-                                            </span>
-                                            <span className={styles.currency}> ج.م</span>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    )}
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {!showMinimalMarbleInfo && !(pricePerLinearMeter || pricePerCubicMeter) && (
+                            <div className={styles.priceSection}>
+                                <span className={styles.priceAmount}>
+                                    {formatPrice(productPrice ?? 0)}
+                                </span>
+                                <span className={styles.currency}> ج.م</span>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className={styles.cardAction}>
+                        {showActionButton && !showMinimalMarbleInfo && (
+                            <div className={styles.cardActionButton}>
+                                عرض التفاصيل
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 

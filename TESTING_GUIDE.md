@@ -99,9 +99,10 @@
 **الحل**:
 1. افتح Console (F12)
 2. ابحث عن رسائل خطأ
-3. تحقق من قيمة `NEXT_PUBLIC_API_BASE_URL` في ملف `.env`:
+3. تحقق من قيمة `NEXT_PUBLIC_API_URL` (والصور إذا لزم) في ملف `.env`:
    ```
-   NEXT_PUBLIC_API_BASE_URL=https://shk2t-t3ban.fly.dev/app/v1
+   NEXT_PUBLIC_API_URL=http://localhost:3002/app/v1
+   NEXT_PUBLIC_API_BASE_URL=http://localhost:3002
    ```
 
 ### المشكلة: الألوان غير صحيحة

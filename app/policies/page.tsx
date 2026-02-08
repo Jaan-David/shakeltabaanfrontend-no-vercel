@@ -3,8 +3,8 @@ import { generateSEO } from "@/config/seo.config";
 
 export const metadata = generateSEO({
   title: "سياسات العملاء",
-  description: "سياسات العملاء — منصة شق تعبان",
-  keywords: ["سياسات", "العملاء", "شق تعبان"],
+  description: "سياسات العملاء — منصة شق الثعبان",
+  keywords: ["سياسات", "العملاء", "شق الثعبان", "سياسات المنصة"],
 });
 
 export default function PoliciesPage() {
@@ -13,17 +13,17 @@ export default function PoliciesPage() {
       <div className="mx-auto w-full max-w-5xl space-y-8">
         <header className="text-center">
           <h1 className="text-3xl sm:text-4xl font-bold text-slate-900">
-            سياسات العملاء — منصة <span className="text-primary">شق تعبان</span>
+            سياسات العملاء — منصة <span className="text-primary">شق الثعبان</span>
           </h1>
           <p className="mt-4 text-base sm:text-lg text-slate-900">
-            مرحبًا بك في منصة شق تعبان. توضح هذه الصفحة الشروط والسياسات التي تنطبق على العملاء (المشترين) عند استخدام الموقع والتعامل مع البائعين عبر المنصة. باستخدامك المنصة، تكون قد قرأت ووافقت على جميع البنود التالية.
+            مرحبًا بك في منصة شق الثعبان. توضح هذه الصفحة الشروط والسياسات التي تنطبق على العملاء (المشترين) عند استخدام الموقع والتعامل مع البائعين عبر المنصة. باستخدامك المنصة، تكون قد قرأت ووافقت على جميع البنود التالية.
           </p>
         </header>
 
         <section className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm">
           <h2 className="text-2xl font-bold text-blue-600">1. التعريفات</h2>
           <ul className="mt-4 list-disc space-y-2 pr-5 text-slate-600">
-            <li>المنصة / شق تعبان: موقع وتطبيق وخدمات المنصة التي تربط بين البائعين والمشترين.</li>
+            <li>المنصة / شق الثعبان: موقع وتطبيق وخدمات المنصة التي تربط بين البائعين والمشترين.</li>
             <li>البائع: المصنع أو المعرض أو الورشة المسجل في المنصة ويعرض منتجاته.</li>
             <li>المشتري / العميل: أي مستخدم يستعرض أو يشتري أو يطلب عروضًا عبر المنصة.</li>
             <li>الطلب العادي: طلب شراء منتج ظاهراً على صفحة المنتج يُقدَّم كونه معروضًا.</li>
@@ -177,7 +177,7 @@ export default function PoliciesPage() {
         <section className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm">
           <h2 className="text-2xl font-bold text-blue-600">ختامًا</h2>
           <p className="mt-4 text-slate-900">
-            باستخدامك منصة شق تعبان، فإنك توافق على شروط هذه السياسة وتتعهد بالتعامل بنزاهة واحترام مع البائعين والأطراف الأخرى. هدفنا تمكين سوق رخام شفاف وآمن ورفع مستوى الثقة والمعرفة لدى المشترين والبائعين على حد سواء.
+            باستخدامك منصة شق الثعبان، فإنك توافق على شروط هذه السياسة وتتعهد بالتعامل بنزاهة واحترام مع البائعين والأطراف الأخرى. هدفنا تمكين سوق رخام شفاف وآمن ورفع مستوى الثقة والمعرفة لدى المشترين والبائعين على حد سواء.
           </p>
         </section>
       </div>

@@ -5,8 +5,9 @@ import { generateSEO } from "@/config/seo.config";
 
 export const metadata = generateSEO({
   title: "صفحة المستخدم",
-  description: "منصة شق الثعبان متخصصة في جميع أنواع الرخام والجرانيت",
-  keywords: ["كيماويات", "تجارة"],
+  description: "إدارة حسابك وطلباتك وتقييماتك على منصة شق الثعبان للرخام والجرانيت والكوارتز.",
+  keywords: ["حساب المستخدم", "طلبات الرخام", "تقييمات", "شق الثعبان"],
+  noIndex: true,
 });
 
 export default function Page() {

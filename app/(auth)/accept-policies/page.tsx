@@ -6,12 +6,12 @@ import Background from '@/components/UI/Background/Background';
 import { Button } from '@/components/UI/Buttons/Button';
 import PolicyConsent from '@/components/Auth/PolicyConsent';
 import styles from '../auth.module.css';
-import { AuthService, UserStorage } from '@/services/auth/login';
+import { AuthService, UserStorage, type User } from '@/services/auth/login';
 import { saveAuthToken } from '@/utils/auth';
 
 interface PendingAuthData {
   token: string;
-  user: Record<string, unknown>;
+  user: User;
 }
 
 const PENDING_AUTH_KEY = 'policy_pending_auth';
@@ -93,7 +93,7 @@ export default function AcceptPoliciesPage() {
           </div>
           <div className={styles.form}>
             <p className="text-sm text-slate-600 text-center leading-relaxed">
-              لإكمال التسجيل وتسجيل الدخول يجب الموافقة على سياسات وشروط منصة شق تعبان.
+              لإكمال التسجيل وتسجيل الدخول يجب الموافقة على سياسات وشروط منصة شق الثعبان.
             </p>
 
             <PolicyConsent

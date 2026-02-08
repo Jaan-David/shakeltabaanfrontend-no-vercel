@@ -2,6 +2,28 @@
 import { API_ENDPOINTS, Api } from '../api/endpoints';
 
 // Order Types matching your API response
+export type OrderStatusArabic =
+  | 'تحت المراجعة'
+  | 'تم التواصل'
+  | 'تم الإلغاء'
+  | 'تم البيع';
+
+const ORDER_STATUS_MAP: Record<string, OrderStatusArabic> = {
+  'Under review': 'تحت المراجعة',
+  reviewed: 'تم التواصل',
+  prepared: 'تم التواصل',
+  shipped: 'تم التواصل',
+  delivered: 'تم البيع',
+  cancelled: 'تم الإلغاء',
+  'تحت المراجعة': 'تحت المراجعة',
+  'تم التواصل': 'تم التواصل',
+  'تم الإلغاء': 'تم الإلغاء',
+  'تم البيع': 'تم البيع',
+};
+
+export const normalizeOrderStatus = (status?: string): OrderStatusArabic => {
+  return ORDER_STATUS_MAP[status ?? ''] ?? 'تحت المراجعة';
+};
 export interface OrderAddress {
   firstName: string;
   lastName: string;
@@ -77,7 +99,7 @@ export interface OrderItem {
   cartId: Cart;  // Changed from string to Cart object
   userId: string;
   orderId: string;
-  status: 'Under review' | 'reviewed' | 'prepared' | 'shipped' | 'delivered' | 'cancelled';
+  status: OrderStatusArabic;
   address: OrderAddress;
   deliveryPrice: number;
   deliveryDate: string | null;
@@ -98,7 +120,7 @@ export interface OrdersResponse {
 export interface TransformedOrder {
   id: string;
   orderNumber: string;
-  status: 'Under review' | 'reviewed' | 'prepared' | 'shipped' | 'delivered' | 'cancelled';
+  status: OrderStatusArabic;
   date: string;
   total: number;
   items: number;
@@ -318,11 +340,14 @@ class OrderService {
       const data: OrdersResponse = await response.json();
       //console.log('✅ Orders fetched successfully:', data.length, 'orders');
       
-      const orders = data.data || [];
+      const orders = (data.data || []).map((order) => ({
+        ...order,
+        status: normalizeOrderStatus(order.status),
+      }));
       
       // Cache the result
       this.setCache(cacheKey, orders, this.CACHE_DURATION.ORDERS_LIST);
-      
+
       return orders;
     } catch (error) {
       //console.error('💥 Error fetching user orders:', error);
@@ -385,11 +410,15 @@ class OrderService {
 
       const data = await response.json();
       const orderDetails = data.data;
-      
+      const normalizedOrder: OrderItem = {
+        ...orderDetails,
+        status: normalizeOrderStatus(orderDetails?.status),
+      };
+
       // Cache the result
-      this.setCache(cacheKey, orderDetails, this.CACHE_DURATION.ORDER_DETAILS);
-      
-      return orderDetails;
+      this.setCache(cacheKey, normalizedOrder, this.CACHE_DURATION.ORDER_DETAILS);
+
+      return normalizedOrder;
     } catch (error) {
       //console.error('Error fetching order details:', error);
       throw error;

@@ -3,13 +3,14 @@ import CartWrapper from './cartWrapper';
 
 export const metadata = generateSEO({
   title: 'سلة التسوق',
-  description: 'منصة شق الثعبان متخصصة في جميع أنواع الرخام والجرانيت',
-  keywords: ['كيماويات', 'تجارة'],
+  description: 'سلة مشتريات الرخام والجرانيت والكوارتز على منصة شق الثعبان.',
+  keywords: ['سلة التسوق', 'طلبات الرخام', 'شق الثعبان'],
+  noIndex: true,
 });
 
 export default function Cart() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900/20 to-purple-900/20">
+    <main className="min-h-screen bg-white">
       <CartWrapper />
     </main>
   );

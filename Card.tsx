@@ -126,6 +126,13 @@ function Card({
         return 0;
     }, [discount, numericOriginalPrice, numericPrice]);
 
+    const hasOfferBadge = useMemo(() => {
+        if (isOffer) return true;
+        const linearOffer = offerLinearPrice !== null && offerLinearPrice !== undefined && Number(offerLinearPrice) > 0;
+        const cubicOffer = offerCubicPrice !== null && offerCubicPrice !== undefined && Number(offerCubicPrice) > 0;
+        return linearOffer || cubicOffer;
+    }, [isOffer, offerLinearPrice, offerCubicPrice]);
+
     // Get unit label using helper function
     const unitLabel = useMemo(() => {
         if (product) {
@@ -201,7 +208,7 @@ function Card({
                     </div>
                 )}
                 
-                {isOffer && (
+                {hasOfferBadge && (
                     <div className={styles.offerBadge}>
                         عرض خاص
                     </div>
@@ -335,7 +342,7 @@ function Card({
                             {/* Cubic Meter Price */}
                             {pricePerCubicMeter && (
                                 <div className={styles.marblePrice}>
-                                    <span className={styles.priceLabel}>سعر المتر المكعب:</span>
+                                    <span className={styles.priceLabel}>سعر المتر مربع:</span>
                                     {offerCubicPrice !== null && offerCubicPrice !== undefined && Number(offerCubicPrice) > 0 ? (
                                         <>
                                             <div className={styles.marblePriceValue}>

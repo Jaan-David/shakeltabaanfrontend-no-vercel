@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 import styles from './CategoriesGrid.module.css';
 
 
@@ -18,9 +19,9 @@ interface CategoriesGridProps {
 
 const categoryImages: Record<string, string> = {
   "جرانيت مستورد": "/categories/1.jpg",
-  "جرانيت مصري": "/categories/2.jpg",
+  "جرانيت مصرى": "/categories/2.jpg",
   "رخام مستورد": "/categories/3.jpg",
-  "رخام مصري": "/categories/5.jpg",
+  "رخام مصرى": "/categories/5.jpg",
   "كوارتز": "/categories/4.jpg",
   "رخام مصنع": "/categories/6.jpg",
 };
@@ -45,15 +46,19 @@ export default function CategoriesGrid({ categories = [], onCategoryClick }: Cat
             onClick={() => handleCategoryClick(category)}
           >
             <div className={styles.imageContainer}>
-              <img
-  src={categoryImages[category.name] || '/acessts/placeholder.svg'}
-  alt={category.name}
-  className={styles.categoryImage}
-  onError={(e) => {
-    const target = e.target as HTMLImageElement;
-    target.src = '/acessts/placeholder.svg';
-  }}
-/>
+              <Image
+                src={categoryImages[category.name] || '/acessts/placeholder.svg'}
+                alt={category.name}
+                width={320}
+                height={200}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                loading="lazy"
+                className={styles.categoryImage}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = '/acessts/placeholder.svg';
+                }}
+              />
 
             </div>
             

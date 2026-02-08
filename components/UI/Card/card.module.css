@@ -1,36 +1,38 @@
 /* card.module.css - Blue & White Theme */
 .card {
   background: #FFFFFF;
-  border-radius: 20px;
-  border: 1px solid #E5E7EB;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+  border: 1px solid #E5DED6;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+  overflow: visible;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
   width: 100%;
-  max-width: 280px;
-  height: 21.125rem;
+  height: 330px;
   position: relative;
   font-family: var(--font-primary);
-  padding: 16px 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+  box-sizing: border-box;
 }
 
 .card:hover {
-  box-shadow: 0 16px 40px rgba(37, 99, 235, 0.15);
-  transform: translateY(-8px) scale(1.02);
-  border-color: #2563EB;
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.12);
+  border-color: #3B82F6;
 }
 
 /* Badge Styles */
 .badge {
   position: absolute;
   top: 8px;
-  left: 8px;
+  inset-inline-start: 8px;
   background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
   color: #FFFFFF;
   padding: 4px 12px;
   border-radius: 12px;
   font-size: 0.7rem;
-  font-weight: 700;
   z-index: 3;
   box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
 }
@@ -38,31 +40,29 @@
 .offerBadge {
   position: absolute;
   top: 8px;
-  left: 8px;
-  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  inset-inline-start: 8px;
+  background: #B91C1C;
   color: #FFFFFF;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
   z-index: 3;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
-  animation: pulse 2s infinite;
+  box-shadow: 0 2px 6px rgba(185, 28, 28, 0.25);
 }
 
 .discountBadge {
   position: absolute;
   top: 8px;
-  right: 8px;
-  background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+  inset-inline-end: 8px;
+  background: #9F1239;
   color: #FFFFFF;
   padding: 4px 10px;
-  border-radius: 12px;
+  border-radius: 999px;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   z-index: 3;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
-  animation: pulse 2s infinite;
+  box-shadow: 0 2px 6px rgba(159, 18, 57, 0.25);
 }
 
 @keyframes pulse {
@@ -76,20 +76,21 @@
 
 /* Card Header */
 .cardHeader {
-  position: absolute;
-  width: 80%;
-  height: 70%;
-  overflow: hidden;
-  border-radius: 16px;
-  justify-self: center;
+  position: relative;
+  width: 100%;
+  overflow: visible;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Heart Icon */
 .icon {
   position: absolute;
   background-color: unset;
-  top: 8%;
-  right: 11%;
+  top: 10px;
+  right: 10px;
   width: 1.5rem;
   height: 1.5rem;
   z-index: 2;
@@ -114,16 +115,15 @@
 /* Product Image Container */
 .cardImage{
   position: relative;
-  margin: 1rem 0;
   background: #F8FAFC;
   width: 100%;
-  height: 75%;
-  border-radius: 18px;
+  height: 180px;
+  border-radius: 12px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #E2E8F0;
+  border: 1px solid #E5DED6;
   box-shadow: inset 0 1px 4px rgba(15, 23, 42, 0.02);
 }
 
@@ -146,7 +146,6 @@
   border-radius: 1.5rem;
   bottom: 27%;
   right: -25%;
-  transform: translateX(-50%);
   z-index: 2;
   gap: 0.5rem;
   font-size: 0.75rem;
@@ -165,7 +164,6 @@
   border-radius: 1.5rem;
   bottom: 25%;
   right: -25%;
-  transform: translateX(-50%);
   z-index: 2;
   gap: 0.5rem;
   font-size: 0.625rem;
@@ -178,12 +176,92 @@
 
 .cardBody {
   position: relative;
-  margin-top: 110%; 
   text-align: center;
   display: flex;
   flex-direction: column;
-  margin-right: 1rem;
-  gap: 0.625rem;
+  align-items: stretch;
+  gap: 0.5rem;
+  flex: 1;
+  overflow: visible;
+}
+
+.cardInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.4rem;
+  min-height: 56px;
+  width: 100%;
+}
+
+.minimalOrganization {
+  font-size: 0.7rem;
+  color: #64748B;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardPrices {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.4rem;
+  min-height: 72px;
+  width: 100%;
+}
+
+.minimalPriceList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.minimalPriceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.8rem;
+}
+
+.minimalPriceLabel {
+  color: #64748B;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.minimalPriceValue {
+  color: #2563EB;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.cardAction {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardActionButton {
+  width: 100%;
+  height: 100%;
+  background: #2563EB;
+  color: #FFFFFF;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.cardActionButton:hover {
+  background: #1D4ED8;
 }
 
 /* Category */
@@ -217,7 +295,7 @@
   align-items: center;
   width: fit-content;
   margin: 0 auto;
-  padding: 0.5rem 0.75rem;
+  padding: 0.35rem 0.6rem;
   background: #F0F9FF;
   border: 1px solid #BAE6FD;
   border-radius: 0.75rem;
@@ -229,6 +307,10 @@
   font-weight: 600;
   color: #1E40AF;
   letter-spacing: 0.01em;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .organizationId {
@@ -241,17 +323,41 @@
   border: 0.5px solid #BAE6FD;
 }
 
+.organizationInline {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.2rem 0.4rem;
+  border: 1px solid #E5E7EB;
+  border-radius: 999px;
+  background: #F8FAFC;
+}
+
+.organizationInlineText {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #475569;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Product Name */
 .productName {
-  display: flex;
-  width: 70%;
-  height: 20%;
-  font-size: 1rem;
+  display: -webkit-box;
+  width: 100%;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #0F172A;
   line-height: 1.4;
   cursor: pointer;
   transition: color 0.3s ease;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  min-height: 2.6em;
+  margin-bottom: 0.15rem;
 }
 
 .productName:hover {
@@ -260,16 +366,16 @@
 
 /* Price */
 .productName:last-child {
-  margin-top: -10%;
-  margin-bottom: 5%;
-  gap: 1.5rem;
+  margin-top: 0;
+  margin-bottom: 0;
+  gap: 0;
 }
 
 .priceSection{
   display: flex;
   gap: 0.2rem;
   align-self: flex-start;
-  margin-top: -6%;
+  margin-top: 0.25rem;
   font-size: 0.875rem;
   font-weight: 700;
   color: #2563EB;
@@ -287,10 +393,8 @@
 @media screen and (max-width: 968px) {
   .card {
     width: 100%;
-    max-width: 180px;
-    height: auto;
-    min-height: 280px;
-    padding: 8px 4px;
+    height: 300px;
+    padding: 8px;
   }
 
   .icon {
@@ -304,7 +408,6 @@
   }
 
   .cardImage {
-    margin: 8px 0;
     width: 100%;
     height: 140px;
   }
@@ -429,7 +532,7 @@
 
   .priceSection {
     font-size: 0.75rem;
-    margin-top: -10%;
+    margin-top: 0.2rem;
   }
 }
 
@@ -448,6 +551,10 @@
   font-weight: 600;
   color: #FFFFFF;
   text-transform: capitalize;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .qualityLabel {
@@ -474,6 +581,10 @@
   font-size: 0.8rem;
   color: #FFFFFF;
   font-weight: 500;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .colorLabel {
@@ -489,9 +600,11 @@
 .marblePriceSection {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 8px 0;
+  gap: 6px;
+  padding: 6px 0;
   border-top: 1px solid #E2E8F0;
+  margin-top: auto;
+  overflow: visible;
 }
 
 .marblePrice {
@@ -501,7 +614,7 @@
 }
 
 .priceLabel {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   color: #64748B;
   font-weight: 600;
   text-transform: capitalize;
@@ -515,7 +628,7 @@
 }
 
 .priceAmount {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: #2563EB;
 }
@@ -534,8 +647,8 @@
 }
 
 .currency {
-  font-size: 0.75rem;
-  color: #FFFFFF;
+  font-size: 0.7rem;
+  color: #64748B;
   font-weight: 500;
 }
 
@@ -556,7 +669,7 @@
 }
 
 .offerAmount {
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: #EF4444;
 }

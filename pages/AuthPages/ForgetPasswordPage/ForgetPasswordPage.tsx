@@ -12,6 +12,9 @@ import ResendTimerSection from "@/pages/AuthPages/ActiveCodePage/sections/Resend
 
 type FormState = { password: string; confirmPassword: string };
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002/app/v1";
+
 export default function ForgetPasswordPage() {
   const router = useRouter();
   // Steps: 1) get email, 2) enter active code, 3) set new password
@@ -156,7 +159,7 @@ export default function ForgetPasswordPage() {
         "فشل التحقق من الرمز. تأكد من ترتيب الأرقام من اليسار إلى اليمين.";
       for (const body of variants) {
         const res = await fetchWithTimeout(
-          "https://shk2t-t3ban.fly.dev/app/v1/users/OTPVerification",
+          `${API_BASE_URL}/users/OTPVerification`,
           {
             method: "PATCH",
             headers: {
@@ -204,7 +207,7 @@ export default function ForgetPasswordPage() {
       setSubmitting(true);
       setError("");
       const res = await fetchWithTimeout(
-        "https://shk2t-t3ban.fly.dev/app/v1/users/OTPResend",
+        `${API_BASE_URL}/users/OTPResend`,
         {
           method: "PATCH",
           headers: {
@@ -252,7 +255,7 @@ export default function ForgetPasswordPage() {
       setEmailError("");
       const emailTrimmed = email.trim();
       const res = await fetchWithTimeout(
-        "https://shk2t-t3ban.fly.dev/app/v1/users/forgetPassword",
+        `${API_BASE_URL}/users/forgetPassword`,
         {
           method: "POST",
           headers: {
@@ -291,7 +294,7 @@ export default function ForgetPasswordPage() {
       setError("");
       const emailTrimmed = email.trim();
       const res = await fetchWithTimeout(
-        "https://shk2t-t3ban.fly.dev/app/v1/users/ResetPassword",
+        `${API_BASE_URL}/users/ResetPassword`,
         {
           method: "PATCH",
           headers: {

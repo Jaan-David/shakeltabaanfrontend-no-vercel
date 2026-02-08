@@ -151,7 +151,7 @@ class ReviewService {
 
   constructor() {
     this.baseUrl =
-      process.env.NEXT_PUBLIC_API_URL || "https://shk2t-t3ban.fly.dev/app/v1";
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002/app/v1";
   }
 
   private getAuthHeaders(token?: string) {

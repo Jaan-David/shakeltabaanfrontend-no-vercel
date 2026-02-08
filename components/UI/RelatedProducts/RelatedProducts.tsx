@@ -3,11 +3,12 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useKeenSlider } from 'keen-slider/react';
 import 'keen-slider/keen-slider.min.css';
 import Link from 'next/link';
-import { Product, productService, ProductFilters } from '@/services/api/products';
-import { CustomImage } from '../Image/Images';
+import { Product as ApiProduct, productService, ProductFilters } from '@/services/api/products';
+import type { Product as UiProduct } from '@/services/product/products';
+import Card from '@/components/UI/Card/Card';
 
 const RelatedProducts: React.FC<{ currentProductId?: string }> = ({ currentProductId }) => {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ApiProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,26 +37,71 @@ const RelatedProducts: React.FC<{ currentProductId?: string }> = ({ currentProdu
   };
 
   // Base URL for images (adjust based on your backend)
-  const BASE_IMAGE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://shk2t-t3ban.fly.dev/app/v1';
+  const BASE_IMAGE_URL =
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    'http://localhost:3002/app/v1';
 
   // Safely pick a primary image with fallback
   const PLACEHOLDER_SRC = '/acessts/NoImage.jpg';
-  const getPrimaryImage = (p: Product): string => {
-    // Check if imageList exists and has valid images
-    if (p?.imageList && Array.isArray(p.imageList) && p.imageList.length > 0) {
-      const firstValidImage = p.imageList.find((img) => typeof img === 'string' && img.trim() !== '');
+  const getPrimaryImage = (p: ApiProduct): string => {
+    const candidates: string[] = [];
 
-      if (firstValidImage) {
-        // Handle relative URLs by prepending the base URL
-        const imageUrl = firstValidImage.startsWith('http')
-          ? firstValidImage
-          : `${BASE_IMAGE_URL}${firstValidImage.startsWith('/') ? '' : '/'}${firstValidImage}`;
-
-        return imageUrl;
-      }
+    if (Array.isArray(p?.imageList)) {
+      candidates.push(...p.imageList.filter((img) => typeof img === 'string' && img.trim() !== ''));
     }
 
-    return PLACEHOLDER_SRC;
+    if (typeof p?.image === 'string' && p.image.trim() !== '') {
+      candidates.push(p.image);
+    }
+
+    if (Array.isArray(p?.images)) {
+      candidates.push(...p.images.filter((img) => typeof img === 'string' && img.trim() !== ''));
+    }
+
+    const firstValidImage = candidates[0];
+    if (!firstValidImage) return PLACEHOLDER_SRC;
+
+    const imageUrl = firstValidImage.startsWith('http')
+      ? firstValidImage
+      : `${BASE_IMAGE_URL}${firstValidImage.startsWith('/') ? '' : '/'}${firstValidImage}`;
+
+    if (imageUrl.startsWith('http://res.cloudinary.com')) {
+      return imageUrl.replace('http://', 'https://');
+    }
+
+    return imageUrl;
+  };
+
+  const mapToUiProduct = (p: ApiProduct): UiProduct => {
+    const imageUrl = getPrimaryImage(p);
+    return {
+      id: p._id || p.id || '',
+      _id: p._id,
+      name: p.name || '',
+      nameAr: p.nameAr,
+      nameEn: p.nameEn,
+      description: p.description,
+      descriptionAr: p.descriptionAr,
+      descriptionEn: p.descriptionEn,
+      category: p.category || '',
+      price: p.price || 0,
+      image: imageUrl,
+      images: [imageUrl],
+      imageList: [imageUrl],
+      inStock: typeof p.stockQty === 'number' ? p.stockQty > 0 : true,
+      stockQuantity: p.stockQty,
+      stockQty: p.stockQty,
+      pricePerLinearMeter: p.pricePerLinearMeter,
+      pricePerCubicMeter: p.pricePerCubicMeter,
+      offerLinearPrice: p.offerLinearPrice,
+      offerCubicPrice: p.offerCubicPrice,
+      color: p.color,
+      qualityGrade: p.qualityGrade,
+      isOffer: p.isOffer,
+      organizationName: p.organizationName,
+      organizationId: p.organizationId,
+    };
   };
 
   // Fetch related products from API
@@ -99,16 +145,13 @@ const RelatedProducts: React.FC<{ currentProductId?: string }> = ({ currentProdu
   if (loading) {
     return (
       <div className="mt-12">
-        <h2 className="text-2xl font-bold text-black87 mb-6">منتجات قد تعجبك</h2>
-        <div className="text-black60">جاري التحميل...</div>
+        <h2 className="text-2xl font-bold text-slate-900 mb-6">منتجات قد تعجبك</h2>
+        <div className="text-slate-600">جاري التحميل...</div>
       </div>
     );
-  }
-
-  if (error) {
     return (
       <div className="mt-12">
-        <h2 className="text-2xl font-bold text-black87 mb-6">منتجات قد تعجبك</h2>
+        <h2 className="text-2xl font-bold text-slate-900 mb-6">منتجات قد تعجبك</h2>
         <div className="text-red-500">{error}</div>
       </div>
     );
@@ -120,80 +163,45 @@ const RelatedProducts: React.FC<{ currentProductId?: string }> = ({ currentProdu
 
   return (
     <div className="mt-12">
-      <h2 className="text-2xl font-bold text-white mb-6">منتجات قد تعجبك</h2>
+      <h2 className="text-2xl font-bold text-slate-900 mb-6">منتجات قد تعجبك</h2>
       <div
         ref={sliderRef}
-        className="keen-slider"
+        className="keen-slider flex gap-4 overflow-hidden px-2"
         onMouseEnter={stop}
         onMouseLeave={start}
       >
-        {products.map((product) => (
-          <div key={product._id} className="keen-slider__slide">
-            <Link href={`/product/${product._id}`} className="block">
-              <div className="bg-slate-800 rounded-[20px] shadow-sm border border-white/10 p-4 mx-1 hover:shadow-md transition-shadow cursor-pointer relative" role="link" aria-label={product.name}>
-                {/* Offer Badge */}
-                {product.isOffer && (
-                  <div className="absolute top-2 left-2 z-10 bg-red-600 text-black text-xs font-extrabold px-3 py-1 rounded-md border-2 border-red-700 shadow-lg">
-                    عرض خاص
-                  </div>
-                )}
-                
-                <div className="relative w-full aspect-square bg-card rounded-lg mb-3 overflow-hidden">
-                  <CustomImage
-                    src={getPrimaryImage(product)}
-                    alt={product.name}
-                    fill
-                    objectFit="cover"
-                    fallbackSrc={PLACEHOLDER_SRC}
-                  />
-                </div>
-                <h3 className="font-medium text-white text-sm mb-2 truncate" title={product.name}>
-                  {product.name}
-                </h3>
-                
-                {/* Organization Info */}
-                {(product.organizationName || product.organizationId) && (
-                  <div className="mb-2 text-xs bg-blue-900/40 border border-blue-500/50 rounded px-2 py-1">
-                    <div className="text-blue-300 font-semibold">
-                      {product.organizationName || product.organizationId}
-                    </div>
-                  </div>
-                )}
-                
-                {/* Price Display - Marble/Granite Fields */}
-                {(product.pricePerCubicMeter || product.pricePerLinearMeter) ? (
-                  <div className="flex flex-col gap-1">
-                    {product.pricePerLinearMeter && (
-                      <div className="flex flex-col">
-                        <span className="text-xs text-gray-400">المتر الطولي:</span>
-                        {product.offerLinearPrice !== null && product.offerLinearPrice !== undefined && Number(product.offerLinearPrice) > 0 ? (
-                          <>
-                            <span className="text-xs text-gray-500 line-through">{Number(product.pricePerLinearMeter).toLocaleString()} ج.م</span>
-                            <span className="text-sm font-bold text-red-500">{Number(product.offerLinearPrice).toLocaleString()} ج.م</span>
-                          </>
-                        ) : (
-                          <span className="text-primary font-bold">{Number(product.pricePerLinearMeter).toLocaleString()} ج.م</span>
-                        )}
-                      </div>
-                    )}
-                    {product.pricePerCubicMeter && (
-                      <div className="flex flex-col">
-                        <span className="text-xs text-gray-400">المتر المكعب:</span>
-                        {product.offerCubicPrice !== null && product.offerCubicPrice !== undefined && Number(product.offerCubicPrice) > 0 ? (
-                          <>
-                            <span className="text-xs text-gray-500 line-through">{Number(product.pricePerCubicMeter).toLocaleString()} ج.م</span>
-                            <span className="text-sm font-bold text-red-500">{Number(product.offerCubicPrice).toLocaleString()} ج.م</span>
-                          </>
-                        ) : (
-                          <span className="text-primary font-bold">{Number(product.pricePerCubicMeter).toLocaleString()} ج.م</span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-primary font-bold">{product.price.toLocaleString()} ج.م</div>
-                )}
-              </div>
+        {products.map((product, index) => (
+          <div
+            key={`${product._id || product.id || 'item'}-${index}`}
+            className="keen-slider__slide shrink-0 box-border w-[240px] sm:w-[260px] lg:w-[280px]"
+          >
+            <Link href={`/product/${product._id || product.id || index}`} className="block">
+              <Card
+                productId={String(product._id || product.id || index)}
+                productImg={getPrimaryImage(product)}
+                productName={product.name || 'منتج'}
+                productCategory={product.category || 'غير محدد'}
+                productPrice={String(product.price || 0)}
+                product={mapToUiProduct(product)}
+                hasOffer={Boolean((product as { hasOffer?: boolean }).hasOffer || product.isOffer)}
+                IsKG={product.IsKG}
+                IsTON={product.IsTON}
+                IsLITER={product.IsLITER}
+                IsCUBIC_METER={product.IsCUBIC_METER}
+                pricePerLinearMeter={product.pricePerLinearMeter}
+                pricePerCubicMeter={product.pricePerCubicMeter}
+                offerLinearPrice={product.offerLinearPrice}
+                offerCubicPrice={product.offerCubicPrice}
+                color={product.color}
+                qualityGrade={product.qualityGrade}
+                isOffer={product.isOffer}
+                organizationName={product.organizationName}
+                organizationId={product.organizationId}
+                showOrganizationInline
+                showQualityGrade={false}
+                showMinimalMarbleInfo
+                showActionButton={false}
+              />
             </Link>
           </div>
         ))}

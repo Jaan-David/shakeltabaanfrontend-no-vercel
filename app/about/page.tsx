@@ -4,8 +4,8 @@ import { generateSEO } from "@/config/seo.config";
 
 export const metadata = generateSEO({
   title: "من نحن",
-  description: "منصة شق الثعبان متخصصة في جميع أنواع الرخام والجرانيت",
-  keywords: ["كيماويات", "تجارة"],
+  description: "تعرف على منصة شق الثعبان لسوق الرخام والجرانيت والكوارتز في مصر، ودورها في الربط بين المصانع والمعارض والعملاء.",
+  keywords: ["منصة شق الثعبان", "سوق الرخام في مصر", "رخام", "جرانيت", "كوارتز"],
 });
 
 export default function Page() {

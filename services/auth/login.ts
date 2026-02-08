@@ -257,7 +257,7 @@ export class AuthError extends Error {
 }
 
 // API Configuration
-const API_BASE_URL = 'https://shk2t-t3ban.fly.dev/app/v1';
+const API_BASE_URL = Api;
 
 // Token expiration monitor
 class TokenExpirationMonitor {

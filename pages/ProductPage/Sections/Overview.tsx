@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Heart, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import { Minus, Plus } from "lucide-react";
 import { CustomImage } from "@/components/UI/Image/Images";
@@ -261,25 +261,25 @@ const Overview: React.FC<Props> = ({
     }
   };
 
-  const nextImage = () => {
+  const nextImage = useCallback(() => {
     setCurrentImageIndex((prev) => (prev + 1) % imageList.length);
     setIsManualNavigation(true);
     setTimeout(() => setIsManualNavigation(false), 5000);
-  };
+  }, [imageList.length]);
 
-  const prevImage = () => {
+  const prevImage = useCallback(() => {
     setCurrentImageIndex(
       (prev) => (prev - 1 + imageList.length) % imageList.length
     );
     setIsManualNavigation(true);
     setTimeout(() => setIsManualNavigation(false), 5000);
-  };
+  }, [imageList.length]);
 
-  const goToImage = (index: number) => {
+  const goToImage = useCallback((index: number) => {
     setCurrentImageIndex(index);
     setIsManualNavigation(true);
     setTimeout(() => setIsManualNavigation(false), 5000);
-  };
+  }, []);
 
   useEffect(() => {
     if (imageList.length <= 1 || isHovering || isManualNavigation) return;
@@ -289,7 +289,7 @@ const Overview: React.FC<Props> = ({
     }, 3000);
 
     return () => clearInterval(autoPlayInterval);
-  }, [imageList.length, isHovering, isManualNavigation]);
+  }, [imageList.length, isHovering, isManualNavigation, nextImage]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -306,7 +306,7 @@ const Overview: React.FC<Props> = ({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [imageList.length]);
+  }, [imageList.length, nextImage, prevImage]);
 
   const handleAddToCart = async () => {
     if (stockQty === 0 || isAdding) return;
@@ -388,11 +388,11 @@ const Overview: React.FC<Props> = ({
   };
 
   return (
-    <section className="bg-white max-w-[95%] mx-auto rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-6">
+    <section className="bg-[#FFFEFB] max-w-[95%] mx-auto rounded-2xl border border-[#E5DED6] shadow-sm p-4 sm:p-6">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-4">
           <div
-            className="w-full max-w-sm mx-auto lg:mx-0 aspect-square bg-card rounded-xl overflow-hidden flex items-center justify-center relative animate-in fade-in duration-500"
+            className="w-full max-w-sm mx-auto lg:mx-0 aspect-square bg-white rounded-xl overflow-hidden flex items-center justify-center relative animate-in fade-in duration-500 border border-[#E5DED6]"
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
           >
@@ -452,7 +452,7 @@ const Overview: React.FC<Props> = ({
           {/* Offer Badge - Top Center */}
           {isOffer && (
             <div className="flex justify-center mb-4">
-              <span className="inline-flex items-center px-4 py-2 rounded-md text-base font-extrabold bg-red-600 text-black border-2 border-red-700 shadow-lg">
+              <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-red-600 text-white border border-red-700/30 shadow-sm">
                 عرض خاص
               </span>
             </div>
@@ -474,7 +474,7 @@ const Overview: React.FC<Props> = ({
           </div>
 
           <div className="flex flex-col items-start justify-between gap-4 mb-3">
-            <span className="px-3 py-1 rounded-full  border text-sm hover:border-primary hover:text-primary">
+            <span className="px-3 py-1 rounded-full border border-[#E5DED6] bg-[#FFFEFB] text-sm text-slate-600 hover:border-primary hover:text-primary">
               {category}
             </span>
             
@@ -521,18 +521,18 @@ const Overview: React.FC<Props> = ({
               <div className="flex flex-col gap-4 w-full">
                 {pricePerCubicMeter && (
                   <div className="flex flex-col gap-2">
-                    <span className="text-slate-700 text-base font-bold">سعر المتر المكعب:</span>
+                    <span className="text-slate-700 text-base font-bold">سعر المتر مربع:</span>
                     {offerCubicPrice !== null && offerCubicPrice !== undefined && Number(offerCubicPrice) > 0 ? (
                       <div className="flex flex-col gap-2">
-                        <span className="text-xl font-semibold text-slate-400 line-through decoration-2">
+                        <span className="text-sm font-semibold text-slate-400 line-through decoration-2">
                           {pricePerCubicMeter.toLocaleString()} ج.م
                         </span>
-                        <span className="text-4xl font-extrabold text-red-600">
+                        <span className="text-3xl font-extrabold text-red-600">
                           {Number(offerCubicPrice).toLocaleString()} ج.م
                         </span>
                       </div>
                     ) : (
-                      <span className="text-4xl font-extrabold text-blue-600">
+                      <span className="text-3xl font-extrabold text-blue-600">
                         {pricePerCubicMeter.toLocaleString()} ج.م
                       </span>
                     )}
@@ -543,15 +543,15 @@ const Overview: React.FC<Props> = ({
                     <span className="text-slate-700 text-base font-bold">سعر المتر الطولي:</span>
                     {offerLinearPrice !== null && offerLinearPrice !== undefined && Number(offerLinearPrice) > 0 ? (
                       <div className="flex flex-col gap-2">
-                        <span className="text-xl font-semibold text-slate-400 line-through decoration-2">
+                        <span className="text-sm font-semibold text-slate-400 line-through decoration-2">
                           {pricePerLinearMeter.toLocaleString()} ج.م
                         </span>
-                        <span className="text-4xl font-extrabold text-red-600">
+                        <span className="text-3xl font-extrabold text-red-600">
                           {Number(offerLinearPrice).toLocaleString()} ج.م
                         </span>
                       </div>
                     ) : (
-                      <span className="text-4xl font-extrabold text-blue-600">
+                      <span className="text-3xl font-extrabold text-blue-600">
                         {pricePerLinearMeter.toLocaleString()} ج.م
                       </span>
                     )}
@@ -570,7 +570,7 @@ const Overview: React.FC<Props> = ({
 
           {/* Product Advantages */}
           {advProduct && advProduct.length > 0 && (
-            <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="mb-4 p-4 bg-slate-50 rounded-lg border border-[#E5DED6]">
               <h3 className="text-blue-900 font-bold text-sm mb-2">مميزات المنتج:</h3>
               <ul className="list-disc list-inside space-y-1">
                 {advProduct.map((advantage, index) => (
@@ -584,7 +584,7 @@ const Overview: React.FC<Props> = ({
 
           {/* Product Details */}
           {(averageRate !== undefined || createdAt || updatedAt) && (
-            <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="mb-4 p-4 bg-slate-50 rounded-lg border border-[#E5DED6]">
               <h3 className="text-blue-900 font-bold text-sm mb-2">معلومات إضافية:</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                 {averageRate !== undefined && (
@@ -672,7 +672,7 @@ const Overview: React.FC<Props> = ({
                       onChange={() => setSelectedUnitType('cubic')}
                       className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
                     />
-                    المتر المكعب
+                    المتر مربع
                   </label>
                 )}
               </div>

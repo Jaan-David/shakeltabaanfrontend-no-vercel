@@ -17,6 +17,9 @@ const SectionLoader = () => (
   <div className="animate-pulse bg-gray-200 rounded-lg h-32 w-full" />
 );
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002/app/v1";
+
 const ProductPage: React.FC<{ data: ProductData }> = ({ data }) => {
   const [product, setProduct] = useState<ProductData | null>(data || null);
   const [loading, setLoading] = useState<boolean>(!data);
@@ -43,7 +46,7 @@ const ProductPage: React.FC<{ data: ProductData }> = ({ data }) => {
         }
 
         const response = await fetch(
-          `https://shk2t-t3ban.fly.dev/app/v1/products/${productId}`
+          `${API_BASE_URL}/products/${productId}`
         );
 
         if (!response.ok) {
@@ -97,7 +100,7 @@ const ProductPage: React.FC<{ data: ProductData }> = ({ data }) => {
     
     try {
       const response = await fetch(
-        `https://shk2t-t3ban.fly.dev/app/v1/products/${product._id}`
+        `${API_BASE_URL}/products/${product._id}`
       );
 
       if (!response.ok) {

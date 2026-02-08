@@ -1,8 +1,8 @@
 import axios from 'axios';
 import {Api ,  API_ENDPOINTS } from './endpoints';
 
-// Fallback to production backend if env is not set
-const BASE_URL =Api ?? 'https://shk2t-t3ban.fly.dev/app/v1';
+// Fallback to local backend if env is not set
+const BASE_URL = Api || 'http://localhost:3002/app/v1';
 
 const apiClient = axios.create({
   baseURL: BASE_URL,

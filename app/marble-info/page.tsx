@@ -2,9 +2,12 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002/app/v1";
+const ALT_API_BASE_URL = API_BASE_URL.replace("/app/v1", "/api/v1");
 const MARBLE_API_BASES = [
-  "https://shk2t-t3ban.fly.dev/app/v1/info/marble",
-  "https://shk2t-t3ban.fly.dev/api/v1/info/marble",
+  `${API_BASE_URL}/info/marble`,
+  `${ALT_API_BASE_URL}/info/marble`,
 ];
 
 const fetchFromBases = async (path: string) => {

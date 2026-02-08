@@ -9,8 +9,9 @@ import { generateSEO } from '@/config/seo.config';
 
 export const metadata = generateSEO({
   title: 'تفاصيل الطلب',
-  description: 'منصة شق الثعبان متخصصة في جميع أنواع الرخام والجرانيت',
-  keywords: ['كيماويات', 'تجارة'],
+    description: 'تفاصيل طلبات الرخام والجرانيت والكوارتز على منصة شق الثعبان.',
+    keywords: ['تفاصيل الطلب', 'طلبات الرخام', 'شق الثعبان'],
+    noIndex: true,
 });
 
 import OrdWrapper from "./ordWrapper";

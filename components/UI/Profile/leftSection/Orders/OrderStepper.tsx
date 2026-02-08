@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import styles from '@/components/UI/Profile/leftSection/Orders/order.module.css';
 
 
-export type OrderStatus = "Under review" | "reviewed" | "prepared" | "shipped" | "delivered" | "cancelled";
+export type OrderStatus = "تحت المراجعة" | "تم التواصل" | "تم الإلغاء" | "تم البيع";
 
 interface OrderStatusStepperProps {
   currentStatus: OrderStatus;
@@ -13,28 +13,20 @@ interface OrderStatusStepperProps {
 
 const statusSteps: { key: OrderStatus; label: string }[] = [
   {
-    key: 'Under review',
-    label: 'قيد المراجعة'
+    key: 'تحت المراجعة',
+    label: 'تحت المراجعة'
   },
   {
-    key: 'reviewed', 
-    label: 'تمت المراجعة'
+    key: 'تم التواصل',
+    label: 'تم التواصل'
   },
   {
-    key: 'prepared',
-    label: 'تم التجهيز'
+    key: 'تم البيع',
+    label: 'تم البيع'
   },
   {
-    key: 'shipped',
-    label: 'تم الشحن'
-  },
-  {
-    key: 'delivered',
-    label: 'تم التسليم'
-  },
-  {
-    key: 'cancelled',
-    label: 'ملغي'
+    key: 'تم الإلغاء',
+    label: 'تم الإلغاء'
   }
 ];
 
@@ -45,7 +37,7 @@ const CheckIcon = ({ className = '' }) => (
 );
 
 export default function OrderStatusStepper({ 
-  currentStatus = 'delivered',
+  currentStatus = 'تحت المراجعة',
   onStatusUpdate 
 }: OrderStatusStepperProps) {
   //console.log('Component props - currentStatus:', currentStatus, 'typeof:', typeof currentStatus);

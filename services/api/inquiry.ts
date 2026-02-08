@@ -1,6 +1,7 @@
 import apiClient from './client';
+import { Api } from './endpoints';
 
-const BASE_URL = 'https://shk2t-t3ban.fly.dev/app/v1';
+const BASE_URL = Api;
 
 export interface Inquiry {
   _id: string;

@@ -7,36 +7,19 @@
 
 .categoryCard {
   cursor: pointer;
-  border-radius: 24px;
+  border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(10, 30, 51, 0.08);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  background: #FFFFFF;
-  border: 1px solid rgba(10, 30, 51, 0.06);
+  box-shadow: 0 6px 16px rgba(10, 30, 51, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  background: #FFFEFB;
+  border: 1px solid #E5DED6;
   position: relative;
 }
 
-.categoryCard::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(10, 30, 51, 0.06) 0%, rgba(95, 168, 230, 0.06) 50%, rgba(201, 162, 63, 0.05) 100%);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  border-radius: 24px;
-}
-
 .categoryCard:hover {
-  transform: translateY(-12px) scale(1.02);
-  box-shadow: 0 24px 48px rgba(10, 30, 51, 0.14);
-  border-color: rgba(95, 168, 230, 0.2);
-}
-
-.categoryCard:hover::before {
-  opacity: 1;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(10, 30, 51, 0.12);
+  border-color: rgba(37, 99, 235, 0.5);
 }
 
 .imageContainer {
@@ -96,20 +79,16 @@
 .categoryInfo {
   padding: 24px;
   text-align: center;
-  background: #FFFFFF;
+  background: #FFFEFB;
   backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(10, 30, 51, 0.08);
+  border-top: 1px solid rgba(201, 162, 63, 0.18);
 }
 
 .categoryName {
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: 8px;
   color: #2563EB;
-  background: linear-gradient(135deg, #2563EB, #60A5FA, #93C5FD);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .categoryDescription {
@@ -128,7 +107,7 @@
   }
 
   .categoryCard {
-    border-radius: 20px;
+    border-radius: 18px;
   }
 
   .imageContainer {

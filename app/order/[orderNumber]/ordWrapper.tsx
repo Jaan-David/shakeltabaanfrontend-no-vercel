@@ -11,20 +11,18 @@ import ItemCard from "@/components/UI/Profile/leftSection/Orders/ItemCard";
 import img from "@/public/acessts/Frame.png";
 
 // Import order service
-import orderService, { OrderItem } from "@/services/profile/orders";
+import orderService, { OrderItem, OrderStatusArabic } from "@/services/profile/orders";
 
 // Status mapping from API to component
 const mapOrderStatus = (apiStatus: OrderItem["status"]): OrderStatus => {
-  const statusMap: Record<OrderItem["status"], OrderStatus> = {
-    "Under review": "Under review",
-    reviewed: "reviewed",
-    prepared: "prepared",
-    shipped: "shipped",
-    delivered: "delivered",
-    cancelled: "cancelled",
+  const statusMap: Record<OrderStatusArabic, OrderStatus> = {
+    "تحت المراجعة": "تحت المراجعة",
+    "تم التواصل": "تم التواصل",
+    "تم الإلغاء": "تم الإلغاء",
+    "تم البيع": "تم البيع",
   };
 
-  return statusMap[apiStatus] || "pending";
+  return statusMap[apiStatus] || "تحت المراجعة";
 };
 
 export default function ordWrapper() {
