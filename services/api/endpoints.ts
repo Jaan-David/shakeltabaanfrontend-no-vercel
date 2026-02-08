@@ -203,7 +203,7 @@ export const buildUrl = (endpoint: string, params: Record<string, string | numbe
 };
 
 // API Base URL according to official documentation
-export const Api = process.env.NEXT_PUBLIC_API_URL || 'https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net/app/v1';
+export const Api = 'https://shk2t-t3ban.fly.dev/app/v1';
 
 export type ApiEndpoint = typeof API_ENDPOINTS;
 export type EndpointPath = string; 
