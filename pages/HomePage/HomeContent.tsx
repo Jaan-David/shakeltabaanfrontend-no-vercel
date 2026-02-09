@@ -4,7 +4,7 @@ import { useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import CategoriesGrid from "@/pages/CategoriesPage/CategoriesGrid";
-import { fetchCategories, Category as CategoryType } from '@/services/product/categories';
+import { Category as CategoryType } from '@/services/product/categories';
 import PartnersSection from "@/pages/HomePage/PartnersSection";
 import { productService } from '@/services/api/products';
 
@@ -31,6 +31,14 @@ export default function HomeContent() {
   const [productSearch, setProductSearch] = useState('');
   const [hasHydrated, setHasHydrated] = useState(false);
   const isMounted = useRef(false);
+  const fixedCategories: CategoryType[] = [
+    { id: "جرانيت مستورد", name: "جرانيت مستورد" },
+    { id: "جرانيت مصرى", name: "جرانيت مصرى" },
+    { id: "رخام مستورد", name: "رخام مستورد" },
+    { id: "رخام مصرى", name: "رخام مصرى" },
+    { id: "كوارتز", name: "كوارتز" },
+    { id: "رخام مصنع", name: "رخام مصنع" },
+  ];
 
   const normalizeProductImage = (src?: string) => {
     if (!src) return "/acessts/NoImage.jpg";
@@ -69,22 +77,11 @@ export default function HomeContent() {
       }
     };
 
-    const loadCategories = async () => {
-      setCategoriesLoading(true);
-      try {
-        const catNames = await fetchCategories();
-        if (isMounted.current) {
-          setCategories(catNames.map((name: string) => ({ id: name, name })));
-        }
-      } catch (err) {
-        if (isMounted.current) setCategories([]);
-      } finally {
-        if (isMounted.current) setCategoriesLoading(false);
-      }
-    };
-
     fetchUserProfile();
-    loadCategories();
+    if (isMounted.current) {
+      setCategories(fixedCategories);
+      setCategoriesLoading(false);
+    }
     return () => { isMounted.current = false; };
   }, []);
 
