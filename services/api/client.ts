@@ -2,7 +2,9 @@ import axios from 'axios';
 import {Api ,  API_ENDPOINTS } from './endpoints';
 
 // Fallback to local backend if env is not set
-const BASE_URL = Api || 'http://localhost:3002/app/v1';
+const BASE_URL =
+  Api ||
+  'https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net/app/v1';
 
 const apiClient = axios.create({
   baseURL: BASE_URL,

@@ -132,7 +132,7 @@ project-shakeltaaban/
 
 ### Environment Variables (.env.local)
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:3002/app/v1
+NEXT_PUBLIC_API_URL=https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net/app/v1
 NEXT_PUBLIC_APP_NAME=ShakElTaaban
 NEXT_PUBLIC_APP_VERSION=1.0.0
 NODE_ENV=development
@@ -144,7 +144,7 @@ NEXT_PUBLIC_DEBUG=true
 ### Prerequisites
 - Node.js 18+
 - npm or yarn
-- Backend API running (default: http://localhost:3002/app/v1)
+- Backend API running (default: https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net/app/v1)
 
 ### Installation
 ```bash

@@ -12,7 +12,7 @@ import { productService } from '@/services/api/products';
 export default function HomeContent() {
   const router = useRouter();
   const apiBaseUrl =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002/app/v1";
+    process.env.NEXT_PUBLIC_API_URL || "https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net/app/v1";
   const imageBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || apiBaseUrl).replace(
     /\/app\/v1\/?$/,
     ""

@@ -18,7 +18,7 @@ export interface SocialLoginData {
 }
 
 async socialLogin(socialData: SocialLoginData) {
-   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/app/v1';
+   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net/app/v1';
   const response = await apiClient.post(
       `${apiBaseUrl}/users/signWithSocial`,
     socialData
@@ -90,7 +90,7 @@ export interface InquiryReply {
 - ✅ `endInquiry()` - إنهاء الطلب
 - ✅ `deleteInquiry()` - حذف الطلب
 
-**API Base URL**: `process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/app/v1'`
+**API Base URL**: `process.env.NEXT_PUBLIC_API_URL || 'https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net/app/v1'`
 
 ---
 

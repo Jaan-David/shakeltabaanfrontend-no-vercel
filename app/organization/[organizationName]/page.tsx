@@ -10,7 +10,7 @@ import {
 } from "@/utils/seo";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002/app/v1";
+  process.env.NEXT_PUBLIC_API_URL || "https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net/app/v1";
 const API_IMAGE_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || API_BASE_URL).replace(
   /\/app\/v1\/?$/,
   ""

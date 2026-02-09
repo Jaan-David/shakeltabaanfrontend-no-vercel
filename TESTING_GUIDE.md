@@ -101,8 +101,8 @@
 2. ابحث عن رسائل خطأ
 3. تحقق من قيمة `NEXT_PUBLIC_API_URL` (والصور إذا لزم) في ملف `.env`:
    ```
-   NEXT_PUBLIC_API_URL=http://localhost:3002/app/v1
-   NEXT_PUBLIC_API_BASE_URL=http://localhost:3002
+   NEXT_PUBLIC_API_URL=https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net/app/v1
+   NEXT_PUBLIC_API_BASE_URL=https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net
    ```
 
 ### المشكلة: الألوان غير صحيحة

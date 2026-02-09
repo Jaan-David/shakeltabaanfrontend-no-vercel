@@ -7,7 +7,7 @@ import { productService } from '@/services/api/products';
 const imageBaseUrl = (
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   process.env.NEXT_PUBLIC_API_URL ||
-  'http://localhost:3002/app/v1'
+  'https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net/app/v1'
 ).replace(/\/app\/v1\/?$/, '');
 
 export default function ProductsPage() {

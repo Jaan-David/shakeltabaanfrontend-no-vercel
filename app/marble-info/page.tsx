@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002/app/v1";
+  process.env.NEXT_PUBLIC_API_URL || "https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net/app/v1";
 const ALT_API_BASE_URL = API_BASE_URL.replace("/app/v1", "/api/v1");
 const MARBLE_API_BASES = [
   `${API_BASE_URL}/info/marble`,

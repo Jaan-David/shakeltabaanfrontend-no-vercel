@@ -40,7 +40,7 @@ const RelatedProducts: React.FC<{ currentProductId?: string }> = ({ currentProdu
   const BASE_IMAGE_URL =
     process.env.NEXT_PUBLIC_API_BASE_URL ||
     process.env.NEXT_PUBLIC_API_URL ||
-    'http://localhost:3002/app/v1';
+    'https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net/app/v1';
 
   // Safely pick a primary image with fallback
   const PLACEHOLDER_SRC = '/acessts/NoImage.jpg';

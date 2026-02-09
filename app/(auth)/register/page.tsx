@@ -126,12 +126,6 @@ export default function RegistrationForm() {
 
     if (!formData.phoneNumber.trim()) {
       newErrors.phoneNumber = "رقم الهاتف مطلوب";
-    } else {
-      const normalizedPhone = formData.phoneNumber.replace(/\D/g, "");
-      const egyptPhoneRegex = /^(01[0-2,5]\d{8})$/;
-      if (!egyptPhoneRegex.test(normalizedPhone)) {
-        newErrors.phoneNumber = "رقم الهاتف غير صحيح (صيغة مصرية)";
-      }
     }
 
     return newErrors;
@@ -146,8 +140,7 @@ export default function RegistrationForm() {
       /\S+@\S+\.\S+/.test(formData.email) &&
       formData.password &&
       formData.password.length >= 8 &&
-      formData.phoneNumber.trim() &&
-      /^(01[0-2,5]\d{8})$/.test(formData.phoneNumber.replace(/\D/g, ""))
+      formData.phoneNumber.trim()
     );
   };
 
@@ -172,13 +165,12 @@ export default function RegistrationForm() {
 
     try {
       // Clean and prepare data
-      const normalizedPhone = formData.phoneNumber.trim().replace(/\D/g, "");
       const registerData: RegisterRequest = {
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
         email: formData.email.trim().toLowerCase(), // Ensure lowercase email
         password: formData.password,
-        phoneNumber: normalizedPhone,
+        phoneNumber: formData.phoneNumber.trim(),
         organizationId: "website-org",
       };
 
@@ -198,6 +190,9 @@ export default function RegistrationForm() {
           "تم إنشاء الحساب بنجاح! يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب."
         );
         setShowSuccessAlert(true);
+        setTimeout(() => {
+          router.push("/active-code");
+        }, 1200);
       }
     } catch (error: any) {
       //console.error("❌ Registration failed:", error);
@@ -338,6 +333,23 @@ export default function RegistrationForm() {
               </div>
             </div>
 
+            {/* Phone Number */}
+            <div className={styles.inputGroup}>
+              <Input
+                type="tel"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleInputChange}
+                placeholder="رقم الهاتف"
+                error={!!errors.phoneNumber}
+                className={styles.Input}
+                disabled={isLoading}
+              />
+              {errors.phoneNumber && (
+                <p className={styles.errorText}>{errors.phoneNumber}</p>
+              )}
+            </div>
+
             {/* Email */}
             <div className={styles.inputGroup}>
               <Input
@@ -397,23 +409,6 @@ export default function RegistrationForm() {
                  <p className={styles.errorText}>{errors.password}</p>
                )}
               </>
-              )}
-            </div>
-
-            {/* Phone Number */}
-            <div className={styles.inputGroup}>
-              <Input
-                type="tel"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleInputChange}
-                placeholder="رقم الهاتف (مثال: +201234567890)"
-                error={!!errors.phoneNumber}
-                className={styles.Input}
-                disabled={isLoading}
-              />
-              {errors.phoneNumber && (
-                <p className={styles.errorText}>{errors.phoneNumber}</p>
               )}
             </div>
 

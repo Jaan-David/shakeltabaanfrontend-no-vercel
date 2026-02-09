@@ -204,7 +204,7 @@ export const buildUrl = (endpoint: string, params: Record<string, string | numbe
 
 // API Base URL (single source of truth)
 export const Api =
-  process.env.NEXT_PUBLIC_API_URL || 'https://shk2t-t3ban.fly.dev/app/v1';
+  process.env.NEXT_PUBLIC_API_URL || 'https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net/app/v1'
 
 export type ApiEndpoint = typeof API_ENDPOINTS;
-export type EndpointPath = string; 
+export type EndpointPath = string; ;
