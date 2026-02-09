@@ -36,26 +36,16 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  // Sample data for demonstration - memoized to prevent recreation on every render
-  // const sampleData: Product[] = useMemo(() => [
-  //   { name: 'زنك كبريتات (1 كجم)', category: 'كيميائيات مبيدات', price: 150.00, status: true, img: null },
-  //   { name: 'نحاس كبريتات (500 جم)', category: 'كيميائيات مبيدات', price: 85.00, status: true, img: null },
-  //   { name: 'مبيد حشري طبيعي', category: 'مبيدات حشرية', price: 120.00, status: true, img: null },
-  //   { name: 'سماد عضوي (5 كجم)', category: 'أسمدة', price: 200.00, status: true, img: null },
-  //   { name: 'بذور طماطم هجين', category: 'بذور', price: 45.00, status: true, img: null },
-  //   { name: 'أدوات تقليم', category: 'أدوات زراعية', price: 75.00, status: false, img: null },
-  //   { name: 'خرطوم ري (25 متر)', category: 'معدات الري', price: 95.00, status: true, img: null },
-  //   { name: 'تربة زراعية مخصبة', category: 'تربة ومواد نمو', price: 65.00, status: true, img: null }
-  // ], []);
-
-  // Memoize searchData to prevent infinite re-renders
-  // const searchData = useMemo(() => {
-  //   return data.length > 0 ? data : sampleData;
-  // }, [data, sampleData]);
-
-  // Popular searches based on your product categories - memoized
+  
   const popularSearches = useMemo(
-    () => ["مبيدات", "أسمدة", "بذور", "أدوات زراعية", "معدات الري"],
+    () => [
+      "جرانيت مستورد",
+      "جرانيت مصرى",
+      "رخام مستورد",
+      "رخام مصرى",
+      "كوارتز",
+      "رخام مصنع",
+    ],
     []
   );
 
@@ -185,6 +175,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
               )}
             </div>
           )}
+
         </div>
       </form>
     );
@@ -210,7 +201,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
             <input
               ref={inputRef}
               type="text"
-              placeholder="ابحث عن المنتجات الزراعية..."
+              placeholder="ابحث عن الرخام الراقي..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className={styles.searchInput}
