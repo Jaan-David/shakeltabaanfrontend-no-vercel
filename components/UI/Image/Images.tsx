@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import Image, { StaticImageData } from "next/image";
 import { cn } from "@/lib/utils";
 import { CSSProperties } from 'react';
@@ -35,11 +35,40 @@ export function CustomImage({
   style,
   ...props
 }: ImageProps) {
-  const [imgSrc, setImgSrc] = useState(src);
+  const resolvedSrc = useMemo(() => {
+    if (typeof src !== "string") {
+      return src;
+    }
+    const trimmed = src.trim();
+    if (!trimmed) {
+      return fallbackSrc;
+    }
+    if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+      return trimmed;
+    }
+    if (trimmed.startsWith("/")) {
+      return trimmed;
+    }
+    const apiBase = (
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      ""
+    ).replace(/\/app\/v1\/?$/, "");
+    if (!apiBase) {
+      return `/${trimmed}`;
+    }
+    return `${apiBase}/${trimmed.replace(/^\//, "")}`;
+  }, [src, fallbackSrc]);
+
+  const isRemoteSrc =
+    typeof resolvedSrc === "string" &&
+    (resolvedSrc.startsWith("http://") || resolvedSrc.startsWith("https://"));
+
+  const [imgSrc, setImgSrc] = useState(resolvedSrc);
 
   useEffect(() => {
-    setImgSrc(src);
-  }, [src]);
+    setImgSrc(resolvedSrc);
+  }, [resolvedSrc]);
 
   const handleError = () => {
     if (imgSrc !== fallbackSrc) setImgSrc(fallbackSrc);
@@ -70,6 +99,7 @@ export function CustomImage({
         height={!fill ? height : undefined}
         onError={handleError}
         priority={priority}
+        unoptimized={isRemoteSrc}
         className={cn(
           objectFit === "cover" && "object-cover",
           objectFit === "contain" && "object-contain",

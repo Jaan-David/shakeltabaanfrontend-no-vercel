@@ -175,6 +175,7 @@ export default async function OrganizationProfilePage({
 
   const rawPhoto = orgData?.photo || "";
   const logo = rawPhoto ? normalizeApiImage(rawPhoto) : "/logo/logo1.png";
+  const logoIsRemote = logo.startsWith("http://") || logo.startsWith("https://");
 
   const orgProfile = {
     name: orgData?.name || organizationId || "اسم الشركة",
@@ -266,6 +267,7 @@ export default async function OrganizationProfilePage({
               sizes="(max-width: 768px) 112px, 128px"
               className="w-full h-full object-contain p-3"
               priority
+              unoptimized={logoIsRemote}
             />
           </div>
           <div className="flex-1 text-center md:text-right space-y-3">
@@ -310,6 +312,7 @@ export default async function OrganizationProfilePage({
                 const name = product.nameAr || product.name || "منتج";
                 const rawImage = product.imageList?.[0] || product.image || "";
                 const image = rawImage ? normalizeApiImage(rawImage) : "/acessts/NoImage.jpg";
+                const imageIsRemote = image.startsWith("http://") || image.startsWith("https://");
                 const ratingCount = Array.isArray(product.productReview) ? product.productReview.length : 0;
                 const altText = buildAltText({
                   productName: name,
@@ -335,6 +338,7 @@ export default async function OrganizationProfilePage({
                         height={240}
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                         className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                        unoptimized={imageIsRemote}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
@@ -430,6 +434,7 @@ export default async function OrganizationProfilePage({
                 const id = work._id || work.id || work.title || "work";
                 const rawImage = work.photoList?.[0] || "";
                 const image = rawImage ? normalizeApiImage(rawImage) : "/acessts/NoImage.jpg";
+                const imageIsRemote = image.startsWith("http://") || image.startsWith("https://");
                 return (
                   <div
                     key={id}
@@ -443,6 +448,7 @@ export default async function OrganizationProfilePage({
                         height={240}
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                        unoptimized={imageIsRemote}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
