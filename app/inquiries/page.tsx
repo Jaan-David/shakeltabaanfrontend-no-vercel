@@ -7,6 +7,7 @@ import {
   type Inquiry,
   type InquiryReply
 } from '@/services/api/inquiry';
+import { isUserAuthenticated } from '@/services/auth/login';
 import Alert from '@/components/UI/Alert/alert';
 
 export default function InquiriesPage() {
@@ -28,6 +29,10 @@ export default function InquiriesPage() {
 
   // Fetch inquiries on mount
   useEffect(() => {
+    if (!isUserAuthenticated()) {
+      router.push(`/login?redirect=${encodeURIComponent('/inquiries')}`);
+      return;
+    }
     fetchInquiries();
   }, []);
 
