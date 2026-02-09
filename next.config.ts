@@ -49,6 +49,11 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
+        protocol: 'https',
+        hostname: 'shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net',
+        pathname: '/**',
+      },
+      {
         protocol: 'http',
         hostname: 'localhost',
         pathname: '/**',
