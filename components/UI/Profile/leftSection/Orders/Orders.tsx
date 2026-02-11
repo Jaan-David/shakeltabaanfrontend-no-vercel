@@ -14,7 +14,7 @@ import { Package } from 'lucide-react';
 import Box from '@/public/icons/order.svg'
 
 // Import the correct interfaces from the service
-import { OrderItem } from '@/services/profile/orders';
+import { CartItem, OrderItem, Product } from '@/services/profile/orders';
 
 interface OrdersProps {
   orders: OrderItem[];  
@@ -95,10 +95,41 @@ const Orders: React.FC<OrdersProps> = ({orders}) => {
     }
   };
 
+  const getItemTotal = (item: CartItem): number => {
+    const pricedItem = item as CartItem & {
+      totalPrice?: number;
+      unitPrice?: number;
+      productId?: Product & { pricePerLinearMeter?: number; price?: number };
+    };
+
+    if (typeof pricedItem.totalPrice === 'number') return pricedItem.totalPrice;
+    if (typeof pricedItem.unitPrice === 'number') {
+      return pricedItem.unitPrice * (item.itemQty ?? 1);
+    }
+
+    const pricePerLinearMeter = pricedItem.productId?.pricePerLinearMeter;
+    if (typeof pricePerLinearMeter === 'number') {
+      return pricePerLinearMeter * (item.itemQty ?? 1);
+    }
+
+    if (typeof pricedItem.productId?.price === 'number') {
+      return pricedItem.productId.price * (item.itemQty ?? 1);
+    }
+
+    return 0;
+  };
+
   // Calculate total price from cart
   const getOrderTotal = (order: OrderItem): number => {
-    const cartTotal = typeof order.cartId === 'object' ? order.paymentDetails?.totalPrice : 0;
-    return (cartTotal ?? 0) + order.deliveryPrice;
+    const deliveryPrice = typeof order.deliveryPrice === 'number' ? order.deliveryPrice : 0;
+    const paymentTotal = order.paymentDetails?.totalPrice;
+
+    if (typeof paymentTotal === 'number' && paymentTotal > 0) {
+      return paymentTotal + deliveryPrice;
+    }
+
+    const itemsTotal = order.cartId?.items?.reduce((sum, item) => sum + getItemTotal(item), 0) ?? 0;
+    return itemsTotal + deliveryPrice;
   };
 
   return (

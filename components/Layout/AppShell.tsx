@@ -39,7 +39,9 @@ const AppShell: React.FC<Props> = ({ children }) => {
   return (
     <>
       {shouldShowHeaderFooter && isMounted && <Header />}
-      {children}
+      <main className={shouldShowHeaderFooter ? "pt-[72px]" : ""}>
+        {children}
+      </main>
       {shouldShowHeaderFooter && <Footer />}
       {shouldShowFloatingChat && <FloatingChat />}
     </>

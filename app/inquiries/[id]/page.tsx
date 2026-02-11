@@ -167,7 +167,7 @@ export default function InquiryDetailsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 pb-12 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -211,7 +211,7 @@ export default function InquiryDetailsPage() {
               <div>
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/*,.heic,.heif,.webp"
                   multiple
                   onChange={handleImageSelect}
                   className="hidden"
@@ -252,6 +252,9 @@ export default function InquiryDetailsPage() {
                       src={img}
                       alt={`صورة ${index + 1}`}
                       className="w-full h-32 object-cover rounded-lg"
+                      onError={(e) => {
+                        e.currentTarget.src = '/acessts/NoImage.jpg';
+                      }}
                     />
                   ))}
                 </div>

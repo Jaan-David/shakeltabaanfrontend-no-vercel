@@ -147,6 +147,17 @@ interface FormErrors {
 // Storage key for form draft
 const DRAFT_STORAGE_KEY = 'addressFormDraft';
 
+const normalizeDigits = (value: string): string => {
+  const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+  return value
+    .split('')
+    .map(char => {
+      const index = arabicDigits.indexOf(char);
+      return index >= 0 ? String(index) : char;
+    })
+    .join('');
+};
+
 // Separate component that uses useSearchParams
 function AddressFormContent() {
   const router = useRouter();
@@ -258,9 +269,14 @@ function AddressFormContent() {
     field: keyof AddressFormData,
     value: string | boolean
   ) => {
+    const normalizedValue =
+      field === 'phoneNumber' && typeof value === 'string'
+        ? normalizeDigits(value)
+        : value;
+
     setFormData((prev) => ({
       ...prev,
-      [field]: value,
+      [field]: normalizedValue,
       ...(field === "governorate" && typeof value === "string"
         ? { city: "" }
         : {}),

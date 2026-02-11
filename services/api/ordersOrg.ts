@@ -34,6 +34,7 @@ export interface OrgItemsResponse {
   message?: string;
 }
 
+
 const BASE = Api;
 
 export const ordersOrgService = {
@@ -48,8 +49,8 @@ export const ordersOrgService = {
     return res.data as OrgItemsResponse;
   },
 
-  async createMultiOrgOrder(payload: Array<{ organizationId: string; items: Array<{ productId: string; itemQty: number }> }>) {
-    const res = await apiClient.post(`${BASE}/orders/multi-org/create`, { orders: payload });
+  async createMultiOrgOrder() {
+    const res = await apiClient.post(`${BASE}/orders/multi-org/create`);
     return res.data;
   }
 };

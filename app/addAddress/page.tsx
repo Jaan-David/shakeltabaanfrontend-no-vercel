@@ -3,10 +3,19 @@ import NewAddressForm from "@/pages/ProfilePage/sections/AddAdress/AddAdress";
 import { generateSEO } from "@/config/seo.config";
 
 export const metadata = generateSEO({
-  title: "إضافة عنوان جديد ",
-  description: "إضافة عنوان الاستلام لطلبات الرخام والجرانيت والكوارتز عبر منصة شق الثعبان.",
-  keywords: ["إضافة عنوان", "طلبات الرخام", "شق الثعبان"],
-  noIndex: true,
+  title: "إضافة عنوان جديد | توريد رخام للمشاريع",
+  description:
+    "اضف عنوانك لتسهيل توريد الرخام والجرانيت والكوارتز للمشاريع والمطابخ عبر منصة شق التعبان.",
+  keywords: [
+    "توريد رخام للمشاريع",
+    "رخام جملة للمقاولين",
+    "مورد رخام مصري للمشاريع الكبيرة",
+    "رخام للمشاريع الكبيرة",
+    "توريد رخام لمولات",
+    "buy marble online egypt",
+    "bulk marble supplier egypt",
+    "marble factory egypt wholesale",
+  ],
 });
 export default function AddAddressPage() {
   return (

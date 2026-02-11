@@ -3,9 +3,21 @@ import AboutPage from "@/pages/AboutPage/Aboutpage";
 import { generateSEO } from "@/config/seo.config";
 
 export const metadata = generateSEO({
-  title: "من نحن",
-  description: "تعرف على منصة شق الثعبان لسوق الرخام والجرانيت والكوارتز في مصر، ودورها في الربط بين المصانع والمعارض والعملاء.",
-  keywords: ["منصة شق الثعبان", "سوق الرخام في مصر", "رخام", "جرانيت", "كوارتز"],
+  title: "افضل مصانع الرخام في مصر | منصة شق التعبان",
+  description:
+    "تعرف على منصة شق التعبان كمركز موثوق لتوريد الرخام والجرانيت والكوارتز للمشاريع والمطابخ والتصدير.",
+  keywords: [
+    "افضل مصانع الرخام في مصر",
+    "تقييم مصانع شق التعبان",
+    "افضل مورد جرانيت مصري",
+    "جودة الرخام المصري",
+    "شركات رخام موثوقة مصر",
+    "تجارب شراء رخام من شق التعبان",
+    "رخام عالي الجودة مصر",
+    "best marble suppliers egypt",
+    "trusted granite supplier egypt",
+    "top stone exporters egypt",
+  ],
 });
 
 export default function Page() {

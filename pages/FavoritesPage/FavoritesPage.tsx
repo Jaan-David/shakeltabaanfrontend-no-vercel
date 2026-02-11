@@ -75,7 +75,7 @@ const FavoritesPageContent: React.FC<{ items?: FavoriteItem[] }> = ({ items }) =
   // Show loading state with a more visible spinner
   if (loading) {
     return (
-      <div className="min-h-screen bg-white font-beiruti mt-[93px] flex items-center justify-center">
+      <div className="min-h-screen bg-white font-beiruti flex items-center justify-center">
         <div className="flex flex-col items-center">
           <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
           <p className="text-lg text-slate-600">جاري تحميل المفضلة...</p>
@@ -87,7 +87,7 @@ const FavoritesPageContent: React.FC<{ items?: FavoriteItem[] }> = ({ items }) =
   // Show unauthenticated message if user is not logged in
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-white font-beiruti mt-[93px]">
+      <div className="min-h-screen bg-white font-beiruti">
         <div className="container mx-auto px-4 py-20">
           <div className="flex flex-col items-center justify-center text-center">
             <LogIn className="h-16 w-16 text-slate-400 mb-6" />
@@ -110,7 +110,7 @@ const FavoritesPageContent: React.FC<{ items?: FavoriteItem[] }> = ({ items }) =
   // Show error state if there's an authentication error
   if (error?.includes('تسجيل الدخول')) {
     return (
-      <div className="min-h-screen bg-white font-beiruti mt-[93px]">
+      <div className="min-h-screen bg-white font-beiruti">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center justify-center py-16">
             <div className="text-center bg-red-50 border border-red-200 rounded-lg p-8 max-w-md">
@@ -137,7 +137,7 @@ const FavoritesPageContent: React.FC<{ items?: FavoriteItem[] }> = ({ items }) =
   // Show empty state
   if (favItems.length === 0) {
     return (
-      <div className="min-h-screen bg-white font-beiruti mt-[93px]">
+      <div className="min-h-screen bg-white font-beiruti">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <header className="mb-8">
             <h1 className="text-2xl font-bold text-slate-900">المفضلة</h1>
@@ -161,7 +161,7 @@ const FavoritesPageContent: React.FC<{ items?: FavoriteItem[] }> = ({ items }) =
   // Show error state if there's an authentication error
   if (error && error.includes('تسجيل الدخول')) {
     return (
-      <div className="min-h-screen bg-background font-beiruti mt-[93px]">
+      <div className="min-h-screen bg-background font-beiruti">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center justify-center py-16">
             <div className="text-center bg-red-50 border border-red-200 rounded-lg p-8 max-w-md">
@@ -185,7 +185,7 @@ const FavoritesPageContent: React.FC<{ items?: FavoriteItem[] }> = ({ items }) =
   // Show error state for other errors
   if (error) {
     return (
-      <div className="min-h-screen bg-white font-beiruti mt-[93px]">
+      <div className="min-h-screen bg-white font-beiruti">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center justify-center py-16">
             <div className="text-center bg-red-50 border border-red-200 rounded-lg p-8 max-w-md">
@@ -205,7 +205,7 @@ const FavoritesPageContent: React.FC<{ items?: FavoriteItem[] }> = ({ items }) =
   }
 
   return (
-    <div className="min-h-screen bg-white font-beiruti mt-[93px]">
+    <div className="min-h-screen bg-white font-beiruti">
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-8">
         <header className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-blue-900">المفضلة</h1>

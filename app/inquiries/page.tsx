@@ -165,7 +165,7 @@ export default function InquiriesPage() {
     : inquiries.filter(i => i.status === activeStatus);
 
   return (
-    <div className="min-h-screen bg-white py-12 px-4 rtl">
+    <div className="min-h-screen bg-white pb-12 px-4 rtl">
       {/* Alerts */}
       {successMessage && (
         <Alert
@@ -283,7 +283,14 @@ export default function InquiriesPage() {
                       <div className="flex gap-2">
                         {inquiry.imageList.slice(0, 3).map((img, idx) => (
                           <div key={idx} className="w-12 h-12 rounded overflow-hidden bg-slate-100">
-                            <img src={img} alt="inquiry" className="w-full h-full object-cover" />
+                            <img
+                              src={img}
+                              alt="inquiry"
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.src = '/acessts/NoImage.jpg';
+                              }}
+                            />
                           </div>
                         ))}
                         {inquiry.imageList.length > 3 && (
@@ -332,7 +339,7 @@ export default function InquiriesPage() {
                 <input
                   type="file"
                   multiple
-                  accept="image/*"
+                  accept="image/*,.heic,.heif,.webp"
                   onChange={(e) => {
                     const files = Array.from(e.target.files || []).slice(0, 5);
                     setImages(files);
@@ -342,7 +349,7 @@ export default function InquiriesPage() {
                 />
                 <label htmlFor="image-upload" className="cursor-pointer">
                   <p className="text-slate-700">اسحب الصور أو اضغط للاختيار</p>
-                  <p className="text-sm text-slate-500 mt-1">دعم JPEG, PNG</p>
+                  <p className="text-sm text-slate-500 mt-1">دعم HEIC, HEIF, WebP, JPEG, PNG</p>
                 </label>
               </div>
 

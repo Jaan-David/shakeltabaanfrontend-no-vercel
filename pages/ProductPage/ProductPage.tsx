@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { Product } from '@/services/api/products';
+import { normalizeMediaList } from '@/utils/media';
 // import { console } from 'inspector';
 
 // Lazy load heavy components
@@ -119,7 +120,7 @@ const ProductPage: React.FC<{ data: ProductData }> = ({ data }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white font-beiruti mt-[93px] flex items-center justify-center">
+      <div className="min-h-screen bg-white font-beiruti flex items-center justify-center">
         <div className="text-center text-slate-600">
           <p className="text-xl">جاري التحميل...</p>
         </div>
@@ -129,7 +130,7 @@ const ProductPage: React.FC<{ data: ProductData }> = ({ data }) => {
 
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-white font-beiruti mt-[93px] flex items-center justify-center">
+      <div className="min-h-screen bg-white font-beiruti flex items-center justify-center">
         <div className="text-center">
           <p className="text-xl text-slate-900">خطأ في تحميل المنتج</p>
           <p className="mt-2 text-slate-600">{error || 'المنتج غير موجود'}</p>
@@ -138,8 +139,15 @@ const ProductPage: React.FC<{ data: ProductData }> = ({ data }) => {
     );
   }
 
+  const mediaList = normalizeMediaList([
+    ...(product.imageList || []),
+    ...(product.images || []),
+    product.image,
+  ]);
+  const safeMediaList = mediaList.length ? mediaList : ['/placeholder-product.jpg'];
+
   return (
-    <div className="min-h-screen bg-white font-beiruti mt-[93px]">
+    <div className="min-h-screen bg-white font-beiruti">
       <div className="mx-auto max-w-[95%] px-4 py-6 space-y-6">
         <Suspense fallback={<SectionLoader />}>
           <Overview
@@ -147,7 +155,7 @@ const ProductPage: React.FC<{ data: ProductData }> = ({ data }) => {
             title={product.name}
             description={product.description || 'لا يوجد وصف متاح'}
             price={product.price}
-            imageList={product.imageList?.length ? product.imageList : ['/placeholder-product.jpg']}
+            imageList={safeMediaList}
             rating={product.averageRate || 0}
             ratingCount={product.reviewSummary?.totalReviews || 0}
             category={product.category}

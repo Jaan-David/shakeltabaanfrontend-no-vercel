@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Heart, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import { Minus, Plus } from "lucide-react";
-import { CustomImage } from "@/components/UI/Image/Images";
+import { CustomMedia } from "@/components/UI/Image/Images";
 import { cartService, checkProductUnitConflict } from "@/services/api/cart";
 import { useRouter } from "next/navigation";
 import { isAuthenticated } from "@/utils/auth";
@@ -396,7 +396,7 @@ const Overview: React.FC<Props> = ({
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
           >
-            <CustomImage
+            <CustomMedia
               src={imageList[currentImageIndex] || "/acessts/placeholder.svg"}
               alt={`${title} - Image ${currentImageIndex + 1}`}
               fill

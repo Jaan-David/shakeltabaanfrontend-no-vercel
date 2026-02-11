@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import dynamic from "next/dynamic";
 import styles from "./profile.module.css";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // Components - Keep critical components for initial render
 import TopMetrics from "@/pages/ProfilePage/sections/TopScetion/Top";
@@ -60,6 +60,7 @@ export interface User {
 
 const ProfilePage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [box, setBox] = useState("");
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileMain, setShowMobileMain] = useState(false);
@@ -168,6 +169,26 @@ const ProfilePage = () => {
 
     fetchUserProfile();
   }, [isMounted, fetchUserProfile]);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const tab = searchParams.get('tab');
+    if (tab === 'addresses') {
+      setBox('عناوينك');
+      if (isMobile) {
+        setShowMobileMain(true);
+      }
+      return;
+    }
+
+    if (tab === 'orders') {
+      setBox('طلباتك');
+      if (isMobile) {
+        setShowMobileMain(true);
+      }
+    }
+  }, [isMounted, isMobile, searchParams]);
 
   /**
    * Check if screen is mobile size

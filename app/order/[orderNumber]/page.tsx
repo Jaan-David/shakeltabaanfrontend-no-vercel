@@ -8,10 +8,19 @@ import orderService, { OrderItem } from "@/services/profile/orders";
 import { generateSEO } from '@/config/seo.config';
 
 export const metadata = generateSEO({
-  title: 'تفاصيل الطلب',
-    description: 'تفاصيل طلبات الرخام والجرانيت والكوارتز على منصة شق الثعبان.',
-    keywords: ['تفاصيل الطلب', 'طلبات الرخام', 'شق الثعبان'],
-    noIndex: true,
+    title: 'تفاصيل الطلب | شراء رخام في مصر',
+    description:
+        'راجع تفاصيل طلب الرخام والجرانيت والكوارتز مع منصة شق التعبان وسوق الرخام المصري.',
+    keywords: [
+        'شراء رخام في مصر',
+        'رخام للبيع في القاهرة',
+        'رخام شق التعبان للبيع',
+        'جرانيت مطابخ للبيع',
+        'شراء كوارتز للمطابخ',
+        'سوق الرخام المصري',
+        'stone marketplace egypt',
+        'marble trading platform',
+    ],
 });
 
 import OrdWrapper from "./ordWrapper";

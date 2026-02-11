@@ -4,9 +4,8 @@ import { generateSEO } from '@/config/seo.config';
 
 export const metadata = generateSEO({
   title: 'صفحة الدفع',
-  description: 'إتمام طلبات الرخام والجرانيت والكوارتز عبر منصة شق الثعبان.',
-  keywords: ['الدفع', 'طلبات الرخام', 'شق الثعبان'],
-  noIndex: true,
+  description: 'منصة شق الثعبان متخصصة في جميع أنواع الرخام والجرانيت',
+  keywords: ['كيماويات', 'تجارة'],
 });
 
 export default function CheckoutPage() {

@@ -6,22 +6,70 @@ import OrderSummary from './Sections/OrderSummary';
 import ContactHelp from './Sections/ContactHelp';
 import RelatedProducts from '@/components/UI/RelatedProducts/RelatedProducts';
 // import type { CartItem } from './Sections/types';
-import { cartService, getClientCartItems } from '@/services/api/cart';
+import { cartService } from '@/services/api/cart';
+import AlertHandler from '@/services/Utils/alertHandler';
 import { isAuthenticated } from '@/utils/auth';
 import { useRouter } from 'next/navigation';
 import ordersOrgService from '@/services/api/ordersOrg';
 
-export  type CartItem = {
+type CartItem = {
   id: string;            // Cart item ID
   name: string;          // Name of the product
-  price: number;         // Price of the individual item
+  price: number;         // Unit price
   quantity: number;      // Quantity in cart
+  totalPrice: number;    // Total price for the item
   image: string;         // URL or path to the product image
   unit: string;          // Unit of measurement (e.g., 'قطعة')
   availability: string;  // Availability status (e.g., 'متوفر', 'غير متوفر')
   category?: string;     // Optional category of the product
   organizationId?: string;
   productId?: string;
+};
+
+type ApiProduct = {
+  _id?: string;
+  id?: string;
+  name?: string;
+  title?: string;
+  category?: string;
+  imageList?: string[];
+  images?: Array<string | { url?: string }>;
+  image?: string | Array<{ url?: string }>;
+  thumbnail?: string;
+  mainImage?: string;
+  coverImage?: string;
+  imageUrl?: string;
+  pricePerLinearMeter?: number | null;
+  pricePerCubicMeter?: number | null;
+  stockQty?: number;
+  quantity?: number;
+  organizationId?: string;
+  organization?: string;
+};
+
+type ApiCartItem = {
+  _id?: string;
+  cartId?: string;
+  productId?: ApiProduct | string | null;
+  itemQty?: number;
+  unitPrice?: number;
+  totalPrice?: number;
+  unitType?: string;
+  pricePerLinearMeter?: number | null;
+  pricePerCubicMeter?: number | null;
+  offerLinearPrice?: number | null;
+  offerCubicPrice?: number | null;
+};
+
+type ApiCartResponse = {
+  status?: string;
+  data?: {
+    cart?: {
+      totalQty?: number;
+      totalPrice?: number;
+      items?: ApiCartItem[];
+    };
+  };
 };
 
 type OrgGroup = {
@@ -33,6 +81,7 @@ type OrgGroup = {
 const CartPage = () => {
   const [orgGroups, setOrgGroups] = useState<OrgGroup[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cartTotalPrice, setCartTotalPrice] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -41,87 +90,81 @@ const CartPage = () => {
         if (!isAuthenticated()) {
           return;
         }
-        await cartService.getCart();
-        const processedItems = await getClientCartItems();
-        
-        // Debug: Log raw cart data
-        console.log('Raw cart items from API:', JSON.stringify(processedItems.slice(0, 2), null, 2));
-        
-        const mapped: CartItem[] = processedItems.map((it: any) => {
-          const p = it.productId || {};
-          const productId = (p && (p._id || p.id)) || it.productId || '';
-          
-          // Convert unit to display name
+        const cartResponse = (await cartService.getCart()) as ApiCartResponse | undefined;
+        const cart = cartResponse?.data?.cart;
+        const items = cart?.items ?? [];
+
+        setCartTotalPrice(cart?.totalPrice ?? 0);
+
+        const mapped: CartItem[] = items.map((item) => {
+          const product = typeof item.productId === 'object' && item.productId ? item.productId : null;
+          const productId = product?._id || product?.id || (typeof item.productId === 'string' ? item.productId : '');
+
+          const unitType = item.unitType || '';
           const unitMap: Record<string, string> = {
-            'unit': 'قطعة',
-            'kg': 'كيلو',
-            'ton': 'طن',
-            'liter': 'لتر',
-            'cubic_meter': 'متر مكعب'
+            unit: 'قطعة',
+            kg: 'كيلو',
+            ton: 'طن',
+            liter: 'لتر',
+            linear: 'متر طولي',
+            cubic: 'متر مربع',
+            square: 'متر مربع',
+            linear_meter: 'متر طولي',
+            cubic_meter: 'متر مربع',
+            square_meter: 'متر مربع',
           };
-          const selectedUnit = unitMap[it.unit] || it.unit || 'قطعة';
-          
+          const selectedUnit = unitMap[unitType] || 'قطعة';
+
           let imageUrl = '/acessts/NoImage.jpg';
-          const imageSources = p.imageList || p.images || p.image || [];
-          
-          // Debug: Log image sources for first item
-          if (it.quantity === processedItems[0]?.quantity) {
-            console.log('Product data structure:', {
-              name: p.name,
-              hasImageList: !!p.imageList,
-              imageListLength: Array.isArray(p.imageList) ? p.imageList.length : 0,
-              imageListFirst: Array.isArray(p.imageList) ? p.imageList[0] : undefined,
-              hasImages: !!p.images,
-              hasImage: !!p.image,
-              allFields: Object.keys(p).filter(k => k.toLowerCase().includes('image') || k.toLowerCase().includes('photo'))
-            });
-          }
-          
-          // Handle different image source formats
+          const imageSources = product?.imageList || product?.images || product?.image || [];
+
           if (Array.isArray(imageSources) && imageSources.length > 0) {
             const firstImage = imageSources[0];
             if (typeof firstImage === 'string') {
               imageUrl = firstImage;
-            } else if (firstImage?.url) {
-              imageUrl = firstImage.url;
+            } else if (firstImage && typeof firstImage === 'object' && 'url' in firstImage) {
+              imageUrl = firstImage.url ?? imageUrl;
             }
           } else if (typeof imageSources === 'string') {
             imageUrl = imageSources;
           }
 
-          // If still no valid image, try other possible image fields
           if (!imageUrl || imageUrl === '/acessts/NoImage.jpg') {
-            imageUrl = p.thumbnail || p.mainImage || p.coverImage || p.imageUrl || '/acessts/NoImage.jpg';
+            imageUrl = product?.thumbnail || product?.mainImage || product?.coverImage || product?.imageUrl || '/acessts/NoImage.jpg';
           }
 
-          // Ensure the image URL is properly formatted
           if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('blob:') && !imageUrl.startsWith('data:')) {
-            // Remove any leading slashes to prevent double slashes
             const cleanPath = imageUrl.replace(/^\/+/, '');
-            // Check if it's a local path that should be served from the public folder
             if (cleanPath.startsWith('public/') || cleanPath.startsWith('uploads/') || cleanPath.startsWith('acessts/')) {
               imageUrl = `/${cleanPath}`;
             } else if (process.env.NEXT_PUBLIC_API_BASE_URL) {
-              // For API paths, use the API base URL
               imageUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${cleanPath}`;
             } else {
-              // Fallback to absolute path
               imageUrl = `/${cleanPath}`;
             }
           }
 
-          const availability = (p.stockQty ?? p.quantity ?? 0) > 0 ? 'متوفر' : 'غير متوفر';
+          const quantity = item.itemQty ?? 0;
+          const unitPrice = item.unitPrice
+            ?? item.pricePerLinearMeter
+            ?? item.pricePerCubicMeter
+            ?? product?.pricePerLinearMeter
+            ?? product?.pricePerCubicMeter
+            ?? 0;
+          const totalPrice = item.totalPrice ?? unitPrice * quantity;
+          const availability = '';
 
           return {
-            id: String(it._id),
-            name: p.name || p.title || 'منتج',
-            price: it.price,
-            quantity: it.quantity,
+            id: String(item._id ?? ''),
+            name: product?.name || product?.title || 'منتج',
+            price: unitPrice,
+            quantity,
+            totalPrice,
             image: imageUrl,
             unit: selectedUnit,
             availability,
-            category: p.category,
-            organizationId: p.organizationId || p.organization || '',
+            category: product?.category,
+            organizationId: product?.organizationId || product?.organization || '',
             productId,
           };
         });
@@ -136,18 +179,8 @@ const CartPage = () => {
           groupsMap.get(orgId)!.items.push(item);
         }
 
-        // Fetch organization names from new endpoint (best-effort)
-        try {
-          const orgs = await ordersOrgService.listOrganizations();
-          orgs.forEach((org: any) => {
-            const key = org._id || org.organizationId;
-            if (key && groupsMap.has(key)) {
-              const g = groupsMap.get(key)!;
-              g.organizationName = org.name || org.organizationName || 'منظمة';
-            }
-          });
-        } catch (e) {
-          console.warn('Failed to fetch organizations list, using defaults');
+        for (const group of groupsMap.values()) {
+          group.organizationName = group.organizationId;
         }
 
         setOrgGroups(Array.from(groupsMap.values()));
@@ -191,48 +224,52 @@ const CartPage = () => {
   };
 
   const cartItems = (orgGroups || []).flatMap(g => g.items || []);
-  const subtotal = cartItems.reduce((sum, item) => {
-    const itemTotal = item.price * item.quantity;
-    return sum + itemTotal;
-  }, 0);
+  const subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
+  const totalPrice = cartTotalPrice > 0 ? cartTotalPrice : subtotal;
 
   const handleMultiOrgCheckout = async () => {
     try {
-      // Validate payload before sending
-      const payload = orgGroups
-        .filter(g => g.items && g.items.length > 0)
-        .map(g => ({
-          organizationId: g.organizationId,
-          items: g.items
-            .filter(it => it.productId) // Filter out items without productId
-            .map(it => ({ 
-              productId: String(it.productId).trim(), 
-              itemQty: it.quantity 
-            }))
-        }))
-        .filter(g => g.items.length > 0); // Filter out groups with no valid items
+      await ordersOrgService.createMultiOrgOrder();
+      AlertHandler.success('تم إنشاء الطلب بنجاح');
+      router.push('/profile?tab=orders');
+    } catch (e: any) {
+      const errorMessage = e?.response?.data?.message || 'يرجى إضافة عنوان في حسابك ثم إعادة المحاولة';
 
-      if (payload.length === 0) {
-        console.error('No valid items to checkout');
+      if (errorMessage.includes('Currently, we only accept orders from Egyptian customers')) {
+        const extractedNumber = errorMessage.match(/\+?\d{8,}/)?.[0] || '201204246538';
+        const whatsappUrl = `https://wa.me/${extractedNumber.replace(/^\+/, '')}`;
+        AlertHandler.warning(errorMessage, {
+          buttons: [
+            {
+              label: 'التواصل عبر واتساب',
+              onClick: () => window.open(whatsappUrl, '_blank'),
+              variant: 'primary'
+            }
+          ]
+        });
         return;
       }
 
-      console.log('Sending checkout payload:', JSON.stringify(payload, null, 2));
-      
-      await ordersOrgService.createMultiOrgOrder(payload);
-      router.push('/checkout');
-    } catch (e: any) {
-      console.error('Failed to create multi-org order:', {
-        message: e.message,
-        status: e?.response?.status,
-        data: e?.response?.data
-      });
+      if (errorMessage.includes('عنوان')) {
+        AlertHandler.error(errorMessage, {
+          buttons: [
+            {
+              label: 'إضافة عنوان',
+              onClick: () => router.push('/addAddress'),
+              variant: 'primary'
+            }
+          ]
+        });
+        return;
+      }
+
+      AlertHandler.error(errorMessage);
     }
   };
   
   if (loading) {
     return (
-      <div className="min-h-screen bg-white font-beiruti mt-[93px] flex items-center justify-center">
+      <div className="min-h-screen bg-white font-beiruti flex items-center justify-center">
         <div className="text-slate-600">جاري التحميل...</div>
       </div>
     );
@@ -251,7 +288,7 @@ return (
                 {orgGroups.map(group => (
                   <div key={group.organizationId} className="border border-slate-200 rounded-lg p-3 bg-slate-50">
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-lg font-semibold text-slate-900">{group.organizationName || 'منظمة'}</h3>
+                      <h3 className="text-lg font-semibold text-slate-900">{group.organizationName || group.organizationId}</h3>
                       <span className="text-slate-500 text-sm">{group.items.length} منتج</span>
                     </div>
                     <CartItemsList 
@@ -272,7 +309,7 @@ return (
                 <OrderSummary 
                   order={cartItems} 
                   itemCount={cartItems.length} 
-                  total={subtotal} 
+                  total={totalPrice} 
                   hasItems={cartItems.length > 0} 
                   onCheckout={handleMultiOrgCheckout}
                 />

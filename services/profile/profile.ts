@@ -390,22 +390,6 @@ export const updateUserProfileWithValidation = async (
   profileData: UpdateProfileData,
   token: string
 ): Promise<UserProfileResponse> => {
-  if (profileData.phoneNumber) {
-    const cleanPhone = profileData.phoneNumber.replace(/[^\d+]/g, '');
-    const isValidFormat = /^(\+201|01)\d{9}$/.test(cleanPhone);
-    
-    if (!isValidFormat) {
-      throw {
-        status: 'error',
-        message: 'رقم الهاتف غير صحيح',
-        errors: [{
-          field: 'phoneNumber',
-          message: 'يجب أن يبدأ رقم الهاتف بـ 01 أو +201 ويتكون من 11 رقماً'
-        }]
-      } as ApiError;
-    }
-  }
-
   if (profileData.image) {
     const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
     const maxSize = 5 * 1024 * 1024;

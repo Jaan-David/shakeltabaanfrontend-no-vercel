@@ -2,6 +2,9 @@
 import { useEffect, useState } from "react";
 import { useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { CustomMedia } from "@/components/UI/Image/Images";
+import { getPrimaryMedia } from "@/utils/media";
 import { useRouter } from "next/navigation";
 import CategoriesGrid from "@/pages/CategoriesPage/CategoriesGrid";
 import { Category as CategoryType } from '@/services/product/categories';
@@ -145,20 +148,51 @@ export default function HomeContent() {
           />
 
           {/* Text Overlay Box */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center z-10 w-11/12 max-w-3xl backdrop-blur-sm bg-white/85 p-8 rounded-2xl border-2 border-blue-300 shadow-2xl">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent mb-4 drop-shadow-2xl leading-tight">
-            {userName}
-            </h1>
-            <p className="text-lg sm:text-xl md:text-2xl text-slate-700 mb-8 drop-shadow-lg leading-relaxed">
-              أفضل أنواع الرخام والجرانيت بأسعار منافسة
-            </p>
-            <div className="flex justify-center items-center">
-              <button 
-                onClick={() => router.push('/marble-info')}
-                className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-lg transition-all duration-300 shadow-xl hover:shadow-blue-600/40 transform hover:scale-105 w-full sm:w-auto"
+          <div
+            className="group absolute top-1/2 left-1/2 z-10 w-11/12 max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-3xl border border-white/20 bg-white/20 p-6 text-center shadow-[0_30px_80px_-40px_rgba(15,23,42,0.75)] ring-1 ring-white/10 backdrop-blur-3xl transition-transform duration-200 hover:-translate-y-[52%] sm:p-10 md:p-12"
+            dir="rtl"
+          >
+            <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-white/40 via-white/10 to-blue-100/20"></div>
+            <div className="pointer-events-none absolute inset-x-6 top-4 h-px bg-gradient-to-r from-transparent via-white/70 to-transparent"></div>
+            <div className="relative mx-auto flex max-w-2xl flex-col items-center gap-4 sm:gap-6">
+              <h1 className="text-3xl font-extrabold leading-tight text-slate-900 drop-shadow-sm sm:text-4xl md:text-5xl lg:text-6xl">
+                منصة شق التعبان
+              </h1>
+              <p className="text-base text-slate-700 sm:text-lg md:text-xl">
+                أفضل أنواع الرخام والجرانيت بأسعار منافسة
+              </p>
+            </div>
+            <div className="relative mt-8 flex flex-col items-stretch gap-4 sm:mt-10 sm:gap-5 md:flex-row md:flex-wrap md:justify-center lg:flex-nowrap">
+              <Link
+                href="/marble-info"
+                className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl border-2 border-blue-600/60 bg-white/70 px-6 py-3 text-base font-semibold text-blue-800 transition-all duration-200 hover:border-blue-700 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 active:scale-[0.97] md:order-1 md:w-[45%] lg:order-none lg:w-auto"
+                aria-label="ازاي اختار نوع رخامتي"
               >
-                لمعرفة المزيد عن الرخام
-              </button>
+                <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6h7M12 12h7M12 18h7M5 6h.01M5 12h.01M5 18h.01" />
+                </svg>
+                <span>ازاي اختار نوع رخامتي</span>
+              </Link>
+              <Link
+                href="/products"
+                className="flex min-h-[56px] w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 px-7 py-4 text-lg font-bold text-white shadow-[0_18px_40px_-16px_rgba(37,99,235,0.9)] transition-all duration-200 hover:scale-105 hover:shadow-[0_22px_45px_-16px_rgba(37,99,235,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 active:scale-[0.97] md:order-3 md:w-full md:max-w-sm md:self-center lg:order-none lg:w-auto lg:-translate-y-1"
+                aria-label="ابحث عن منتجك"
+              >
+                <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.3-4.3M16.7 10.8a5.9 5.9 0 1 1-11.8 0 5.9 5.9 0 0 1 11.8 0Z" />
+                </svg>
+                <span>ابحث عن منتجك</span>
+              </Link>
+              <Link
+                href="/inquiries"
+                className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-white/80 px-6 py-3 text-base font-semibold text-slate-800 shadow-sm transition-all duration-200 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 active:scale-[0.97] md:order-2 md:w-[45%] lg:order-none lg:w-auto"
+                aria-label="طلبيتك علي مزاجك"
+              >
+                <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h16M4 17h16" />
+                </svg>
+                <span>طلبيتك علي مزاجك</span>
+              </Link>
             </div>
           </div>
         </div>
@@ -253,13 +287,16 @@ export default function HomeContent() {
                   )}
                   
                   <div className="relative overflow-hidden rounded-xl mb-4">
-                    <Image
-                      src={normalizeProductImage(product.imageList?.[0] || product.image)}
+                    <CustomMedia
+                      src={normalizeProductImage(
+                        getPrimaryMedia(
+                          [product.imageList?.[0] || null, product.image || null],
+                          "/acessts/NoImage.jpg"
+                        )
+                      )}
                       alt={product.name || "صورة المنتج"}
                       width={420}
                       height={240}
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                      loading="lazy"
                       className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

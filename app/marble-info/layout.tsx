@@ -1,9 +1,21 @@
-import { generateSEO } from "@/config/seo.config";
+import { generateSEO } from "../../config/seo.config";
 
 export const metadata = generateSEO({
-  title: "معلومات الرخام",
-  description: "معلومات وأنواع الرخام وأسعار تقديرية في مصر مع نصائح الاختيار والصيانة.",
-  keywords: ["معلومات الرخام", "اسعار الرخام", "رخام مصري", "نصائح الرخام"],
+  title: "الفرق بين الرخام والجرانيت | انواع الكوارتز الصناعي",
+  description:
+    "معلومات شاملة عن الفرق بين الرخام والجرانيت والكوارتز مع انواع الرخام المصري وافضل رخام للمطبخ والارضيات.",
+  keywords: [
+    "الفرق بين الرخام والجرانيت",
+    "افضل رخام للمطبخ",
+    "افضل جرانيت للارضيات",
+    "انواع الكوارتز الصناعي",
+    "مميزات الرخام الطبيعي",
+    "عيوب الرخام الصناعي",
+    "الجرانيت احسن ولا الرخام",
+    "quartz vs granite comparison",
+    "types of marble stone",
+    "granite vs marble durability",
+  ],
   url: "/marble-info",
 });
 

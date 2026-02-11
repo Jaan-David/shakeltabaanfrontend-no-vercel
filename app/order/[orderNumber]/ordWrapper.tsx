@@ -1,36 +1,41 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
-import styles from "./order.module.css";
+'use client';
+import React, { useEffect, useState } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 
 //components
-import OrderStepper from "@/components/UI/Profile/leftSection/Orders/OrderStepper";
-import type { OrderStatus } from "@/components/UI/Profile/leftSection/Orders/OrderStepper";
-import InfoCard from "@/components/UI/Profile/leftSection/Orders/InfoCard";
-import ItemCard from "@/components/UI/Profile/leftSection/Orders/ItemCard";
-import img from "@/public/acessts/Frame.png";
+import OrderStepper from '@/components/UI/Profile/leftSection/Orders/OrderStepper';
+import type { OrderStatus } from '@/components/UI/Profile/leftSection/Orders/OrderStepper';
+import InfoCard from '@/components/UI/Profile/leftSection/Orders/InfoCard';
+import ItemCard from '@/components/UI/Profile/leftSection/Orders/ItemCard';
 
 // Import order service
-import orderService, { OrderItem, OrderStatusArabic } from "@/services/profile/orders";
+import orderService, { OrderItem, OrderStatusArabic } from '@/services/profile/orders';
 
 // Status mapping from API to component
-const mapOrderStatus = (apiStatus: OrderItem["status"]): OrderStatus => {
+const mapOrderStatus = (apiStatus: OrderItem['status']): OrderStatus => {
   const statusMap: Record<OrderStatusArabic, OrderStatus> = {
-    "تحت المراجعة": "تحت المراجعة",
-    "تم التواصل": "تم التواصل",
-    "تم الإلغاء": "تم الإلغاء",
-    "تم البيع": "تم البيع",
+    'تحت المراجعة': 'تحت المراجعة',
+    'تم التواصل': 'تم التواصل',
+    'تم الإلغاء': 'تم الإلغاء',
+    'تم البيع': 'تم البيع',
   };
-
-  return statusMap[apiStatus] || "تحت المراجعة";
+  return statusMap[apiStatus] || 'تحت المراجعة';
 };
 
-export default function ordWrapper() {
+// Helper to safely get item price
+const getItemPrice = (item: any): number => {
+  if (item.totalPrice) return item.totalPrice;
+  if (item.unitPrice) return item.unitPrice * (item.itemQty ?? 1);
+  if (item.productId?.pricePerLinearMeter)
+    return item.productId.pricePerLinearMeter * (item.itemQty ?? 1);
+  return 0;
+};
+
+export default function OrdWrapper() {
   const router = useRouter();
   const params = useParams();
   const orderId = params?.orderNumber as string;
 
-  // State management
   const [order, setOrder] = useState<OrderItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,36 +43,25 @@ export default function ordWrapper() {
   useEffect(() => {
     const fetchOrderDetails = async () => {
       if (!orderId) {
-        setError("معرف الطلب غير موجود");
+        setError('معرف الطلب غير موجود');
         setLoading(false);
         return;
       }
-
       try {
         setLoading(true);
         setError(null);
 
-        // Try to get from cache first by fetching all orders
         const allOrders = await orderService.getUserOrders();
-        const foundOrder = allOrders.find(
-          (o) => o._id === orderId || o.orderId === orderId
-        );
+        const foundOrder = allOrders.find(o => o._id === orderId || o.orderId === orderId);
 
         if (foundOrder) {
-          console.log('✅ Order found in cache:', foundOrder);
           setOrder(foundOrder);
         } else {
-          // If not found in list, try to fetch specific order details
           const orderDetails = await orderService.getOrderDetails(orderId);
-          console.log('✅ Order details fetched:', orderDetails);
           setOrder(orderDetails);
         }
       } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "حدث خطأ أثناء تحميل تفاصيل الطلب"
-        );
+        setError(err instanceof Error ? err.message : 'حدث خطأ أثناء تحميل تفاصيل الطلب');
       } finally {
         setLoading(false);
       }
@@ -76,114 +70,102 @@ export default function ordWrapper() {
     fetchOrderDetails();
   }, [orderId]);
 
-  // Loading state
   if (loading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.content_wrapper}>
-          <div className={styles.loading}>
-            <div className={styles.spinner}></div>
-            <p>جاري تحميل تفاصيل الطلب...</p>
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 py-20 px-4">
+        <div className="flex flex-col items-center">
+          <div className="animate-spin h-10 w-10 border-4 border-t-blue-600 rounded-full mb-3"></div>
+          <p className="text-slate-700 text-md">جاري تحميل تفاصيل الطلب...</p>
         </div>
       </div>
     );
   }
 
-  // Error state
-  if (error) {
+  if (error || !order) {
     return (
-      <div className={styles.container}>
-        <div className={styles.content_wrapper}>
-          <div className={styles.error}>
-            <p className={styles.error_message}>⚠️ {error}</p>
-            <button
-              onClick={() => router.back()}
-              className={styles.back_button}
-            >
-              العودة للطلبات
-            </button>
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 py-20 px-4">
+        <div className="flex flex-col items-center bg-white shadow-lg rounded-xl p-5">
+          <p className="text-red-600 font-semibold mb-3">
+            {error ? `⚠️ ${error}` : 'الطلب غير موجود'}
+          </p>
+          <button
+            onClick={() => router.back()}
+            className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition text-sm"
+          >
+            العودة للطلبات
+          </button>
         </div>
       </div>
     );
   }
 
-  // No order found
-  if (!order) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.content_wrapper}>
-          <div className={styles.error}>
-            <p className={styles.error_message}>الطلب غير موجود</p>
-            <button
-              onClick={() => router.back()}
-              className={styles.back_button}
-            >
-              العودة للطلبات
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Format date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("ar-EG", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
+    return date.toLocaleDateString('ar-EG', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
   };
 
-  // Get full address
   const fullAddress = `${order.address.address}, ${order.address.city}, ${order.address.region}`;
   const fullName = `${order.address.firstName} ${order.address.lastName}`;
+  const cartTotal = order.cartId?.items?.reduce((sum, item) => sum + getItemPrice(item), 0) ?? 0;
 
   return (
-    <div className={styles.container}>
-      <div className={styles.content_wrapper}>
-        <span className={styles.title}> تفاصيل الطلب {order.orderId} </span>
+    <div className="min-h-screen bg-slate-50 py-6 px-3">
+      <div className="max-w-5xl mx-auto flex flex-col gap-6">
+        <h1 className="text-xl md:text-2xl font-bold text-slate-900">
+          تفاصيل الطلب {order.orderId}
+        </h1>
 
-        <div className={styles.stepper}>
-          <OrderStepper currentStatus={mapOrderStatus(order.status)} />
+        <OrderStepper currentStatus={mapOrderStatus(order.status)} />
+
+        {/* Order Info */}
+        <div className="bg-white shadow-lg rounded-xl p-4 border border-slate-200">
+          <InfoCard
+            orderNumber={order.orderId}
+            orderPrice={`${order.deliveryPrice + cartTotal} ج`}
+            orderDate={formatDate(order.createdAt)}
+            address={fullAddress}
+            phone={order.address.phoneNumber}
+            name={fullName}
+          />
         </div>
 
-        <div className={styles.info_order}>
-          <div className={styles.information_section}>
-            <InfoCard
-              orderNumber={order.orderId}
-              orderPrice={`${
-                order.deliveryPrice + (order.paymentDetails?.totalPrice ?? 0)
-              } ج`}
-              orderDate={formatDate(order.createdAt)}
-              address={fullAddress}
-              phone={order.address.phoneNumber}
-              name={fullName}
-            />
+        {/* Items */}
+        <div className="bg-white shadow-lg rounded-xl p-4 border border-slate-200">
+          <h2 className="text-md font-semibold text-slate-900 mb-3">المنتجات الخاصة بطلبك</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {order.cartId?.items?.length > 0 ? (
+              order.cartId.items
+                .filter(item => item?.productId)
+                .map(item => (
+                  <div
+                    key={item._id}
+                    className="flex flex-col items-center bg-slate-100 rounded-lg p-3 shadow hover:shadow-md transition"
+                  >
+                    <img
+                      src={item.productId.imageList?.[0] ?? '/acessts/NoImage.jpg'}
+                      alt={item.productId?.name}
+                      className="w-full h-32 object-contain mb-2 rounded-md"
+                    />
+                    <h3 className="text-sm font-semibold text-slate-900 text-center">
+                      {item.productId?.name ?? 'منتج غير متوفر'}
+                    </h3>
+                    <p className="text-blue-600 font-semibold mt-1 text-sm">{getItemPrice(item)} ج.م</p>
+                    <button
+                      onClick={() => router.push(`/product/${item.productId?._id}`)}
+                      className="mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm w-full"
+                    >
+                      قم بالشراء مرة أخرى
+                    </button>
+                  </div>
+                ))
+            ) : (
+              <p className="text-slate-500 text-center col-span-full text-sm">لا توجد منتجات في هذا الطلب</p>
+            )}
           </div>
-
-          <div className={styles.Items_container}>
-  <span className={styles.items_title}>المنتجات الخاصة بطلبك</span>
-  <div className={styles.items_list}>
-    {order.cartId?.items?.length > 0 ? (
-      order.cartId.items
-        .filter((item) => item?.productId !== null && item?.productId !== undefined)
-        .map((item) => (
-          <ItemCard
-            key={item._id}
-            image={item.productId.imageList == null ? ['/acessts/NoImage.jpg'] : item.productId.imageList }
-            name={item.productId?.name || 'منتج غير متوفر'}
-            price={`${item.productId?.price || 0} ج.م`}
-          />
-        ))
-    ) : (
-      <p className={styles.no_items}>لا توجد منتجات في هذا الطلب</p>
-    )}
-  </div>
-</div>
         </div>
       </div>
     </div>

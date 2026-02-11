@@ -5,7 +5,7 @@ import type { StaticImageData } from "next/image";
 import styles from '@/components/UI/Card/card.module.css';
 
 // Components
-import { CustomImage } from '@/components/UI/Image/Images';
+import { CustomMedia } from '@/components/UI/Image/Images';
 import Availablity from '@/components/UI/Card/Availablity';
 import { useFavorites } from '@/services/favorites/FavoritesContext';
 import Alert from '@/components/UI/Alert/alert';
@@ -268,7 +268,7 @@ function Card({
                                 -{discountPercentage}%
                             </div>
                         )}
-                        <CustomImage
+                        <CustomMedia
                             src={imageSrc}
                             alt={productName || 'صورة المنتج'}
                             width={240}

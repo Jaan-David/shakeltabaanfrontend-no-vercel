@@ -1,4 +1,4 @@
-import { generateSEO } from "@/config/seo.config";
+import { generateSEO } from "../../config/seo.config";
 
 export const metadata = generateSEO({
   title: "تعرف على الرخام",
