@@ -36,6 +36,7 @@ const PLACEHOLDER_SRC = "/acessts/NoImage.jpg";
 
 const FavoritesList: React.FC<Props> = ({ items, onRemove }) => {
   const mappedProducts = useMemo(() => {
+    if (!items || !Array.isArray(items)) return [];
     return items.map((item) => {
       const imageUrl = item.image?.startsWith('http') 
         ? item.image.replace('http://', 'https://')
