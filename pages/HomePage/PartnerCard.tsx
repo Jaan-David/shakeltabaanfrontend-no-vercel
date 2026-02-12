@@ -1,6 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 
+// Prevent static prerendering which causes auth context errors
+export const dynamic = 'force-dynamic';
+
 interface PartnerCardProps {
   name: string;
   logo: string;

@@ -4,6 +4,9 @@ import PartnerCard from './PartnerCard';
 import { organizationService, Organization } from '@/services/api/organizations';
 import { Api } from '@/services/api/endpoints';
 
+// Prevent static prerendering which causes auth context errors
+export const dynamic = 'force-dynamic';
+
 interface Partner {
   id: string;
   name: string;

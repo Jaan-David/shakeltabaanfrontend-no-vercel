@@ -10,6 +10,8 @@ import { Category as CategoryType } from '@/services/product/categories';
 import PartnersSection from "@/pages/HomePage/PartnersSection";
 import { productService } from '@/services/api/products';
 
+// Prevent static prerendering which causes auth context errors
+export const dynamic = 'force-dynamic';
 
 export default function HomeContent() {
   const apiBaseUrl =
