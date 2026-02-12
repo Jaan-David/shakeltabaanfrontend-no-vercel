@@ -4,6 +4,9 @@ import React from "react";
 
 import HomeContent from "@/pages/HomePage/HomeContent";
 
+// Prevent static prerendering which causes auth context errors
+export const dynamic = 'force-dynamic';
+
 export default function HomePage() {
   return (
     <div>
