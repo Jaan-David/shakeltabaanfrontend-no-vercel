@@ -2,13 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
+import {
   inquiryService,
   type Inquiry,
   type InquiryReply
 } from '@/services/api/inquiry';
 import { isUserAuthenticated } from '@/services/auth/login';
 import Alert from '@/components/UI/Alert/alert';
+import HowItWorksSteps from './components/HowItWorksSteps';
+import InquiriesHeader from './components/InquiriesHeader';
+import InquiryCard from './components/InquiryCard';
+import InquiryFilters from './components/InquiryFilters';
+import InquiryStatusBadge from './components/InquiryStatusBadge';
 
 export default function InquiriesPage() {
   const router = useRouter();
@@ -90,6 +95,9 @@ export default function InquiriesPage() {
     try {
       const result = await inquiryService.acceptReply(inquiry._id, reply._id);
       setSuccessMessage('تم قبول العرض بنجاح');
+      setSelectedInquiry(null);
+      setActiveTab('list');
+      setActiveStatus('accepted');
       fetchInquiries();
     } catch (error: any) {
       setErrorMessage(error.message || 'فشل في قبول العرض');
@@ -101,6 +109,9 @@ export default function InquiriesPage() {
     try {
       const result = await inquiryService.rejectReply(inquiry._id);
       setSuccessMessage('تم رفض العرض');
+      setSelectedInquiry(null);
+      setActiveTab('list');
+      setActiveStatus('active');
       fetchInquiries();
     } catch (error: any) {
       setErrorMessage(error.message || 'فشل في رفض العرض');
@@ -134,38 +145,12 @@ export default function InquiriesPage() {
     }
   }
 
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
-      case 'accepted':
-        return 'bg-blue-50 text-blue-700 border border-blue-200';
-      case 'ended':
-        return 'bg-slate-50 text-slate-700 border border-slate-200';
-      default:
-        return 'bg-slate-50 text-slate-700 border border-slate-200';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'نشط';
-      case 'accepted':
-        return 'مقبول';
-      case 'ended':
-        return 'منتهي';
-      default:
-        return status;
-    }
-  };
-
   const filteredInquiries = activeStatus === 'all' 
     ? inquiries 
     : inquiries.filter(i => i.status === activeStatus);
 
   return (
-    <div className="min-h-screen bg-white py-12 px-4 rtl">
+    <div className="min-h-screen bg-white pb-16 px-4 rtl">
       {/* Alerts */}
       {successMessage && (
         <Alert
@@ -183,118 +168,59 @@ export default function InquiriesPage() {
         />
       )}
 
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8 bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">طلباتي</h1>
-          <p className="text-slate-600">عرض وإدارة الطلبات الخاصة بك والعروض من الشركات</p>
-        </div>
+      <div className="mx-auto flex max-w-6xl flex-col gap-8">
+        <InquiriesHeader
+          title="طلباتك الخاصة"
+          subtitle="اكتب طلبك وسيقوم الموردون بإرسال عروض أسعار — اختر العرض المناسب وابدأ التنفيذ بسهولة."
+        />
 
-        {/* Tabs */}
-        <div className="flex gap-3 mb-8">
-          <button
-            onClick={() => setActiveTab('list')}
-            className={`px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 border ${
-              activeTab === 'list'
-                ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                : 'bg-white text-slate-700 border-slate-200 hover:border-blue-400 hover:text-blue-600'
-            }`}
-          >
-            قائمة الطلبات ({filteredInquiries.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('create')}
-            className={`px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 border ${
-              activeTab === 'create'
-                ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                : 'bg-white text-slate-700 border-slate-200 hover:border-blue-400 hover:text-blue-600'
-            }`}
-          >
-            طلب جديد
-          </button>
+        {/* شرح الرحلة للعميل قبل عرض الطلبات */}
+        <HowItWorksSteps />
+
+        <div className="flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center justify-between gap-3">
+            <button
+              onClick={() => setActiveTab('create')}
+              className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+            >
+              طلب جديد
+            </button>
+            <span className="text-sm text-slate-500">ابدأ طلبك في أقل من دقيقة</span>
+          </div>
+          <InquiryFilters
+            activeStatus={activeStatus}
+            onChange={setActiveStatus}
+            count={filteredInquiries.length}
+          />
         </div>
 
         {/* List Tab */}
         {activeTab === 'list' && (
-          <div className="space-y-6">
-            {/* Status Filter */}
-            <div className="flex gap-2 flex-wrap">
-              {(['all', 'active', 'accepted', 'ended'] as const).map((status) => (
-                <button
-                  key={status}
-                  onClick={() => setActiveStatus(status)}
-                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-all border ${
-                    activeStatus === status
-                      ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                      : 'bg-white text-slate-700 border-slate-200 hover:border-blue-400 hover:text-blue-600'
-                  }`}
-                >
-                  {status === 'all' ? 'الكل' : getStatusLabel(status)}
-                </button>
-              ))}
-            </div>
-
-            {/* Inquiries List */}
+          <div className="space-y-5">
             {isLoading ? (
-              <div className="text-center py-12 bg-white border border-slate-200 rounded-2xl shadow-sm">
-                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                <p className="text-slate-600 mt-4">جاري التحميل...</p>
+              <div className="rounded-2xl border border-slate-200 bg-white py-12 text-center shadow-sm">
+                <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600"></div>
+                <p className="mt-4 text-slate-600">جاري التحميل...</p>
               </div>
             ) : filteredInquiries.length === 0 ? (
-              <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-sm">
-                <p className="text-slate-600 text-lg mb-4">لا توجد طلبات</p>
+              <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-sm">
+                <p className="text-lg text-slate-600">لا توجد طلبات حالياً</p>
+                <p className="mt-2 text-sm text-slate-500">ابدأ بطلب جديد ليصلك أفضل العروض.</p>
                 <button
                   onClick={() => setActiveTab('create')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold shadow-sm"
+                  className="mt-4 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
                 >
                   إنشاء طلب جديد
                 </button>
               </div>
             ) : (
               filteredInquiries.map((inquiry) => (
-                <div
+                <InquiryCard
                   key={inquiry._id}
-                  className="bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden cursor-pointer"
-                  onClick={() => setSelectedInquiry(inquiry)}
-                >
-                  <div className="p-6 border-r-4 border-blue-500">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-xl font-bold text-slate-900">{inquiry.name}</h3>
-                        <p className="text-slate-600 text-sm">
-                          {new Date(inquiry.createdAt).toLocaleDateString('ar-EG')}
-                        </p>
-                      </div>
-                      <span className={`px-4 py-2 rounded-full text-sm font-medium ${getStatusBadgeColor(inquiry.status)}`}>
-                        {getStatusLabel(inquiry.status)}
-                      </span>
-                    </div>
-
-                    <p className="text-slate-700 mb-4 line-clamp-2">{inquiry.description}</p>
-
-                    <div className="flex gap-4 text-sm text-slate-600 mb-4">
-                      <span>📊 {inquiry.reply.length} عرض</span>
-                      {inquiry.acceptedReplyId && (
-                        <span className="text-emerald-600 font-semibold">✓ عرض مقبول</span>
-                      )}
-                    </div>
-
-                    {inquiry.imageList && inquiry.imageList.length > 0 && (
-                      <div className="flex gap-2">
-                        {inquiry.imageList.slice(0, 3).map((img, idx) => (
-                          <div key={idx} className="w-12 h-12 rounded overflow-hidden bg-slate-100">
-                            <img src={img} alt="inquiry" className="w-full h-full object-cover" />
-                          </div>
-                        ))}
-                        {inquiry.imageList.length > 3 && (
-                          <div className="w-12 h-12 rounded bg-slate-200 flex items-center justify-center text-slate-600">
-                            +{inquiry.imageList.length - 3}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
+                  inquiry={inquiry}
+                  onViewDetails={() => setSelectedInquiry(inquiry)}
+                  onViewOffers={() => setSelectedInquiry(inquiry)}
+                />
               ))
             )}
           </div>
@@ -302,8 +228,18 @@ export default function InquiriesPage() {
 
         {/* Create Tab */}
         {activeTab === 'create' && (
-          <form onSubmit={handleCreateInquiry} className="bg-slate-50 border border-slate-200 rounded-2xl shadow-sm p-8 max-w-2xl">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6">إنشاء طلب جديد</h2>
+          <form onSubmit={handleCreateInquiry} className="max-w-2xl rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-slate-900">إنشاء طلب جديد</h2>
+              {/* العودة تساعد المستخدم على استكمال المتابعة بعد إنشاء الطلب. */}
+              <button
+                type="button"
+                onClick={() => setActiveTab('list')}
+                className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-blue-200 hover:text-blue-700"
+              >
+                عودة للطلبات
+              </button>
+            </div>
 
             {/* Description */}
             <div className="mb-6">
@@ -332,7 +268,7 @@ export default function InquiriesPage() {
                 <input
                   type="file"
                   multiple
-                  accept="image/*"
+                  accept="image/*,.heic,.heif,.webp"
                   onChange={(e) => {
                     const files = Array.from(e.target.files || []).slice(0, 5);
                     setImages(files);
@@ -342,7 +278,7 @@ export default function InquiriesPage() {
                 />
                 <label htmlFor="image-upload" className="cursor-pointer">
                   <p className="text-slate-700">اسحب الصور أو اضغط للاختيار</p>
-                  <p className="text-sm text-slate-500 mt-1">دعم JPEG, PNG</p>
+                  <p className="text-sm text-slate-500 mt-1">دعم HEIC, HEIF, WebP, JPEG, PNG</p>
                 </label>
               </div>
 
@@ -384,6 +320,18 @@ export default function InquiriesPage() {
         )}
       </div>
 
+      {activeTab === 'list' && (
+        <div className="fixed bottom-4 left-4 right-4 z-40 md:hidden">
+          {/* زر ثابت على الموبايل لتقليل التشتت وزيادة التحويل. */}
+          <button
+            onClick={() => setActiveTab('create')}
+            className="w-full rounded-2xl bg-blue-600 py-3 text-base font-semibold text-white shadow-lg shadow-blue-200/50 transition hover:bg-blue-700"
+          >
+            طلب جديد
+          </button>
+        </div>
+      )}
+
       {/* Inquiry Details Modal */}
       {selectedInquiry && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -408,9 +356,7 @@ export default function InquiriesPage() {
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <p className="text-slate-600 text-sm">الحالة</p>
-                    <span className={`inline-block px-4 py-2 rounded-full text-sm font-medium ${getStatusBadgeColor(selectedInquiry.status)}`}>
-                      {getStatusLabel(selectedInquiry.status)}
-                    </span>
+                    <InquiryStatusBadge status={selectedInquiry.status} />
                   </div>
                   <div>
                     <p className="text-slate-600 text-sm">التاريخ</p>

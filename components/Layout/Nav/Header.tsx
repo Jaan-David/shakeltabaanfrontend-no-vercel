@@ -1,9 +1,10 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
+import { ChevronDown, Menu, Search, X } from "lucide-react";
 import styles from "./Header.module.css";
 import "../../../app/globals.css";
 
@@ -15,14 +16,7 @@ import {
   AuthService,
 } from "../../../services/auth/login";
 
-// Import products service
-import {
-  getProductsWithState,
-  Product,
-} from "../../../services/product/products";
-
 // Components
-import SearchComponent from "./../../UI/search/search";
 import NotificationsComponent from "./../../UI/notification/notification";
 // import LanguageSelector from "./../../UI/Language/language";
 import { Button } from "../../UI/Buttons/Button";
@@ -35,9 +29,6 @@ import Logo from "@/public/logo/logo1.png";
 import Heart from "./../../../public/icons/Header/Heart.svg";
 import Cart from "./../../../public/icons/Header/Cart Large 2.svg";
 import Notification from "./../../../public/icons/Header/Bell Bing.svg";
-import SearchIcon from "./../../../public/icons/Header/Rounded Magnifer.svg";
-import MessageCircle from "./../../../public/icons/Header/float-btn.svg";
-import MessIcon from "./../../../public/icons/Header/float-btn (1).svg";
 
 export interface User {
   _id: string;
@@ -65,33 +56,60 @@ interface HeaderProps {
   className?: string;
   variant?: "default" | "auth" | "minimal" | "transparent";
   customStyles?: React.CSSProperties;
-  showSearch?: boolean;
   showUserActions?: boolean;
-  dataSearch?: any[];
 }
+
+type NavItem = {
+  label: string;
+  href: string;
+};
+
+const MAIN_NAV_ITEMS: NavItem[] = [
+  { label: "المنتجات", href: "/products" },
+  { label: "طلباتك الخاصة", href: "/inquiries" },
+  { label: "ازاي تختار", href: "/marble-info" },
+];
+
+const ACTION_LINKS: NavItem[] = [
+  { label: "بحث", href: "/products" },
+  { label: "المفضلة", href: "/favorites" },
+  { label: "عربة التسوق", href: "/cart" },
+];
+
+const getUserInitial = (firstName: string, lastName: string): string => {
+  if (firstName && lastName) {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  } else if (firstName) {
+    return firstName.charAt(0).toUpperCase();
+  } else if (lastName) {
+    return lastName.charAt(0).toUpperCase();
+  }
+  return "U";
+};
+
+const getUserDisplayName = (firstName?: string, lastName?: string): string => {
+  const fullName = `${firstName ?? ""} ${lastName ?? ""}`.trim();
+  return fullName || "حسابي";
+};
 
 function Header({
   className = "",
   variant = "default",
   customStyles = {},
-  showSearch = true,
   showUserActions = true,
-  dataSearch = [],
 }: HeaderProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session, status } = useSession();
 
   // State for user data
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isProductsLoading, setIsProductsLoading] = useState(true);
-  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [chat, setChat] = useState(false);
-  const [open, setOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Handle session-based auth (for social login)
   useEffect(() => {
@@ -140,23 +158,6 @@ function Header({
     }
   }, [status]);
 
-  // Fetch cached products for search
-  useEffect(() => {
-    const loadCachedProducts = async () => {
-      try {
-        setIsProductsLoading(true);
-        const cachedProducts = await getProductsWithState();
-        setProducts(cachedProducts);
-      } catch (error) {
-        console.error("❌ Error loading cached products:", error);
-        setProducts([]);
-      } finally {
-        setIsProductsLoading(false);
-      }
-    };
-
-    loadCachedProducts();
-  }, []);
 
   // Fetch unread notifications count
   useEffect(() => {
@@ -239,28 +240,31 @@ function Header({
     };
   }, [router]);
 
-  const getUserInitial = (firstName: string, lastName: string): string => {
-    if (firstName && lastName) {
-      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-    } else if (firstName) {
-      return firstName.charAt(0).toUpperCase();
-    } else if (lastName) {
-      return lastName.charAt(0).toUpperCase();
-    }
-    return "U";
-  };
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 8);
+    };
 
-  const getUserDisplayName = (firstName: string, lastName: string): string => {
-    return `${firstName} ${lastName}`.trim();
-  };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) {
+      return;
+    }
+
+    document.body.style.overflow = isMobileMenuOpen ? "hidden" : "";
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileMenuOpen, isMounted]);
 
   const handleLogin = (): void => {
     router.push("/login");
-  };
-
-  const handleChat = () => {
-    setChat(!chat);
-    setOpen(!open);
   };
 
   const handleNotificationClick = (): void => {
@@ -272,10 +276,6 @@ function Header({
     if (user) {
       getUnreadNotificationsCount().then(setUnreadCount).catch(console.error);
     }
-  };
-
-  const handleSearchClick = (): void => {
-    setIsSearchModalOpen(true);
   };
 
   const getVariantClass = (): string => {
@@ -293,9 +293,23 @@ function Header({
 
   const headerClasses = `${
     styles.header
-  } ${getVariantClass()} ${className}`.trim();
+  } ${isScrolled ? styles.headerScrolled : ""} ${getVariantClass()} ${className}`.trim();
 
   const isAuthenticated = user !== null && !isLoading;
+
+  const isPathActive = useMemo(() => {
+    return (href: string) => {
+      if (!pathname) {
+        return false;
+      }
+
+      if (href === "/") {
+        return pathname === "/";
+      }
+
+      return pathname.startsWith(href);
+    };
+  }, [pathname]);
 
   if (!isMounted) {
     return null;
@@ -303,351 +317,336 @@ function Header({
 
   if ((isLoading || status === "loading") && showUserActions) {
     return (
-      <header className={headerClasses} style={customStyles}>
-        <div className={styles.left}>
-          <Link href="/" className={styles.logoLink}>
-            <Image
-              src="/logo/logo1.png"
-              alt="Logo"
-              width={140}
-              height={40}
-              sizes="140px"
-              className={styles.logo}
-              priority
-            />
-          </Link>
-          {/* <LanguageSelector /> */}
-        </div>
-
-        {showSearch && (
-          <div className={styles.mid}>
-            <SearchComponent data={[]} />
-          </div>
-        )}
-
-        <div className={styles.right}>
-          <div className={styles.loadingSpinner}>
-            <span>...</span>
+      <header className={headerClasses} style={customStyles} dir="rtl">
+        <div className={styles.headerInner}>
+          <div className={styles.rightSection}>
+            <Link href="/" className={styles.logoLink}>
+              <Image
+                src={Logo}
+                alt="Logo"
+                width={140}
+                height={40}
+                sizes="140px"
+                className={styles.logoImage}
+                priority
+              />
+            </Link>
+            <span className={styles.loadingText}>...</span>
           </div>
         </div>
       </header>
     );
   }
 
-  const searchData = products.length > 0 ? products : dataSearch;
-
   return (
     <>
-      {/* Main Header */}
-      <header className={headerClasses} style={customStyles}>
-        <div className={styles.left}>
-          <Link href="/" className={styles.logoLink}>
+      <Navbar className={headerClasses} customStyles={customStyles}>
+        <div className={styles.rightSection}>
+          <Link href="/" className={styles.logoLink} aria-label="الانتقال للصفحة الرئيسية">
             <Image
               src={Logo}
               alt="Logo"
               width={140}
               height={40}
               sizes="140px"
-              className={styles.logo}
+              className={styles.logoImage}
               priority
             />
-
           </Link>
-{/* <LanguageSelector /> */}
+          <NavLink
+            href="/"
+            label="الرئيسية"
+            isActive={isPathActive("/")}
+            className={styles.homeLink}
+          />
+          {/* Inline primary nav links beside Home */}
+          <nav className={styles.navList} aria-label="القائمة الرئيسية">
+            {MAIN_NAV_ITEMS.map((item) => (
+              <NavLink
+                key={item.href}
+                href={item.href}
+                label={item.label}
+                isActive={isPathActive(item.href)}
+              />
+            ))}
+          </nav>
         </div>
 
-        {/* Desktop Search - Hidden on Mobile */}
-        {showSearch && (
-          <div className={styles.mid}>
-            <SearchComponent data={searchData} />
-          </div>
-        )}
-
-        <div className={styles.right}>
-          {/* Mobile Search Button - Shown only on Mobile when user is NOT logged in */}
-          {showSearch && !isAuthenticated && (
-            <div className={styles.mobileSearchBtn}>
-              <button
-                onClick={handleSearchClick}
-                className={styles.searchIconBtn}
-                aria-label="البحث"
-              >
-                <SearchIcon className={styles.searchIcon} />
-              </button>
-            </div>
-          )}
-
+        <div className={styles.leftSection}>
           {showUserActions && (
             <>
-              {isAuthenticated && user ? (
-                <>
-                  <nav className={styles.navs}>
-                    <div className={styles.notification_btn}>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleNotificationClick}
-                        leftIcon={<Notification className={styles.icon} />}
-                      >
-                        <span className={styles.navText}>الإشعارات</span>
-                      </Button>
-
-                      {unreadCount > 0 && (
-                        <div className={styles.unreadIndicator}>
-                          {unreadCount > 99
-                            ? "99+"
-                            : unreadCount > 5
-                            ? "5+"
-                            : unreadCount}
-                        </div>
-                      )}
-                    </div>
-
-                    <Link href="/favorites" className={styles.navLink}>
-                      <Heart className={styles.icon} />
-                      <span className={styles.navText}>المفضلة</span>
-                    </Link>
-
-                    <Link href="/inquiries" className={styles.navLink}>
-                      <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                      </svg>
-                      <span className={styles.navText}>طلباتي</span>
-                    </Link>
-
-                    <Link href="/cart" className={styles.navLink}>
-                      <Cart className={styles.icon} />
-                      <span className={styles.navText}>عربة التسوق</span>
-                    </Link>
-                  </nav>
-
-                  <div className={styles.prof}>
-                    <div className={styles.userDropdown}>
-                      <div
-                        className={styles.avatar}
-                        onClick={() => router.push("/profile")}
-                        title={`${getUserDisplayName(
-                          user.firstName,
-                          user.lastName
-                        )}`}
-                      >
-                        {user.image ? (
-                          <Image
-                            src={user.image}
-                            alt="User Avatar"
-                            width={40}
-                            height={40}
-                            className={styles.avatarImage}
-                          />
-                        ) : (
-                          <span className={styles.initial}>
-                            {getUserInitial(user.firstName, user.lastName)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Button
-                    variant="primary"
-                    size="md"
-                    onClick={handleLogin}
-                    className={styles.loginButton}
-                    rounded={true}
-                  >
-                    تسجيل الدخول
-                  </Button>
-                </>
-              )}
+              <IconGroup
+                isAuthenticated={isAuthenticated}
+                unreadCount={unreadCount}
+                onNotificationsClick={handleNotificationClick}
+              />
+              <AuthButton
+                isAuthenticated={isAuthenticated}
+                user={user}
+                onLogin={handleLogin}
+              />
             </>
           )}
-        </div>
-      </header>
 
-      {/* Bottom Navigation for Mobile */}
-      {showUserActions && user && (
-        <nav className={styles.bottomNav}>
-          {/* Floating Chat Button */}
-          {/* <button 
-            onClick={handleChat} 
-            aria-label="فتح الدردشة" 
-            className={styles.MessageCircle}
-          > */}
-          {chat ? (
-            <MessIcon
-              onClick={handleChat}
-              aria-label="فتح الدردشة"
-              className={styles.MessageCircle}
-            />
-          ) : (
-            <MessageCircle
-              onClick={handleChat}
-              aria-label="فتح الدردشة"
-              className={styles.MessageCircle}
-            />
-          )}
-          {/* </button> */}
-
-          {/* Navigation Items */}
-          <div className={styles.bottomNavContent}>
-            {isAuthenticated && user && (
-              <>
-                {showSearch && (
-                  <button
-                    onClick={handleSearchClick}
-                    className={styles.bottomNavItem}
-                    aria-label="البحث"
-                  >
-                    <SearchIcon className={styles.bottomNavIcon} />
-                    <span className={styles.bottomNavText}>البحث</span>
-                  </button>
-                )}
-
-                <button
-                  onClick={handleNotificationClick}
-                  className={styles.bottomNavItem}
-                  aria-label="الإشعارات"
-                >
-                  <Notification className={styles.bottomNavIcon} />
-                  <span className={styles.bottomNavText}>الإشعارات</span>
-
-                  {unreadCount > 0 && (
-                    <span className={styles.bottomNavBadge}>
-                      {unreadCount > 99 ? "99+" : unreadCount}
-                    </span>
-                  )}
-                </button>
-
-                <Link
-                  href="/favorites"
-                  className={styles.bottomNavItem}
-                  aria-label="المفضلة"
-                >
-                  <Heart className={styles.bottomNavIcon} />
-                  <span className={styles.bottomNavText}>المفضلة</span>
-                </Link>
-
-                <Link
-                  href="/custom-order"
-                  className={styles.bottomNavItem}
-                  aria-label="طلب خاص"
-                >
-                  <svg className={styles.bottomNavIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span className={styles.bottomNavText}>طلب خاص</span>
-                </Link>
-
-                <Link
-                  href="/cart"
-                  className={styles.bottomNavItem}
-                  aria-label="السلة"
-                >
-                  <Cart className={styles.bottomNavIcon} />
-                  <span className={styles.bottomNavText}>السلة</span>
-                </Link>
-              </>
+          <button
+            type="button"
+            className={styles.menuButton}
+            aria-label={isMobileMenuOpen ? "إغلاق القائمة" : "فتح القائمة"}
+            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+          >
+            {isMobileMenuOpen ? (
+              <X className={styles.menuIcon} />
+            ) : (
+              <Menu className={styles.menuIcon} />
             )}
-          </div>
+          </button>
+        </div>
+      </Navbar>
 
-          {/* Chat Modal */}
-          {open && (
-            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-              <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                onClick={() => setOpen(false)}
-                aria-hidden="true"
-              />
-
-              <div className="relative z-10 w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
-                <div className="bg-primary text-white p-4 text-center relative">
-                  <h2 className="text-lg font-bold">للشكاوى والاستفسارات</h2>
-                  <button
-                    onClick={() => setOpen(false)}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-200 transition-colors"
-                    aria-label="إغلاق"
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                <form className="p-6 space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <input
-                        type="text"
-                        placeholder="الاسم"
-                        defaultValue={
-                          user
-                            ? getUserDisplayName(user.firstName, user.lastName)
-                            : ""
-                        }
-                        className="w-full rounded-full border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <input
-                        type="tel"
-                        placeholder="رقم الهاتف"
-                        defaultValue={user?.phoneNumber || ""}
-                        className="w-full rounded-full border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <input
-                      type="email"
-                      placeholder="البريد الإلكتروني"
-                      defaultValue={user?.email || ""}
-                      className="w-full rounded-full border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <textarea
-                      rows={4}
-                      placeholder="اكتب الشكوى أو الاستفسار لنتمكن من تقديم المساعدة"
-                      className="w-full rounded-2xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none transition-all"
-                      required
-                    />
-                  </div>
-
-                  <div className="pt-2">
-                    <button
-                      type="submit"
-                      className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-2.5 px-6 rounded-full transition-colors"
-                    >
-                      إرسال
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-        </nav>
-      )}
+      <MobileMenu
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+        navItems={MAIN_NAV_ITEMS}
+        isActive={isPathActive}
+        isAuthenticated={isAuthenticated}
+        user={user}
+        onLogin={handleLogin}
+      />
 
       <NotificationsComponent
         isOpen={isNotificationsOpen}
         onClose={handleNotificationsClose}
         onUnreadCountChange={setUnreadCount}
       />
-
-      {isSearchModalOpen && (
-        <SearchComponent
-          data={searchData}
-          isModal={true}
-          onClose={() => setIsSearchModalOpen(false)}
-        />
-      )}
     </>
   );
 }
 
 export default Header;
+
+function Navbar({
+  className,
+  customStyles,
+  children,
+}: {
+  className: string;
+  customStyles: React.CSSProperties;
+  children: React.ReactNode;
+}) {
+  return (
+    <header className={className} style={customStyles} dir="rtl">
+      <div className={styles.headerInner}>{children}</div>
+    </header>
+  );
+}
+
+function NavLink({
+  href,
+  label,
+  isActive,
+  className = "",
+}: {
+  href: string;
+  label: string;
+  isActive: boolean;
+  className?: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`${styles.navLink} ${isActive ? styles.navLinkActive : ""} ${
+        className || ""
+      }`.trim()}
+    >
+      <span className={styles.navLinkLabel}>{label}</span>
+    </Link>
+  );
+}
+
+function IconGroup({
+  isAuthenticated,
+  unreadCount,
+  onNotificationsClick,
+}: {
+  isAuthenticated: boolean;
+  unreadCount: number;
+  onNotificationsClick: () => void;
+}) {
+  return (
+    <div className={styles.iconGroup} aria-label="الإجراءات">
+      <Link
+        href={ACTION_LINKS[0].href}
+        className={styles.iconButton}
+        aria-label={ACTION_LINKS[0].label}
+      >
+        <Search className={styles.icon} />
+      </Link>
+
+      <Link
+        href={ACTION_LINKS[1].href}
+        className={styles.iconButton}
+        aria-label={ACTION_LINKS[1].label}
+      >
+        <Heart className={styles.icon} />
+      </Link>
+
+      {isAuthenticated ? (
+        <button
+          type="button"
+          className={styles.iconButton}
+          aria-label="الإشعارات"
+          onClick={onNotificationsClick}
+        >
+          <Notification className={styles.icon} />
+          {unreadCount > 0 && (
+            <span className={styles.iconBadge}>
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          )}
+        </button>
+      ) : (
+        <div className={styles.iconButtonMuted} aria-hidden="true">
+          <Notification className={styles.icon} />
+        </div>
+      )}
+
+      <Link
+        href={ACTION_LINKS[2].href}
+        className={styles.iconButton}
+        aria-label={ACTION_LINKS[2].label}
+      >
+        <Cart className={styles.icon} />
+      </Link>
+    </div>
+  );
+}
+
+function AuthButton({
+  isAuthenticated,
+  user,
+  onLogin,
+}: {
+  isAuthenticated: boolean;
+  user: User | null;
+  onLogin: () => void;
+}) {
+  if (isAuthenticated && user) {
+    const displayName = getUserDisplayName(user.firstName, user.lastName) || "حسابي";
+
+    return (
+      <Link href="/profile" className={styles.profileButton} aria-label="الملف الشخصي">
+        <div className={styles.profileAvatar}>
+          {user.image ? (
+            <Image
+              src={user.image}
+              alt="User Avatar"
+              width={36}
+              height={36}
+              className={styles.avatarImage}
+            />
+          ) : (
+            <span className={styles.profileInitial}>
+              {getUserInitial(user.firstName, user.lastName)}
+            </span>
+          )}
+        </div>
+        <span className={styles.profileName}>{displayName}</span>
+        <ChevronDown className={styles.dropdownIndicator} />
+      </Link>
+    );
+  }
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={onLogin}
+      className={styles.loginButton}
+      rounded={true}
+    >
+      تسجيل دخول
+    </Button>
+  );
+}
+
+function MobileMenu({
+  isOpen,
+  onClose,
+  navItems,
+  isActive,
+  isAuthenticated,
+  user,
+  onLogin,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  navItems: NavItem[];
+  isActive: (href: string) => boolean;
+  isAuthenticated: boolean;
+  user: User | null;
+  onLogin: () => void;
+}) {
+  return (
+    <div className={`${styles.mobileMenu} ${isOpen ? styles.mobileMenuOpen : ""}`.trim()}>
+      <div className={styles.mobileMenuOverlay} onClick={onClose} aria-hidden="true" />
+      <div className={styles.mobileMenuPanel} role="dialog" aria-modal="true">
+        <div className={styles.mobileMenuHeader}>
+          <span className={styles.mobileMenuTitle}>القائمة</span>
+          <button type="button" className={styles.mobileMenuClose} onClick={onClose}>
+            <X className={styles.menuIcon} />
+          </button>
+        </div>
+
+        <nav className={styles.mobileMenuList} aria-label="القائمة الرئيسية">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={onClose}
+              className={`${styles.mobileNavLink} ${
+                isActive(item.href) ? styles.mobileNavLinkActive : ""
+              }`.trim()}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className={styles.mobileMenuFooter}>
+          {isAuthenticated && user ? (
+            <Link href="/profile" onClick={onClose} className={styles.mobileProfile}>
+              <div className={styles.profileAvatar}>
+                {user.image ? (
+                  <Image
+                    src={user.image}
+                    alt="User Avatar"
+                    width={36}
+                    height={36}
+                    className={styles.avatarImage}
+                  />
+                ) : (
+                  <span className={styles.profileInitial}>
+                    {getUserInitial(user.firstName, user.lastName)}
+                  </span>
+                )}
+              </div>
+              <span className={styles.profileName}>
+                {getUserDisplayName(user.firstName, user.lastName) || "حسابي"}
+              </span>
+            </Link>
+          ) : (
+            <Button
+              variant="outline"
+              size="md"
+              onClick={onLogin}
+              className={styles.mobileLoginButton}
+              rounded={true}
+            >
+              تسجيل دخول
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

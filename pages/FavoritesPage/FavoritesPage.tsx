@@ -75,10 +75,11 @@ const FavoritesPageContent: React.FC<{ items?: FavoriteItem[] }> = ({ items }) =
   // Show loading state with a more visible spinner
   if (loading) {
     return (
-      <div className="min-h-screen bg-white font-beiruti mt-[93px] flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white font-beiruti flex items-center justify-center">
         <div className="flex flex-col items-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-          <p className="text-lg text-slate-600">جاري تحميل المفضلة...</p>
+          <Loader2 className="h-16 w-16 animate-spin text-blue-600 mb-4" />
+          <p className="text-xl font-bold text-slate-900">جاري تحميل المفضلة...</p>
+          <p className="text-sm text-slate-500 mt-2">يرجى الانتظار قليلاً</p>
         </div>
       </div>
     );
@@ -87,19 +88,28 @@ const FavoritesPageContent: React.FC<{ items?: FavoriteItem[] }> = ({ items }) =
   // Show unauthenticated message if user is not logged in
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-white font-beiruti mt-[93px]">
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white font-beiruti">
         <div className="container mx-auto px-4 py-20">
-          <div className="flex flex-col items-center justify-center text-center">
-            <LogIn className="h-16 w-16 text-slate-400 mb-6" />
-            <h1 className="text-3xl font-bold text-blue-900 mb-4">يرجى تسجيل الدخول</h1>
-            <p className="text-slate-600 mb-8 max-w-md">
+          <div className="flex flex-col items-center justify-center text-center max-w-xl mx-auto">
+            <div className="bg-blue-50 p-8 rounded-full mb-6 shadow-lg">
+              <LogIn className="h-20 w-20 text-blue-600" />
+            </div>
+            <h1 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">يرجى تسجيل الدخول</h1>
+            <p className="text-slate-600 text-lg mb-8">
               لعرض المنتجات المفضلة والاستمتاع بمزايا التسوق، يرجى تسجيل الدخول أولاً
             </p>
             <button
               onClick={() => router.push('/login?redirect=/favorites')}
-              className="px-8 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+              className="flex items-center gap-3 px-10 py-4 bg-blue-600 text-white text-lg font-bold rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
             >
-              تسجيل الدخول
+              <LogIn className="w-6 h-6" />
+              تسجيل الدخول الآن
+            </button>
+            <button
+              onClick={() => router.push('/products')}
+              className="mt-4 text-blue-600 hover:text-blue-700 font-semibold underline"
+            >
+              أو تصفح المنتجات بدون تسجيل
             </button>
           </div>
         </div>
@@ -110,7 +120,7 @@ const FavoritesPageContent: React.FC<{ items?: FavoriteItem[] }> = ({ items }) =
   // Show error state if there's an authentication error
   if (error?.includes('تسجيل الدخول')) {
     return (
-      <div className="min-h-screen bg-white font-beiruti mt-[93px]">
+      <div className="min-h-screen bg-white font-beiruti">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center justify-center py-16">
             <div className="text-center bg-red-50 border border-red-200 rounded-lg p-8 max-w-md">
@@ -137,22 +147,33 @@ const FavoritesPageContent: React.FC<{ items?: FavoriteItem[] }> = ({ items }) =
   // Show empty state
   if (favItems.length === 0) {
     return (
-      <div className="min-h-screen bg-white font-beiruti mt-[93px]">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <header className="mb-8">
-            <h1 className="text-2xl font-bold text-slate-900">المفضلة</h1>
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white font-beiruti">
+        <div className="max-w-[95%] mx-auto px-4 py-8">
+          <header className="mb-8 pb-6 border-b-2 border-slate-200">
+            <div className="flex items-center gap-4">
+              <h1 className="text-3xl md:text-4xl font-black text-slate-900">المفضلة</h1>
+              <span className="text-base font-bold text-slate-400 bg-slate-100 px-4 py-2 rounded-full border-2 border-slate-200">
+                0 منتج
+              </span>
+            </div>
           </header>
-          <section className="flex flex-col items-center justify-center py-16">
+          <section className="flex flex-col items-center justify-center py-12 md:py-16">
             <ActionEmptyState
               imageSrc="/icons/empty-cart.png"
               imageAlt="لا يوجد منتجات في المفضلة"
               message="لا يوجد منتجات في المفضلة"
               actionLabel="تصفح المنتجات"
-              actionHref="/"
+              actionHref="/products"
               imageClassName="w-64 h-auto mb-6"
             />
           </section>
-          <RelatedProducts />
+          <section className="pt-8">
+            <div className="mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">منتجات قد تعجبك</h2>
+              <p className="text-slate-600">ابدأ بإضافة منتجات إلى المفضلة من هنا</p>
+            </div>
+            <RelatedProducts />
+          </section>
         </div>
       </div>
     );
@@ -161,7 +182,7 @@ const FavoritesPageContent: React.FC<{ items?: FavoriteItem[] }> = ({ items }) =
   // Show error state if there's an authentication error
   if (error && error.includes('تسجيل الدخول')) {
     return (
-      <div className="min-h-screen bg-background font-beiruti mt-[93px]">
+      <div className="min-h-screen bg-background font-beiruti">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center justify-center py-16">
             <div className="text-center bg-red-50 border border-red-200 rounded-lg p-8 max-w-md">
@@ -185,7 +206,7 @@ const FavoritesPageContent: React.FC<{ items?: FavoriteItem[] }> = ({ items }) =
   // Show error state for other errors
   if (error) {
     return (
-      <div className="min-h-screen bg-white font-beiruti mt-[93px]">
+      <div className="min-h-screen bg-white font-beiruti">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center justify-center py-16">
             <div className="text-center bg-red-50 border border-red-200 rounded-lg p-8 max-w-md">
@@ -205,20 +226,37 @@ const FavoritesPageContent: React.FC<{ items?: FavoriteItem[] }> = ({ items }) =
   }
 
   return (
-    <div className="min-h-screen bg-white font-beiruti mt-[93px]">
-      <div className="max-w-6xl mx-auto px-4 py-6 space-y-8">
-        <header className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-blue-900">المفضلة</h1>
-          <span className="text-sm text-slate-600 bg-slate-100 px-3 py-1 rounded-full">
-            {favItems.length} منتج
-          </span>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white font-beiruti">
+      <div className="max-w-[95%] mx-auto px-4 py-8 space-y-8">
+        <header className="flex items-center justify-between pb-6 border-b-2 border-slate-200">
+          <div className="flex items-center gap-4">
+            <h1 className="text-3xl md:text-4xl font-black text-slate-900">المفضلة</h1>
+            <span className="text-base md:text-lg font-bold text-blue-600 bg-blue-50 px-4 py-2 rounded-full border-2 border-blue-200">
+              {favItems.length} منتج
+            </span>
+          </div>
+          {favItems.length > 0 && (
+            <button
+              onClick={() => router.push('/products')}
+              className="hidden md:flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 font-bold shadow-lg hover:shadow-xl"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              تصفح المزيد
+            </button>
+          )}
         </header>
 
         {/* Favorites List */}
         <FavoritesList items={favItems} onRemove={remove} />
 
         {/* Related products */}
-        <section>
+        <section className="pt-8">
+          <div className="mb-6">
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">منتجات قد تعجبك</h2>
+            <p className="text-slate-600">اكتشف منتجات مميزة قد تكون مهتماً بها</p>
+          </div>
           <RelatedProducts />
         </section>
       </div>

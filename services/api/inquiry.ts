@@ -50,7 +50,50 @@ export interface InquiryFilters {
   status?: 'active' | 'accepted' | 'ended';
 }
 
+const convertImageToJpeg = async (file: File): Promise<File> => {
+  if (typeof window === 'undefined') {
+    throw new Error('Unsupported file type');
+  }
+
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error('Unsupported file type'));
+    reader.readAsDataURL(file);
+  });
+
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('Unsupported file type'));
+    image.src = dataUrl;
+  });
+
+  const canvas = document.createElement('canvas');
+  canvas.width = img.naturalWidth || img.width;
+  canvas.height = img.naturalHeight || img.height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    throw new Error('Unsupported file type');
+  }
+  ctx.drawImage(img, 0, 0);
+
+  const blob = await new Promise<Blob | null>((resolve) => {
+    canvas.toBlob(resolve, 'image/jpeg', 0.9);
+  });
+
+  if (!blob) {
+    throw new Error('Unsupported file type');
+  }
+
+  const baseName = file.name.replace(/\.[^/.]+$/, '');
+  return new File([blob], `${baseName}.jpg`, { type: 'image/jpeg' });
+};
+
 export const inquiryService = {
+  // Allowed image MIME types accepted by the backend
+  allowedImageTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'],
+  allowedVideoTypes: ['video/mp4', 'video/webm', 'video/quicktime', 'video/ogg', 'video/x-m4v'],
   /**
    * Create a new inquiry
    */
@@ -64,9 +107,21 @@ export const inquiryService = {
       if (data.email) formData.append('email', data.email);
       
       if (data.images && data.images.length > 0) {
-        data.images.forEach(image => {
-          formData.append('image', image);
-        });
+        for (const image of data.images) {
+          let uploadFile = image;
+          if (image.type.startsWith('video/')) {
+            if (!this.allowedVideoTypes.includes(image.type)) {
+              throw new Error('Unsupported file type');
+            }
+          } else if (image.type.startsWith('image/')) {
+            if (!this.allowedImageTypes.includes(image.type)) {
+              uploadFile = await convertImageToJpeg(image);
+            }
+          } else {
+            throw new Error('Unsupported file type');
+          }
+          formData.append('image', uploadFile, uploadFile.name);
+        }
       }
 
       const response = await apiClient.post(`${BASE_URL}/inquiries`, formData);
@@ -109,9 +164,21 @@ export const inquiryService = {
       if (data.description) formData.append('description', data.description);
       
       if (data.images && data.images.length > 0) {
-        data.images.forEach(image => {
-          formData.append('image', image);
-        });
+        for (const image of data.images) {
+          let uploadFile = image;
+          if (image.type.startsWith('video/')) {
+            if (!this.allowedVideoTypes.includes(image.type)) {
+              throw new Error('Unsupported file type');
+            }
+          } else if (image.type.startsWith('image/')) {
+            if (!this.allowedImageTypes.includes(image.type)) {
+              uploadFile = await convertImageToJpeg(image);
+            }
+          } else {
+            throw new Error('Unsupported file type');
+          }
+          formData.append('image', uploadFile, uploadFile.name);
+        }
       }
 
       const response = await apiClient.patch(`${BASE_URL}/inquiries/${id}`, formData);

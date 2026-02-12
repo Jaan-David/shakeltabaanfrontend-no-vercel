@@ -5,10 +5,11 @@ import type { StaticImageData } from "next/image";
 import styles from '@/components/UI/Card/card.module.css';
 
 // Components
-import { CustomImage } from '@/components/UI/Image/Images';
+import { CustomMedia } from '@/components/UI/Image/Images';
 import Availablity from '@/components/UI/Card/Availablity';
 import { useFavorites } from '@/services/favorites/FavoritesContext';
 import Alert from '@/components/UI/Alert/alert';
+import PriceRow from '@/components/UI/Price/PriceRow';
 
 // Import Product type and helper function
 import type { Product } from '@/services/product/products';
@@ -56,6 +57,8 @@ interface CardProps {
     showMinimalMarbleInfo?: boolean;
     showActionButton?: boolean;
     hasOffer?: boolean;
+    isVerifiedSupplier?: boolean;
+    alwaysShowBothPrices?: boolean;
 }
 
 // Helper function to format price
@@ -107,7 +110,9 @@ function Card({
     showQualityGrade = true,
     showMinimalMarbleInfo = false,
     showActionButton = true,
-    hasOffer = false
+    hasOffer = false,
+    isVerifiedSupplier = false,
+    alwaysShowBothPrices = false
 }: CardProps) {
     const { toggle, isFavorite } = useFavorites();
     const router = useRouter();
@@ -140,13 +145,15 @@ function Card({
         return 0;
     }, [discount, numericOriginalPrice, numericPrice]);
 
-    const hasOfferBadge = useMemo(() => {
-        if (isOffer || hasOffer) return true;
-        if (discountPercentage > 0) return true;
-        const linearOffer = offerLinearPrice !== null && offerLinearPrice !== undefined && Number(offerLinearPrice) > 0;
-        const cubicOffer = offerCubicPrice !== null && offerCubicPrice !== undefined && Number(offerCubicPrice) > 0;
-        return linearOffer || cubicOffer;
-    }, [isOffer, hasOffer, discountPercentage, offerLinearPrice, offerCubicPrice]);
+    const showSpecialOfferBadge = useMemo(() => {
+        return hasOffer === true;
+    }, [hasOffer]);
+
+    const imageBadgeText = useMemo(() => {
+        if (badge) return badge;
+        if (productCategory && productCategory !== 'غير محدد') return productCategory;
+        return '';
+    }, [badge, productCategory]);
 
     // Get unit label using helper function
     const unitLabel = useMemo(() => {
@@ -199,6 +206,7 @@ function Card({
         router.push(`/product/${slug}`);
     }, [router, productName, productId, isLoading]);
 
+
     if (isLoading) {
         return (
             <div className={`${styles.card} ${styles.loading}`}>
@@ -206,9 +214,10 @@ function Card({
                     <div className={styles.skeletonImage}></div>
                 </div>
                 <div className={styles.cardBody}>
-                    <div className={styles.skeletonCategory}></div>
-                    <div className={styles.skeletonName}></div>
+                    <div className={styles.skeletonLine}></div>
+                    <div className={styles.skeletonLine}></div>
                     <div className={styles.skeletonPrice}></div>
+                    <div className={styles.skeletonActions}></div>
                 </div>
             </div>
         );
@@ -217,34 +226,19 @@ function Card({
     return (
         <>
             <div className={`${styles.card} ${!available ? styles.unavailable : ''}`}>
-                {badge && (
-                    <div className={styles.badge}>
-                        {badge}
-                    </div>
-                )}
-                
                 <div className={styles.cardHeader}>
-                    <div className={styles.icon}>
-                        {loved ? (
-                            <img
-                                src={FHEART_SRC}
-                                onClick={onHeartClick}
-                                className={styles.heartIcon}
-                                role="button"
-                                aria-label="إزالة من المفضلة"
-                                alt="مفضل"
-                            />
-                        ) : (
-                            <img
-                                src={EHEART_SRC}
-                                onClick={onHeartClick}
-                                className={styles.heartIcon}
-                                role="button"
-                                aria-label="إضافة إلى المفضلة"
-                                alt="غير مفضل"
-                            />
-                        )}
-                    </div>
+                    <button
+                        type="button"
+                        className={styles.favoriteButton}
+                        onClick={onHeartClick}
+                        aria-label={loved ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'}
+                    >
+                        <img
+                            src={loved ? FHEART_SRC : EHEART_SRC}
+                            className={styles.heartIcon}
+                            alt={loved ? 'مفضل' : 'غير مفضل'}
+                        />
+                    </button>
                     
                     <div
                         className={styles.cardImage}
@@ -257,199 +251,120 @@ function Card({
                             }
                         }}
                     >
-                        {hasOfferBadge && (
-                            <div className={styles.offerBadge}>
-                                عرض خاص
-                            </div>
-                        )}
-
+                        <div className={styles.badgeStack}>
+                            {imageBadgeText && (
+                                <span className={styles.imageBadge}>
+                                    {imageBadgeText}
+                                </span>
+                            )}
+                            {showSpecialOfferBadge && (
+                                <span className={styles.specialOfferBadge}>
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M13.5 2l-2 6H6l4.5 3-2 6L13 13l4.5 4-2-6L20 8h-5.5L13.5 2z" />
+                                    </svg>
+                                    عرض خاص
+                                </span>
+                            )}
+                        </div>
                         {discountPercentage > 0 && (
                             <div className={styles.discountBadge}>
                                 -{discountPercentage}%
                             </div>
                         )}
-                        <CustomImage
+                        <div className={styles.quickActions}>
+                            <button type="button" className={styles.quickActionButton} onClick={handleCardClick}>
+                                عرض التفاصيل
+                            </button>
+                        </div>
+                        <CustomMedia
                             src={imageSrc}
                             alt={productName || 'صورة المنتج'}
-                            width={240}
+                            width={320}
                             height={240}
                             rounded="md"
                             className={styles.img}
                             objectFit="cover"
                             priority
-                            style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover',
-                                objectPosition: 'center'
-                            }}
                         />
                     </div>
                 </div>
                 
                 <div className={styles.cardBody}>
-                    {!showMinimalMarbleInfo && (
-                        <div className={styles.category}>
-                            <span className={styles.categoryText}>{productCategory || 'غير محدد'}</span>
+                    <div className={styles.topMeta}>
+                        <div className={styles.supplierRow}>
+                            <span className={styles.supplierName}>
+                                {organizationName || organizationId || 'مورد معتمد'}
+                            </span>
+                            {isVerifiedSupplier && (
+                                <span className={styles.verifiedBadge} title="مورد موثوق">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M12 2l2.4 4.8 5.3.8-3.8 3.7.9 5.2L12 14.8 7.2 16.5l.9-5.2L4.3 7.6l5.3-.8L12 2z" />
+                                    </svg>
+                                </span>
+                            )}
                         </div>
-                    )}
-                    
-                    {!showMinimalMarbleInfo && !showOrganizationInline && (organizationName || organizationId) && (
-                        <div className={styles.organizationName}>
-                            <span className={styles.organizationText}>
-                                {organizationName || organizationId}
+                        <div className={styles.ratingRow}>
+                            <span className={styles.ratingStar}>★</span>
+                            <span className={styles.ratingValue}>{(rating ?? 0).toFixed(1)}</span>
+                            <span className={styles.ratingCount}>({reviewsCount ?? 0})</span>
+                        </div>
+                    </div>
+
+                    <h2
+                        className={styles.productName}
+                        title={productName}
+                        onClick={handleCardClick}
+                    >
+                        {productName || 'اسم المنتج'}
+                    </h2>
+
+                    {!showMinimalMarbleInfo && showQualityGrade && qualityGrade && (
+                        <div className={styles.qualityBadge}>
+                            <span className={styles.qualityText}>
+                                <span className={styles.qualityLabel}>جودة:</span>{" "}
+                                <span className={styles.qualityValue}>{qualityGrade}</span>
                             </span>
                         </div>
                     )}
 
-                    {!showMinimalMarbleInfo && showOrganizationInline && (organizationName || organizationId) && (
-                        <div className={styles.organizationInline}>
-                            <span className={styles.organizationInlineText}>
-                                {organizationName || organizationId}
-                                {organizationName && organizationId ? ` • ${organizationId}` : ''}
+                    {!showMinimalMarbleInfo && color && (
+                        <div className={styles.colorDisplay}>
+                            <span className={styles.colorText}>
+                                <span className={styles.colorLabel}>لون:</span>{" "}
+                                <span className={styles.colorValue}>{color}</span>
                             </span>
                         </div>
                     )}
-                    
-                    <div className={styles.cardInfo}>
-                        <h2 
-                            className={styles.productName}
-                            title={productName}
-                            onClick={handleCardClick}
-                        >
-                            {productName || 'اسم المنتج'} 
-                        </h2>
 
-                        {showMinimalMarbleInfo && organizationId && (
-                            <div className={styles.minimalOrganization}>
-                                {organizationId}
-                            </div>
-                        )}
-
-                        {/* Quality Grade Badge */}
-                        {!showMinimalMarbleInfo && showQualityGrade && qualityGrade && (
-                            <div className={styles.qualityBadge}>
-                                <span className={styles.qualityText}>
-                                    <span className={styles.qualityLabel}>جودة:</span>{" "}
-                                    <span className={styles.qualityValue}>{qualityGrade}</span>
-                                </span>
-                            </div>
-                        )}
-
-                        {/* Color Display */}
-                        {!showMinimalMarbleInfo && color && (
-                            <div className={styles.colorDisplay}>
-                                <span className={styles.colorText}>
-                                    <span className={styles.colorLabel}>لون:</span>{" "}
-                                    <span className={styles.colorValue}>{color}</span>
-                                </span>
-                            </div>
+                    <div className={styles.priceBlock}>
+                        <PriceRow
+                            label="سعر المتر المربع"
+                            price={pricePerCubicMeter}
+                            offerPrice={offerCubicPrice}
+                            unitLabel="م مربع"
+                            size="primary"
+                            showPlaceholder={alwaysShowBothPrices}
+                        />
+                        <PriceRow
+                            label="سعر المتر الطولي"
+                            price={pricePerLinearMeter}
+                            offerPrice={offerLinearPrice}
+                            unitLabel="م طولي"
+                            size="secondary"
+                            showPlaceholder={alwaysShowBothPrices}
+                        />
+                        {!pricePerCubicMeter && !offerCubicPrice && !pricePerLinearMeter && !offerLinearPrice && (
+                            <span className={styles.priceOnRequest}>السعر عند الطلب</span>
                         )}
                     </div>
 
-                    <div className={styles.cardPrices}>
-                        {showMinimalMarbleInfo && (pricePerLinearMeter || pricePerCubicMeter) && (
-                            <div className={styles.minimalPriceList}>
-                                {pricePerCubicMeter && (
-                                    <div className={styles.minimalPriceRow}>
-                                        <span className={styles.minimalPriceLabel}>سعر المتر مربع:</span>
-                                        <span className={styles.minimalPriceValue}>
-                                            {formatPrice(offerCubicPrice && Number(offerCubicPrice) > 0 ? offerCubicPrice : pricePerCubicMeter)} ج.م
-                                        </span>
-                                    </div>
-                                )}
-                                {pricePerLinearMeter && (
-                                    <div className={styles.minimalPriceRow}>
-                                        <span className={styles.minimalPriceLabel}>سعر المتر الطولي:</span>
-                                        <span className={styles.minimalPriceValue}>
-                                            {formatPrice(offerLinearPrice && Number(offerLinearPrice) > 0 ? offerLinearPrice : pricePerLinearMeter)} ج.م
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {!showMinimalMarbleInfo && (pricePerLinearMeter || pricePerCubicMeter) && (
-                            <div className={styles.marblePriceSection}>
-                                {/* Linear Meter Price */}
-                                {pricePerLinearMeter && (
-                                    <div className={styles.marblePrice}>
-                                        <span className={styles.priceLabel}>سعر المتر الطولي:</span>
-                                        {offerLinearPrice !== null && offerLinearPrice !== undefined && Number(offerLinearPrice) > 0 ? (
-                                            <>
-                                                <div className={styles.marblePriceValue}>
-                                                    <span className={`${styles.priceAmount} ${styles.strikethrough}`}>
-                                                        {formatPrice(pricePerLinearMeter)}
-                                                    </span>
-                                                    <span className={styles.currency}> ج.م</span>
-                                                </div>
-                                                <div className={styles.offerPriceValue}>
-                                                    <span className={styles.offerAmount}>
-                                                        {formatPrice(offerLinearPrice)}
-                                                    </span>
-                                                    <span className={styles.currency}> ج.م</span>
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <div className={styles.marblePriceValue}>
-                                                <span className={styles.priceAmount}>
-                                                    {formatPrice(pricePerLinearMeter)}
-                                                </span>
-                                                <span className={styles.currency}> ج.م</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* Cubic Meter Price */}
-                                {pricePerCubicMeter && (
-                                    <div className={styles.marblePrice}>
-                                        <span className={styles.priceLabel}>سعر المتر مربع:</span>
-                                        {offerCubicPrice !== null && offerCubicPrice !== undefined && Number(offerCubicPrice) > 0 ? (
-                                            <>
-                                                <div className={styles.marblePriceValue}>
-                                                    <span className={`${styles.priceAmount} ${styles.strikethrough}`}>
-                                                        {formatPrice(pricePerCubicMeter)}
-                                                    </span>
-                                                    <span className={styles.currency}> ج.م</span>
-                                                </div>
-                                                <div className={styles.offerPriceValue}>
-                                                    <span className={styles.offerAmount}>
-                                                        {formatPrice(offerCubicPrice)}
-                                                    </span>
-                                                    <span className={styles.currency}> ج.م</span>
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <div className={styles.marblePriceValue}>
-                                                <span className={styles.priceAmount}>
-                                                    {formatPrice(pricePerCubicMeter)}
-                                                </span>
-                                                <span className={styles.currency}> ج.م</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {!showMinimalMarbleInfo && !(pricePerLinearMeter || pricePerCubicMeter) && (
-                            <div className={styles.priceSection}>
-                                <span className={styles.priceAmount}>
-                                    {formatPrice(productPrice ?? 0)}
-                                </span>
-                                <span className={styles.currency}> ج.م</span>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className={styles.cardAction}>
-                        {showActionButton && !showMinimalMarbleInfo && (
-                            <div className={styles.cardActionButton}>
+                    {showActionButton && !showMinimalMarbleInfo && (
+                        <div className={styles.cardActions}>
+                            <button type="button" className={styles.primaryButton} onClick={handleCardClick}>
                                 عرض التفاصيل
-                            </div>
-                        )}
-                    </div>
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 

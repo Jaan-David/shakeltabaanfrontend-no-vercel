@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Minus, Plus, Trash } from 'lucide-react';
 import { Button, IconButton } from '@/components/UI/Buttons/Button';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ActionEmptyState from '@/components/UI/EmptyStates/ActionEmptyState';
 
@@ -9,10 +10,12 @@ export type CartItem = {
   name: string;
   price: number;
   quantity: number;
+  totalPrice: number;
   image: string;
   unit: string;
   availability: string;
   category?: string;
+  productId?: string;
 };
 
 type Props = {
@@ -27,26 +30,36 @@ const CartItemImage: React.FC<{ src: string; alt: string }> = ({ src, alt }) => 
   const [hasError, setHasError] = React.useState(false);
   
   React.useEffect(() => {
-    if (!src) {
+    const normalizedSrc = src?.trim();
+
+    if (!normalizedSrc) {
       setImageSource('/acessts/NoImage.jpg');
       return;
     }
 
     // If it's already a full URL or data URL, use it directly
-    if (src.startsWith('http') || src.startsWith('blob:') || src.startsWith('data:')) {
-      setImageSource(src);
+    if (normalizedSrc.startsWith('http') || normalizedSrc.startsWith('blob:') || normalizedSrc.startsWith('data:')) {
+      setImageSource(normalizedSrc);
+      return;
+    }
+
+    if (normalizedSrc.startsWith('/')) {
+      setImageSource(normalizedSrc);
       return;
     }
 
     // Handle local paths (remove any leading slashes)
-    const cleanPath = src.replace(/^\/+/, '');
+    const cleanPath = normalizedSrc.replace(/^\/+/, '');
     
     // Check if it's a local path that should be served from the public folder
     if (cleanPath.startsWith('public/') || cleanPath.startsWith('uploads/')) {
       setImageSource(`/${cleanPath}`);
     } else {
       // For API paths, use the API base URL
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const baseUrl =
+        process.env.NEXT_PUBLIC_API_BASE_URL ||
+        process.env.NEXT_PUBLIC_API_URL ||
+        "https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net/app/v1";
       setImageSource(baseUrl ? `${baseUrl}/${cleanPath}` : `/${cleanPath}`);
     }
   }, [src]);
@@ -74,7 +87,6 @@ const CartItemImage: React.FC<{ src: string; alt: string }> = ({ src, alt }) => 
         onError={handleError}
         className="w-full h-full object-contain p-1"
         loading="lazy"
-        crossOrigin="anonymous"
       />
     </div>
   );
@@ -125,27 +137,44 @@ const CartItemsList: React.FC<Props> = React.memo(({
             
             <div className="flex sm:flex-row gap-4">
               <div className="flex-shrink-0 m-auto">
-                <CartItemImage src={item.image} alt={item.name} />
+                {item.productId ? (
+                  <Link href={`/product/${item.productId}`} className="block">
+                    <CartItemImage src={item.image} alt={item.name} />
+                  </Link>
+                ) : (
+                  <CartItemImage src={item.image} alt={item.name} />
+                )}
               </div>
 
               <div className="flex-1 flex justify-between min-w-0">
                 <div className="flex flex-col justify-between items-start w-[35%] mb-2">
-                  <h3 className="text-lg font-semibold text-slate-900 truncate">
-                    {item.name}
-                  </h3>
-                  <h4 className="text-[14px] font-medium text-right leading-tight w-[17px] h-[17px] text-slate-500 font-beiruti mb-2">
+                  {item.productId ? (
+                    <Link
+                      href={`/product/${item.productId}`}
+                      className="text-lg font-semibold text-slate-900 truncate hover:text-blue-600 transition-colors"
+                    >
+                      {item.name}
+                    </Link>
+                  ) : (
+                    <h3 className="text-lg font-semibold text-slate-900 truncate">
+                      {item.name}
+                    </h3>
+                  )}
+                  <h4 className="text-[14px] font-medium text-right leading-tight text-slate-500 font-beiruti mb-2 whitespace-nowrap">
                     {item.unit}
                   </h4>
-                  <h4 className="text-[14px] font-medium leading-[1] text-right w-[71px] h-[17px] text-emerald-500 font-beiruti mb-2">
-                    {item.availability}
-                  </h4>
+                  {item.availability ? (
+                    <h4 className="text-[14px] font-medium leading-[1] text-right w-[71px] h-[17px] text-emerald-500 font-beiruti mb-2">
+                      {item.availability}
+                    </h4>
+                  ) : null}
                   <Button
                     variant="ghost"
                     size="sm"
                     state="default"
                     leftIcon={<Trash className="w-4 h-4 sm:w-5 sm:h-5" />}
                     onClick={() => onRemove(item.id)}
-                    className="text-red-500 hover:bg-red-500/10 hover:text-red-600 w-full sm:w-auto justify-start sm:justify-center p-1 sm:px-2"
+                    className="text-red-500 hover:bg-red-500/10 hover:text-red-600 w-full sm:w-auto justify-start sm:justify-center p-1 sm:px-2 mt-2"
                   >
                     <span className="text-sm sm:text-base whitespace-nowrap overflow-hidden text-ellipsis">
                       حذف المنتج من السلة
@@ -155,21 +184,11 @@ const CartItemsList: React.FC<Props> = React.memo(({
 {/* /************************************************************/}
                 <div className="flex flex-col items-start  w-[35%] sm:flex-col sm:items-center pr-[10px] sm:pr-3 justify-between gap-4">
                   <div className="text-left w-[100%] pl-2 sm:pl-3 ">
-                    <div className="text-l font-bold text-slate-900">
-                      {(() => {
-                        const displayPrice = (item.unit === 'طن' || item.unit === 'متر مكعب') 
-                          ? (item.price  * item.quantity) 
-                          : (item.price * item.quantity);
-                        return displayPrice.toLocaleString();
-                      })()} ج.م / {item.unit}
+                    <div className="text-l font-bold text-slate-900 whitespace-nowrap">
+                      {(item.totalPrice || item.price * item.quantity).toLocaleString()} ج.م / {item.unit}
                     </div>
-                    <div className="text-xs text-slate-500 mt-1">
-                      {(() => {
-                        const unitPrice = (item.unit === 'طن' || item.unit === 'متر مكعب') 
-                          ? (item.price ) 
-                          : item.price;
-                        return unitPrice.toLocaleString();
-                      })()} ج.م / {item.unit}
+                    <div className="text-xs text-slate-500 mt-1 whitespace-nowrap">
+                      {item.price.toLocaleString()} ج.م / {item.unit}
                     </div>
                   </div>
                   

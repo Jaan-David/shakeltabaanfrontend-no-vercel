@@ -11,8 +11,8 @@ import { seoConfig, organizationSchema, websiteSchema } from "@/config/seo.confi
 // ============================================
 export const metadata: Metadata = {
   title: {
-    default: seoConfig.defaultTitle,
-    template: `%s | ${seoConfig.siteName}`,
+    default: `${seoConfig.siteName} | ${seoConfig.siteDescription.substring(0, 60)}...`,
+    template: `%s | ${seoConfig.siteName}`
   },
   description: seoConfig.siteDescription,
   keywords: seoConfig.defaultKeywords,
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://www.shkelteaban.com'),
   alternates: {
     canonical: '/',
     languages: {
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     locale: 'ar_EG',
     url: '/',
     siteName: seoConfig.siteName,
-    title: seoConfig.defaultTitle,
+    title: seoConfig.siteName,
     description: seoConfig.siteDescription,
     images: [
       {
@@ -50,19 +50,19 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: seoConfig.defaultTitle,
+    title: seoConfig.siteName,
     description: seoConfig.siteDescription,
     images: [seoConfig.images.twitterImage],
     site: seoConfig.twitter.site,
     creator: seoConfig.twitter.creator,
   },
-  robots: seoConfig.robots,
+  // robots: seoConfig.robots,
   icons: {
     icon: seoConfig.images.favicon,
     shortcut: seoConfig.images.favicon,
-    apple: '/logo/logo2.png',
+    apple: '/apple-touch-icon.png',
   },
-  manifest: '/site.webmanifest',
+  // manifest: '/site.webmanifest',
   verification: seoConfig.verification,
 };
 
@@ -142,7 +142,7 @@ export default function RootLayout({
               '@type': 'LocalBusiness',
               'name': seoConfig.siteName,
               'description': seoConfig.siteDescription,
-              'image': `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}${seoConfig.images.logo}`,
+              'image': `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.shkelteaban.com'}${seoConfig.images.logo}`,
               'telephone': seoConfig.contact.phone,
               'email': seoConfig.contact.email,
               'address': {
@@ -156,11 +156,10 @@ export default function RootLayout({
                 'latitude': 30.0444,
                 'longitude': 31.2357
               },
-              'url': process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000',
+              'url': process.env.NEXT_PUBLIC_BASE_URL || 'https://www.shkelteaban.com',
               'sameAs': Object.values(seoConfig.socialLinks),
               'priceRange': '$$',
               'openingHours': 'Mo-Su 09:00-18:00',
-              'areaServed': ['EG', 'SA', 'AE', 'KW', 'LY', 'JO'],
             })
           }}
         />

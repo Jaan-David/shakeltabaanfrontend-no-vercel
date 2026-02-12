@@ -1,62 +1,51 @@
 .header {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: 10vh;
-  justify-content: space-between;
-  padding: 0 2%;
-  background-color: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid #E2E8F0;
-  box-shadow: 0 2px 16px rgba(15, 23, 42, 0.04);
-  position: fixed;
+  position: sticky;
   top: 0;
   left: 0;
   right: 0;
   z-index: 100;
-  box-sizing: border-box;
-  transition: all 0.3s ease;
+  width: 100%;
+  height: 72px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  transition: height 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.headerScrolled {
+  height: 64px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+}
+
+.headerInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  max-width: 1280px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 24px;
+  direction: rtl;
 }
 
 /* Header Variants */
 .headerAuth {
-  background-color: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid #E2E8F0;
-  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.03);
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 10vh;
-  padding: 0 2%;
-  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.88);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .headerMinimal {
-  background-color: transparent;
+  background: transparent;
   border-bottom: none;
   box-shadow: none;
-  padding: 0 2%;
-  height: 10vh;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  box-sizing: border-box;
 }
 
 .headerTransparent {
-  background-color: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid #E2E8F0;
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
-  height: 10vh;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.72);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .body {
@@ -64,305 +53,370 @@
 }
 
 /* Right Section - Logo and Language */
-.right {
+.rightSection {
   display: flex;
   align-items: center;
-  gap: 7%;
+  gap: 18px;
   flex: 0 0 auto;
-  height: 100%;
+  flex-wrap: nowrap;
 }
-.logo {
-  margin: 0 auto 0.6rem auto;
- 
-  display: block;
+
+.centerSection {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+}
+
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 0 0 auto;
 }
 
 .logoLink {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   text-decoration: none;
+  padding: 4px 6px;
   transition: transform 0.2s ease;
-  /* height: 100%; */
-   width: 6.2rem;
-  height: 6.2rem;
 }
 
 .logoLink:hover {
-  transform: scale(1.05);
+  transform: translateY(-1px) scale(1.03);
 }
 
-.logo {
-  width: 300px;
-  height: auto;
-  max-height: 120%;
-  color: var(--primary);
+.logoImage {
+  width: auto;
+  height: 48px;
+  object-fit: contain;
+}
+
+.homeLink {
+  padding-inline: 12px;
 }
 
 /* Middle Section - Search */
-.mid {
+.navList {
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex: 1;
-  max-width: 600px;
-  margin: 0 24px;
-  height: 100%;
-  position: relative;
-  overflow: visible;
-  z-index: 101;
+  gap: 18px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 /* Mobile Search Button - Hidden by default */
-.mobileSearchBtn {
+.menuButton {
   display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.8);
+  transition: all 0.2s ease;
+}
+
+.menuButton:hover {
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.2);
+}
+
+.menuIcon {
+  width: 20px;
+  height: 20px;
+  color: #2563EB;
 }
 
 /* Search Icon Button - Fixed */
-.searchIconBtn {
-  display: flex;
+.navLink {
+  position: relative;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 12px;
-  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #475569;
+  border-radius: 999px;
   transition: all 0.2s ease;
-  color: #f2f5f8;
-  min-width: 48px;
-  min-height: 48px;
 }
 
-.searchIconBtn:hover {
-  background-color: #F9FAFB;
-  color: #0A1E33;
+.navLinkLabel {
+  white-space: nowrap;
 }
 
-.searchIconBtn:active {
-  transform: scale(0.95);
+.navLink:hover {
+  color: #0F172A;
+  background: rgba(37, 99, 235, 0.08);
 }
 
-.searchIcon {
-  width: 24px;
-  height: 24px;
-  color: currentColor;
-  flex-shrink: 0;
+.navLink::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 70%;
+  height: 2px;
+  background: #2563EB;
+  border-radius: 999px;
+  transition: transform 0.2s ease;
+}
+
+.navLinkActive {
+  color: #0F172A;
+}
+
+.navLinkActive::after {
+  transform: translateX(-50%) scaleX(1);
 }
 
 
 /* Left Section - User Actions */
-.left {
+.iconGroup {
   display: flex;
   align-items: center;
-  gap: 24px;
-  flex: 0 0 auto;
-  height: 100%;
+  gap: 12px;
+}
+
+.iconButton,
+.iconButtonMuted {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  line-height: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.78);
+  color: #1E40AF;
+  overflow: visible;
+  transition: all 0.2s ease;
+}
+
+.iconButton:hover {
+  background: rgba(37, 99, 235, 0.12);
+  border-color: rgba(37, 99, 235, 0.2);
+  transform: translateY(-1px);
+}
+
+.iconButton:focus-visible,
+.menuButton:focus-visible,
+.profileButton:focus-visible,
+.navLink:focus-visible {
+  outline: 2px solid rgba(37, 99, 235, 0.5);
+  outline-offset: 2px;
+}
+
+.iconButtonMuted {
+  opacity: 0.5;
+}
+
+.icon {
+  /* Ensure SVGs are fully visible (no cropping). */
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  color: currentColor;
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.iconBadge {
+  position: absolute;
+  top: -4px;
+  inset-inline-end: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background: #EF4444;
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.35);
 }
 
 /* Profile Section */
-.prof {
-  display: flex;
+.profileButton {
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  height: 100%;
-  cursor: pointer;
-}
-
-.prof a {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-decoration: none;
-  color: var(--black87);
-  font-weight: 500;
-  padding: 8px 12px;
-  border-radius: 8px;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+  color: #0F172A;
+  font-weight: 600;
   transition: all 0.2s ease;
-  height: fit-content;
-  position: relative;
-  cursor: pointer;
 }
 
-.prof a:hover {
-  background-color: var(--black8);
-  color: var(--primary);
+.profileButton:hover {
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.2);
 }
 
-.avatar {
-  width: 40px;
-  height: 40px;
+.profileAvatar {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--primary);
-  border: 2px solid var(--black16);
-  transition: border-color 0.2s ease;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-
-.avatar:hover {
-  border-color: var(--primary);
+  background: #2563EB;
 }
 
 .avatarImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 50%;
 }
 
-.initial {
-  color: var(--onPrimary);
+.profileInitial {
+  color: #FFFFFF;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 14px;
   text-transform: uppercase;
 }
 
+.profileName {
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.dropdownIndicator {
+  width: 16px;
+  height: 16px;
+  color: #2563EB;
+}
+
 /* Navigation Links */
-.navs {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  height: 100%;
+.loginButton {
+  min-width: 140px;
 }
 
-.notification_btn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+.loginButton:hover {
+  transform: translateY(-1px);
 }
 
-.navLink,
-.notification_btn {
+.loadingText {
+  color: #64748B;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mobileMenu {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.mobileMenuOpen {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobileMenuOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.3);
+  backdrop-filter: blur(6px);
+}
+
+.mobileMenuPanel {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  bottom: 0;
+  width: min(80vw, 360px);
+  background: #FFFFFF;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+  padding: 24px;
   display: flex;
   flex-direction: column;
+  gap: 24px;
+  transform: translateX(100%);
+  transition: transform 0.2s ease;
+}
+
+.mobileMenuOpen .mobileMenuPanel {
+  transform: translateX(0);
+}
+
+.mobileMenuHeader {
+  display: flex;
   align-items: center;
-  gap: 4px;
-  text-decoration: none;
+  justify-content: space-between;
+}
+
+.mobileMenuTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.mobileMenuClose {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #F8FAFC;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobileMenuList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mobileNavLink {
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-weight: 600;
   color: #475569;
-  font-size: 12px;
-  font-weight: 500;
-  padding: 8px 12px;
-  border-radius: 8px;
+  background: #F8FAFC;
   transition: all 0.2s ease;
-  position: relative;
-  background: none;
-  border: none;
-  cursor: pointer;
-  height: fit-content;
 }
 
-.navLink:hover,
-.notification_btn:hover {
-  color: #2563EB;
-  background-color: #EFF6FF;
+.mobileNavLinkActive,
+.mobileNavLink:hover {
+  color: #0F172A;
+  background: rgba(37, 99, 235, 0.12);
 }
 
-.navLink:active,
-.notification_btn:active {
-  transform: scale(0.95);
+.mobileMenuFooter {
+  margin-top: auto;
 }
 
-.icon {
-  width: 24px;
-  height: 24px;
-  display: flex;
+.mobileProfile {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: #F8FAFC;
+  color: #0F172A;
+  font-weight: 600;
 }
 
-.icon svg {
+.mobileLoginButton {
   width: 100%;
-  height: 100%;
-  color: currentColor;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.navText {
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-  color: #FFFFFF;
-  background-color: #2563EB;
-  padding: 8px 12px;
-  border-radius: 6px;
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%) translateY(8px);
-  opacity: 0;
-  transition: all 0.3s ease;
-  pointer-events: none;
-  z-index: 1000;
-  box-shadow: 0 6px 16px rgba(10, 30, 51, 0.2);
-  min-width: max-content;
-}
-
-.navText::after {
-  content: "";
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  /* border: 6px solid transparent; */
-  border-bottom-color: var(--black87);
-}
-
-.navLink:hover .navText,
-.notification_btn:hover .navText {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(-50%) translateY(4px);
-}
-
-/* Active link styles */
-.navLink:global(.active) {
-  color: #0A1E33;
-  background-color: #F9FAFB;
-}
-
-.navLink:global(.active) .icon {
-  color: #0A1E33;
-}
-
-/* Login Button */
-.loginButton:hover {
-  background-color: var(--secondary1);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
-}
-
-.loginButton:active {
-  transform: translateY(0);
-}
-
-.navLink::after,
-.notification_btn::after {
-  content: "";
-  position: absolute;
-  top: 4px;
-  right: 8px;
-  width: 8px;
-  height: 8px;
-  background-color: var(--error);
-  border-radius: 50%;
-  opacity: 0;
-  transform: scale(0);
-  transition: all 0.2s ease;
-}
-
-.navLink.hasNotification::after,
-.notification_btn.hasNotification::after {
-  opacity: 1;
-  transform: scale(1);
 }
 
 /* Bottom Navigation for Mobile - Enhanced Curved Design */
@@ -721,237 +775,72 @@
   color: var(--onPrimary);
 }
 
-[dir="rtl"] .navs[dir="rtl"] .navText::after {
-  left: 50%;
-  transform: translateX(-50%);
-}
-
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .header {
+  .headerInner {
     padding: 0 16px;
-    height: 10vh;
   }
 
-  .headerAuth,
-  .headerMinimal {
-    padding: 0 16px;
-    height: 10vh;
+  /* Collapse inline nav into menu on tablet. */
+  .navList {
+    display: none;
   }
 
-  .mid {
-    margin: 0 16px;
-    max-width: 400px;
-  }
-
-  .left {
-    gap: 16px;
-  }
-
-  .right {
-    gap: 16px;
-  }
-
-  .navs {
-    gap: 16px;
-  }
-
-  .icon svg {
-    width: 60%;
-    height: 60%;
-  }
-
-  .logo {
-    width: 100px;
-    max-height: 70%;
+  .menuButton {
+    display: inline-flex;
   }
 }
 
 @media (max-width: 768px) {
-  .header,
-  .headerAuth,
-  .headerMinimal,
-  .headerTransparent {
+  .headerInner {
     padding: 0 12px;
-    height: 10vh;
+    gap: 16px;
   }
 
-  /* Hide desktop search component and navigation */
-  .mid,
-  .navs {
+  .logoImage {
+    height: 42px;
+  }
+
+  .profileName,
+  .dropdownIndicator {
     display: none;
   }
 
-  /* Show mobile search button in header ONLY when user is NOT logged in */
-  .mobileSearchBtn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* Adjust header right section spacing */
-  .header .right {
-    gap: 12px;
-  }
-
-  /* Show bottom navigation */
-  .bottomNav {
-    display: block;
-  }
-
-  /* Bottom nav grid for 4 items + center button when user is logged in */
-  .bottomNavContent {
-    grid-template-columns: 1fr 1fr 120px 1fr 1fr;
-  }
-
-  .body {
-    padding-bottom: 88px;
-  }
-
-  .searchIconBtn {
-    padding: 10px;
-    min-width: 44px;
-    min-height: 44px;
-  }
-
-  .searchIcon {
-    width: 22px;
-    height: 22px;
+  .iconButton,
+  .iconButtonMuted {
+    width: 40px;
+    height: 40px;
   }
 }
 
 @media (max-width: 480px) {
-  .header,
-  .headerAuth,
-  .headerMinimal,
-  .headerTransparent {
-    padding: 0 12px;
-    height: 10vh;
+  .headerInner {
+    padding: 0 10px;
+    gap: 12px;
   }
 
-  .logo {
-    width: 80px;
-    max-height: 60%;
-  }
-
-  .avatar {
-    width: 32px;
-    height: 32px;
-  }
-
-  .initial {
-    font-size: 14px;
+  .logoImage {
+    height: 36px;
   }
 
   .loginButton {
-    padding: 8px 16px;
+    min-width: 110px;
     font-size: 12px;
   }
 
-  .searchIconBtn {
-    /* padding: 8px; */
-    min-width: 40px;
-    min-height: 40px;
-  }
-
-  .searchIcon {
-    width: 100%;
-    height: 100%;
-    margin-left: -2%;
-  }
-  .bottomNav {
-    height: 75px;
-    padding: 0 12px 8px;
-  }
-
-  .bottomNavContent {
-    grid-template-columns: 1fr 1fr 90px 1fr 1fr;
-    padding: 10px 4px 14px;
-    border-radius: 25px 25px 0 0;
-  }
-
-  .bottomNavContent::before {
-    top: -42px;
-    width: 80px;
-    height: 80px;
-    /* background: radial-gradient(circle at center, 
-      transparent 0%, 
-      transparent 38px, 
-      #f8f9fa 38px, 
-      #ffffff 40px
-    ); */
-  }
-
-  .MessageCircle {
-    top: -30%;
-  }
-
-  .MessageCircle svg {
-    width: 64px;
-    height: 64px;
-  }
-
-  .MessageCircle::after {
-    width: 72px;
-    height: 72px;
-  }
-
-  .bottomNavItem {
-    padding: 6px 8px;
-    min-width: 50px;
-    gap: 3px;
-  }
-
-  .bottomNavIcon {
-    width: 24px;
-    height: 24px;
-  }
-
-  .bottomNavIcon svg {
-    width: 22px;
-    height: 22px;
-  }
-
-  .bottomNavText {
-    font-size: 10px;
-  }
-
-  .bottomNavBadge {
-    min-width: 16px;
-    height: 16px;
-    font-size: 9px;
-    padding: 0 4px;
-  }
-}
-
-@media (max-width: 380px) {
-  .bottomNavContent {
-    grid-template-columns: 1fr 1fr 85px 1fr 1fr;
-    padding: 8px 2px 12px;
-  }
-
-  .bottomNavItem {
-    padding: 4px 6px;
-    min-width: 45px;
-  }
-
-  .bottomNavText {
-    font-size: 9px;
+  .iconGroup {
+    gap: 8px;
   }
 }
 
 /* Accessibility improvements */
 @media (prefers-reduced-motion: reduce) {
-  .bottomNavItem,
-  .MessageCircle,
-  .bottomNavIcon svg,
-  .bottomNavBadge {
+  .navLink,
+  .iconButton,
+  .menuButton,
+  .mobileMenu,
+  .mobileMenuPanel {
     transition: none;
-    animation: none;
-  }
-  
-  .MessageCircle::after {
-    animation: none;
   }
 }
 

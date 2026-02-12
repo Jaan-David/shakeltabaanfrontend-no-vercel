@@ -132,9 +132,10 @@ const isValidImageUrl = (url: string): boolean => {
     return false;
   }
   
-  const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg|bmp)(\?|$)/i;
+  const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg|bmp|heic|heif)(\?|$)/i;
+  const videoExtensions = /\.(mp4|mov|m4v|webm|ogv|ogg)(\?|$)/i;
   const cloudServices = /(cloudinary|amazonaws|imgix|unsplash|pexels)/i;
-  return imageExtensions.test(url) || cloudServices.test(url);
+  return imageExtensions.test(url) || videoExtensions.test(url) || cloudServices.test(url);
 };
 
 const processProductImagesStatic = (product: any): Product => {

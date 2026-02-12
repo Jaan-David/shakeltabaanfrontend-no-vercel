@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Heart, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import { Minus, Plus } from "lucide-react";
-import { CustomImage } from "@/components/UI/Image/Images";
+import { CustomMedia } from "@/components/UI/Image/Images";
+import PriceRow from "@/components/UI/Price/PriceRow";
 import { cartService, checkProductUnitConflict } from "@/services/api/cart";
 import { useRouter } from "next/navigation";
 import { isAuthenticated } from "@/utils/auth";
@@ -120,13 +121,15 @@ const Overview: React.FC<Props> = ({
   createdAt,
   updatedAt,
 }) => {
-  console.log('🔍 Overview component props:', { organizationName, organizationId });
-  
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const hasLinearPrice = pricePerLinearMeter !== null && pricePerLinearMeter !== undefined;
   const hasCubicPrice = pricePerCubicMeter !== null && pricePerCubicMeter !== undefined;
   const hasMarbleUnits = hasLinearPrice || hasCubicPrice;
+  const hasAnyPrice = useMemo(() => {
+    return [pricePerCubicMeter, offerCubicPrice, pricePerLinearMeter, offerLinearPrice]
+      .some((value) => Number(value) > 0);
+  }, [pricePerCubicMeter, offerCubicPrice, pricePerLinearMeter, offerLinearPrice]);
   const [selectedUnitType, setSelectedUnitType] = useState<'linear' | 'cubic'>(
     hasLinearPrice ? 'linear' : 'cubic'
   );
@@ -387,216 +390,267 @@ const Overview: React.FC<Props> = ({
     setShowLoginAlert(false);
   };
 
+  const handleRequestQuote = () => {
+    router.push('/inquiries');
+  };
+
   return (
-    <section className="bg-[#FFFEFB] max-w-[95%] mx-auto rounded-2xl border border-[#E5DED6] shadow-sm p-4 sm:p-6">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <div className="lg:col-span-4">
+    <section className="bg-white max-w-6xl mx-auto rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-6 lg:p-8" dir="rtl">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="lg:col-span-7 lg:order-2">
           <div
-            className="w-full max-w-sm mx-auto lg:mx-0 aspect-square bg-white rounded-xl overflow-hidden flex items-center justify-center relative animate-in fade-in duration-500 border border-[#E5DED6]"
+            className="w-full aspect-[4/3] bg-slate-50 rounded-2xl overflow-hidden flex items-center justify-center relative border border-slate-200"
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
           >
-            <CustomImage
-              src={imageList[currentImageIndex] || "/acessts/placeholder.svg"}
-              alt={`${title} - Image ${currentImageIndex + 1}`}
-              fill
-              objectFit="contain"
-              priority={true}
-              fallbackSrc="/acessts/placeholder.svg"
-              className="w-full h-full transition-all duration-700 ease-in-out"
-            />
+            {!isMounted ? (
+              <div className="h-full w-full animate-pulse bg-slate-200" />
+            ) : (
+              <CustomMedia
+                src={imageList[currentImageIndex] || "/acessts/placeholder.svg"}
+                alt={`${title} - Image ${currentImageIndex + 1}`}
+                fill
+                objectFit="contain"
+                priority={true}
+                fallbackSrc="/acessts/placeholder.svg"
+                className="w-full h-full transition-transform duration-700 ease-in-out hover:scale-105"
+              />
+            )}
 
             {imageList.length > 1 && (
               <>
                 <button
                   onClick={prevImage}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-primary/80 hover:bg-primary text-white p-2 rounded-full transition-all duration-300 hover:scale-110 shadow-lg hover:shadow-xl z-10"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 bg-slate-900/70 hover:bg-slate-900 text-white p-2 rounded-full transition-all duration-300 hover:scale-105 shadow-lg z-10"
                   aria-label="Previous image"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <button
                   onClick={nextImage}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-primary/80 hover:bg-primary text-white p-2 rounded-full transition-all duration-300 hover:scale-110 shadow-lg hover:shadow-xl z-10"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-slate-900/70 hover:bg-slate-900 text-white p-2 rounded-full transition-all duration-300 hover:scale-105 shadow-lg z-10"
                   aria-label="Next image"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </>
             )}
-
-            {imageList.length > 1 && (
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-                {imageList.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => goToImage(index)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 hover:scale-125 ${
-                      index === currentImageIndex
-                        ? "bg-white scale-125 animate-pulse"
-                        : "bg-white/50 hover:bg-white/75"
-                    } ${
-                      !isHovering && !isManualNavigation && imageList.length > 1
-                        ? "animate-pulse"
-                        : ""
-                    }`}
-                    aria-label={`Go to image ${index + 1}`}
-                  />
-                ))}
-              </div>
-            )}
           </div>
-        </div>
 
-        <div className="lg:col-span-8 w-full">
-          {/* Offer Badge - Top Center */}
-          {isOffer && (
-            <div className="flex justify-center mb-4">
-              <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-red-600 text-white border border-red-700/30 shadow-sm">
-                عرض خاص
-              </span>
+          {imageList.length > 1 && (
+            <div className="mt-4 grid grid-cols-4 sm:grid-cols-6 gap-2">
+              {imageList.map((img, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToImage(index)}
+                  className={`relative aspect-square rounded-lg border overflow-hidden transition-all ${
+                    index === currentImageIndex
+                      ? "border-blue-600 ring-2 ring-blue-200"
+                      : "border-slate-200 hover:border-blue-300"
+                  }`}
+                  aria-label={`Go to image ${index + 1}`}
+                >
+                  <CustomMedia
+                    src={img || "/acessts/placeholder.svg"}
+                    alt={`${title} thumbnail ${index + 1}`}
+                    fill
+                    objectFit="cover"
+                    fallbackSrc="/acessts/placeholder.svg"
+                  />
+                </button>
+              ))}
             </div>
           )}
-          
-          <div className="flex items-start justify-between gap-3 mb-2">
-            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 leading-snug flex-1">
+        </div>
+
+        <div className="lg:col-span-5 lg:order-1 flex flex-col gap-6">
+          <div className="flex items-start justify-between gap-4">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight">
               {title}
             </h1>
             <button
               aria-label={loved ? "remove from wishlist" : "add to wishlist"}
               onClick={toggleFavorite}
-              className={`p-2 rounded-full border hover:border-primary transition-colors ${
-                loved ? "text-primary border-primary" : "text-slate-500"
+              className={`p-2 rounded-full border transition-colors ${
+                loved ? "text-blue-600 border-blue-600" : "text-slate-500 border-slate-200 hover:border-blue-300"
               }`}
             >
               <Heart className={`w-5 h-5 ${loved ? "fill-current" : ""}`} />
             </button>
           </div>
 
-          <div className="flex flex-col items-start justify-between gap-4 mb-3">
-            <span className="px-3 py-1 rounded-full border border-[#E5DED6] bg-[#FFFEFB] text-sm text-slate-600 hover:border-primary hover:text-primary">
+          <div className="flex flex-wrap gap-2">
+            <span className="px-3 py-1 rounded-full border border-slate-200 bg-slate-50 text-sm text-slate-600">
               {category}
             </span>
-            
-            {/* Organization Info */}
-            {(organizationName || organizationId) && (
-              <div className="flex flex-col gap-2 bg-blue-50 border border-blue-200 rounded-lg p-3 w-full">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-blue-900">المنظمة:</span>
-                  <span className="text-sm font-bold text-blue-700">
-                    {organizationName || organizationId}
-                  </span>
-                </div>
-                {organizationId && organizationName && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-blue-700">معرف المنظمة:</span>
-                    <span className="text-xs font-mono bg-white px-2 py-1 rounded border border-blue-300 text-blue-800">
-                      {organizationId}
-                    </span>
-                  </div>
-                )}
-              </div>
+            {isOffer && (
+              <span className="px-3 py-1 rounded-full bg-rose-600 text-white text-sm font-semibold shadow-sm">
+                عرض خاص
+              </span>
             )}
-            
-            {/* Quality Grade & Color */}
-            <div className="flex flex-wrap gap-3">
-              {qualityGrade && (
-                <span className="text-sm">
-                  <span className="font-semibold text-slate-900">جودة:</span>{" "}
-                  <span className="font-semibold text-blue-700">
-                    {qualityGrade === 'first' ? 'أولى' : qualityGrade}
-                  </span>
-                </span>
+          </div>
+
+          {(organizationName || organizationId) && (
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <p className="text-xs text-slate-500">المورد</p>
+              <p className="text-base font-semibold text-slate-900">
+                {organizationName || organizationId}
+              </p>
+              {organizationId && organizationName && (
+                <p className="mt-1 text-xs text-slate-500">معرف المورد: {organizationId}</p>
               )}
-              {color && (
-                <span className="text-sm">
-                  <span className="font-semibold text-slate-900">لون:</span>{" "}
-                  <span className="font-semibold text-blue-700">{color}</span>
-                </span>
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-3">
+            <span className="rounded-full border border-slate-200 px-3 py-1 text-sm text-slate-600">
+              <span className="text-slate-500">الفرز:</span> {qualityGrade ? (qualityGrade === 'first' ? 'أولى' : qualityGrade) : 'غير متاح'}
+            </span>
+            <span className="rounded-full border border-slate-200 px-3 py-1 text-sm text-slate-600">
+              <span className="text-slate-500">اللون:</span> {color || 'غير متاح'}
+            </span>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 shadow-sm lg:sticky lg:top-24">
+            <div className="flex items-center justify-between gap-2">
+              <div className="text-sm text-slate-500">الاسعار</div>
+              <div className="flex items-center gap-1 text-amber-500 text-sm">
+                <span>★</span>
+                <span className="text-slate-600">{rating.toFixed(1)}</span>
+                <span className="text-slate-400">({ratingCount})</span>
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <PriceRow
+                label="سعر المتر المربع"
+                price={pricePerCubicMeter}
+                offerPrice={offerCubicPrice}
+                unitLabel="م مربع"
+                size="primary"
+              />
+              <PriceRow
+                label="سعر المتر الطولي"
+                price={pricePerLinearMeter}
+                offerPrice={offerLinearPrice}
+                unitLabel="م طولي"
+                size="secondary"
+              />
+              {!hasAnyPrice && (
+                <div className="text-sm text-slate-500">السعر عند الطلب</div>
               )}
             </div>
 
-            {/* Marble/Granite Prices - Cubic and Linear Meter */}
-            {(pricePerCubicMeter || pricePerLinearMeter) && (
-              <div className="flex flex-col gap-4 w-full">
-                {pricePerCubicMeter && (
-                  <div className="flex flex-col gap-2">
-                    <span className="text-slate-700 text-base font-bold">سعر المتر مربع:</span>
-                    {offerCubicPrice !== null && offerCubicPrice !== undefined && Number(offerCubicPrice) > 0 ? (
-                      <div className="flex flex-col gap-2">
-                        <span className="text-sm font-semibold text-slate-400 line-through decoration-2">
-                          {pricePerCubicMeter.toLocaleString()} ج.م
-                        </span>
-                        <span className="text-3xl font-extrabold text-red-600">
-                          {Number(offerCubicPrice).toLocaleString()} ج.م
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-3xl font-extrabold text-blue-600">
-                        {pricePerCubicMeter.toLocaleString()} ج.م
-                      </span>
-                    )}
-                  </div>
-                )}
-                {pricePerLinearMeter && (
-                  <div className="flex flex-col gap-2">
-                    <span className="text-slate-700 text-base font-bold">سعر المتر الطولي:</span>
-                    {offerLinearPrice !== null && offerLinearPrice !== undefined && Number(offerLinearPrice) > 0 ? (
-                      <div className="flex flex-col gap-2">
-                        <span className="text-sm font-semibold text-slate-400 line-through decoration-2">
-                          {pricePerLinearMeter.toLocaleString()} ج.م
-                        </span>
-                        <span className="text-3xl font-extrabold text-red-600">
-                          {Number(offerLinearPrice).toLocaleString()} ج.م
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-3xl font-extrabold text-blue-600">
-                        {pricePerLinearMeter.toLocaleString()} ج.م
-                      </span>
-                    )}
-                  </div>
-                )}
+            <div className="mt-4 flex flex-col gap-2">
+              <button
+                className="w-full rounded-xl bg-blue-600 py-3 text-white font-bold hover:bg-blue-700 transition-colors"
+                onClick={handleRequestQuote}
+              >
+                اطلب تسعيرة
+              </button>
+              <button
+                className="w-full rounded-xl border border-slate-200 bg-white py-3 text-slate-700 font-semibold hover:border-blue-300 hover:text-blue-700 transition-colors"
+                disabled={stockQty === 0 || isAdding}
+                onClick={handleAddToCart}
+              >
+                أضف إلى السلة
+              </button>
+              <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2">
+                <span className="text-sm text-slate-500">الكمية</span>
+                <div className="flex items-center gap-3">
+                  <button
+                    aria-label="decrease"
+                    onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                    className="p-1 rounded-full hover:bg-slate-100"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="min-w-[1.5rem] text-center text-sm font-semibold">{quantity}</span>
+                  <button
+                    aria-label="increase"
+                    onClick={() =>
+                      setQuantity((prev) => Math.min(stockQty, prev + 1))
+                    }
+                    className="p-1 rounded-full hover:bg-slate-100"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            )}
 
+              {!pricePerLinearMeter && !pricePerCubicMeter && (
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(availableUnits).map(([key, label]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => handleUnitSelect(key)}
+                      className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                        selectedUnit === key
+                          ? "border-blue-600 text-blue-600 bg-blue-50"
+                          : "border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-600"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-3">
+                <label className="flex items-center gap-2 text-xs text-slate-600">
+                  <input
+                    type="radio"
+                    checked={selectedUnitType === 'linear'}
+                    onChange={() => setSelectedUnitType('linear')}
+                    className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  المتر الطولي
+                </label>
+                <label className="flex items-center gap-2 text-xs text-slate-600">
+                  <input
+                    type="radio"
+                    checked={selectedUnitType === 'cubic'}
+                    onChange={() => setSelectedUnitType('cubic')}
+                    className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  المتر مربع
+                </label>
+              </div>
+            </div>
           </div>
 
           {description && (
-            <p className="text-slate-600 text-sm sm:text-base leading-relaxed mb-3">
+            <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
               {description}
             </p>
           )}
 
-          {/* Product Advantages */}
           {advProduct && advProduct.length > 0 && (
-            <div className="mb-4 p-4 bg-slate-50 rounded-lg border border-[#E5DED6]">
-              <h3 className="text-blue-900 font-bold text-sm mb-2">مميزات المنتج:</h3>
-              <ul className="list-disc list-inside space-y-1">
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <h3 className="text-slate-900 font-bold text-sm mb-2">مميزات المنتج</h3>
+              <ul className="list-disc list-inside space-y-1 text-sm text-slate-600">
                 {advProduct.map((advantage, index) => (
-                  <li key={index} className="text-slate-600 text-sm">
-                    {advantage}
-                  </li>
+                  <li key={index}>{advantage}</li>
                 ))}
               </ul>
             </div>
           )}
 
-          {/* Product Details */}
           {(averageRate !== undefined || createdAt || updatedAt) && (
-            <div className="mb-4 p-4 bg-slate-50 rounded-lg border border-[#E5DED6]">
-              <h3 className="text-blue-900 font-bold text-sm mb-2">معلومات إضافية:</h3>
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <h3 className="text-slate-900 font-bold text-sm mb-2">معلومات إضافية</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                 {averageRate !== undefined && (
                   <div className="flex justify-between">
                     <span className="text-slate-500">متوسط التقييم:</span>
-                    <span className="text-blue-900 font-semibold">{averageRate.toFixed(1)} / 5</span>
+                    <span className="text-slate-900 font-semibold">{averageRate.toFixed(1)} / 5</span>
                   </div>
                 )}
                 {createdAt && (
                   <div className="flex justify-between">
                     <span className="text-slate-500">تاريخ الإضافة:</span>
-                    <span className="text-blue-900 font-semibold">
+                    <span className="text-slate-900 font-semibold">
                       {new Date(createdAt).toLocaleDateString('ar-EG')}
                     </span>
                   </div>
@@ -604,7 +658,7 @@ const Overview: React.FC<Props> = ({
                 {updatedAt && (
                   <div className="flex justify-between">
                     <span className="text-slate-500">آخر تحديث:</span>
-                    <span className="text-blue-900 font-semibold">
+                    <span className="text-slate-900 font-semibold">
                       {new Date(updatedAt).toLocaleDateString('ar-EG')}
                     </span>
                   </div>
@@ -612,105 +666,6 @@ const Overview: React.FC<Props> = ({
               </div>
             </div>
           )}
-
-          <div
-            className="flex items-center gap-2 text-amber-500 mb-4"
-            aria-label={`التقييم ${rating} من 5`}
-          >
-            {Array.from({ length: 5 }).map((_, i) => (
-              <span
-                key={i}
-                className={
-                  i < Math.round(rating) ? "text-amber-500" : "text-gray-600"
-                }
-              >
-                ★
-              </span>
-            ))}
-            <span className="text-slate-600 text-sm">({ratingCount})</span>
-          </div>
-
-          <div className="flex flex-row justify-between flex-wrap items-center gap-3">
-            {/* Only show unit selector for non-marble/granite products */}
-            {!pricePerLinearMeter && !pricePerCubicMeter && (
-              <div className="flex items-center gap-2 order-1">
-                {Object.entries(availableUnits).map(([key, label]) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => handleUnitSelect(key)}
-                    className={`w-[90px] h-[35px] px-4 py-1 rounded-full border text-sm transition-colors ${
-                      selectedUnit === key
-                        ? "border-primary text-primary bg-primary/10"
-                        : "hover:border-primary hover:text-primary hover:bg-blue-50"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {(hasLinearPrice || hasCubicPrice) && (
-              <div className="flex items-center gap-3 order-1">
-                {hasLinearPrice && (
-                  <label className="flex items-center gap-2 text-sm text-slate-700">
-                    <input
-                      type="checkbox"
-                      checked={selectedUnitType === 'linear'}
-                      onChange={() => setSelectedUnitType('linear')}
-                      className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
-                    />
-                    المتر الطولي
-                  </label>
-                )}
-                {hasCubicPrice && (
-                  <label className="flex items-center gap-2 text-sm text-slate-700">
-                    <input
-                      type="checkbox"
-                      checked={selectedUnitType === 'cubic'}
-                      onChange={() => setSelectedUnitType('cubic')}
-                      className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
-                    />
-                    المتر مربع
-                  </label>
-                )}
-              </div>
-            )}
-
-            <div className="flex items-center gap-2 order-2">
-              <div className="flex items-center gap-3 border rounded-full px-3 py-1 order-2">
-                <button
-                  aria-label="decrease"
-                  onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                  className="p-1 rounded-full hover:bg-blue-50"
-                >
-                  <Minus className="w-4 h-4" />
-                </button>
-                <span className="min-w-[1.5rem] text-center">{quantity}</span>
-                <button
-                  aria-label="increase"
-                  onClick={() =>
-                    setQuantity((prev) => Math.min(stockQty, prev + 1))
-                  }
-                  className="p-1 rounded-full hover:bg-blue-50"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="order-3 sm:ml-auto">
-                <button
-                  className="px-5 py-2 rounded-full bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-2"
-                  disabled={stockQty === 0 || isAdding}
-                  onClick={handleAddToCart}
-                >
-                  <ShoppingCart className="w-5 h-5" />
-                  أضف إلى سلة التسوق
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 

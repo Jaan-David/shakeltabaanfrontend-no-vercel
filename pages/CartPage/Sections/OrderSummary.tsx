@@ -7,6 +7,7 @@ interface Item {
   name: string;
   price: number;
   quantity: number;
+  totalPrice: number;
   image: string;
   unit: string;
   availability: string;
@@ -28,18 +29,17 @@ const OrderSummary: React.FC<Props> = ({ itemCount, total, hasItems, order, onCh
   // Calculate total quantity of all items
   const totalItemQuantity = order.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Calculate total price with multiplication for ton and cubic_meter
   const calculatedTotal = order.reduce((sum, item) => {
-    const itemTotal = (item.unit === 'طن' || item.unit === 'متر مكعب') 
-      ? (item.price  * item.quantity) 
-      : (item.price * item.quantity);
+    const itemTotal = item.totalPrice ?? item.price * item.quantity;
     return sum + itemTotal;
   }, 0);
+
+  const finalTotal = total > 0 ? total : calculatedTotal;
 
   const handleCheckout = () => {
     const checkoutData = {
       totalItemQuantity,
-      total: calculatedTotal,
+      total: finalTotal,
       hasItems,
       order
     };
@@ -55,7 +55,7 @@ const OrderSummary: React.FC<Props> = ({ itemCount, total, hasItems, order, onCh
 
   return (
     <div className="bg-white/85 backdrop-blur-md rounded-2xl shadow-sm border border-slate-200 p-6 sticky top-6">
-      <h2 className="text-xl font-bold text-slate-900 mb-6 text-center">إجمالي سلة التسوق</h2>
+      <h2 className="text-xl font-bold text-slate-900 mb-6 text-center">إجمالي الطلب للتاجر</h2>
 
       <div className="space-y-4 mb-6">
         <div className="flex justify-between text-slate-900">
@@ -64,7 +64,7 @@ const OrderSummary: React.FC<Props> = ({ itemCount, total, hasItems, order, onCh
         </div>
         <div className="flex justify-between items-baseline">
           <span className="text-slate-600">الإجمالي</span>
-          <span className="font-bold text-primary text-xl">{(calculatedTotal).toLocaleString()} ج.م</span>
+          <span className="font-bold text-primary text-xl">{finalTotal.toLocaleString()} ج.م</span>
         </div>
       </div>
 
@@ -75,7 +75,7 @@ const OrderSummary: React.FC<Props> = ({ itemCount, total, hasItems, order, onCh
         variant="primary" 
         rounded
       >
-        اتمام عملية التواصل
+        إرسال الطلب للتاجر
       </Button>
     </div>
   );

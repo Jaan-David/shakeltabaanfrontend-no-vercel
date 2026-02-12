@@ -2,40 +2,34 @@ import HomePage from "@/pages/HomePage/HomePage";
 
 import style from "./page.module.css";
 import { generateSEO } from "@/config/seo.config";
-import { buildBreadcrumbJsonLd, buildKeywordSet } from "@/utils/seo";
 
 export const metadata = generateSEO({
-  title: "شق الثعبان | رخام وجرانيت وكوارتز في مصر",
-  description: "اكتشف مصانع ومعارض الرخام والجرانيت والكوارتز في شق الثعبان مع مقارنة أسعار اليوم وتواصل مباشر في مصر.",
-  keywords: buildKeywordSet({
-    baseKeywords: [
-      "رخام شق الثعبان",
-      "اسعار الرخام",
-      "مصانع رخام",
-      "معرض رخام",
-      "جرانيت مطابخ",
-      "كوارتز مطابخ",
-    ],
-    intents: ["buy", "price", "supplier", "export"],
-  }),
+  title: "منصة بيع رخام اونلاين مصر | سوق الرخام المصري",
+  description:
+    "منصة بيع رخام اونلاين مصر وسوق الرخام المصري لشراء رخام وجرانيت وكوارتز للمطابخ والمشاريع بجودة عالية.",
+  keywords: [
+    "منصة بيع رخام اونلاين مصر",
+    "سوق الرخام المصري",
+    "منصة موردين الرخام",
+    "دليل مصانع شق التعبان",
+    "شراء رخام في مصر",
+    "رخام للبيع في القاهرة",
+    "رخام شق التعبان للبيع",
+    "جرانيت مطابخ للبيع",
+    "شراء كوارتز للمطابخ",
+    "stone marketplace egypt",
+    "marble trading platform",
+    "buy marble online egypt",
+    "marble slabs for sale egypt",
+    "granite suppliers egypt",
+    "quartz countertop supplier egypt",
+  ],
 });
 
 export default function Home() {
-  const breadcrumbSchema = buildBreadcrumbJsonLd([
-    { name: "الرئيسية", url: "/" },
-  ]);
-
   return (
-    <>
-      <div className={style.container}>
-        <HomePage />
-      </div>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(breadcrumbSchema),
-        }}
-      />
-    </>
+    <div className={style.container}>
+      <HomePage />
+    </div>
   );
 }
