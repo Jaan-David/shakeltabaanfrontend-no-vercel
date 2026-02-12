@@ -1,4 +1,4 @@
-import CategoriesPage from "@/pages/CategoriesPage/CategoriesPage";
+import CategoriesPage from "@/_pages/CategoriesPage/CategoriesPage";
 
 import style from "./page.module.css";
 import { generateSEO } from "@/config/seo.config";

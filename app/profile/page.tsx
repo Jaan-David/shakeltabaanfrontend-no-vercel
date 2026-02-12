@@ -1,7 +1,9 @@
 // import React from 'react';
-import Profile from "@/pages/ProfilePage/ProfilePage";
+import Profile from "@/_pages/ProfilePage/ProfilePage";
 
 import { generateSEO } from "@/config/seo.config";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = generateSEO({
   title: "صفحة المستخدم",

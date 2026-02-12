@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Header from "@/components/Layout/Nav/Header";
-import Footer from "@/pages/HomePage/sections/FooterSection/Footer";
+import Footer from "@/_pages/HomePage/sections/FooterSection/Footer";
 import FloatingChat from "@/components/UI/FloatingChat/FloatingChat";
 
 interface Props {

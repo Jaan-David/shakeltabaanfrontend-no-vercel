@@ -1,4 +1,4 @@
-import CategoryProductsPage from "@/pages/CategoryProductsPage/CategoryProductsPage";
+import CategoryProductsPage from "@/_pages/CategoryProductsPage/CategoryProductsPage";
 
 import style from "./page.module.css";
 import { generateSEO } from "@/config/seo.config";

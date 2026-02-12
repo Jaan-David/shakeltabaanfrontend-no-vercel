@@ -1,5 +1,7 @@
-import ProductsPage from "@/pages/ProductsPage/ProductsPage";
+import ProductsPage from "@/_pages/ProductsPage/ProductsPage";
 import { generateSEO } from "@/config/seo.config";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = generateSEO({
   title: "شراء رخام مصري اونلاين | سوق الرخام في مصر",

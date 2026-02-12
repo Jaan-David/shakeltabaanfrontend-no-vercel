@@ -1,4 +1,4 @@
-import AboutPage from "@/pages/AboutPage/Aboutpage";
+import AboutPage from "@/_pages/AboutPage/Aboutpage";
 
 import { generateSEO } from "@/config/seo.config";
 
