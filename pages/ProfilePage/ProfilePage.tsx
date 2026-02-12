@@ -171,7 +171,7 @@ const ProfilePage = () => {
   }, [isMounted, fetchUserProfile]);
 
   useEffect(() => {
-    if (!isMounted) return;
+    if (!isMounted || !searchParams) return;
 
     const tab = searchParams.get('tab');
     if (tab === 'addresses') {
