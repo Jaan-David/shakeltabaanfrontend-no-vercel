@@ -1,7 +1,9 @@
-import HomePage from "@/pages/HomePage/HomePage";
+import HomePage from "@/_pages/HomePage/HomePage";
 
 import style from "./page.module.css";
 import { generateSEO } from "@/config/seo.config";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = generateSEO({
   title: "منصة بيع رخام اونلاين مصر | سوق الرخام المصري",

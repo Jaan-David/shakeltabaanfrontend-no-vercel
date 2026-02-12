@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 
 // Dynamically import the CartPage component with SSR disabled
-const CartPage = dynamic(() => import("@/pages/CartPage/CartPage"), {
+const CartPage = dynamic(() => import("@/_pages/CartPage/CartPage"), {
   ssr: false,
   loading: () => (
     <div className="min-h-screen bg-white font-beiruti flex items-center justify-center">

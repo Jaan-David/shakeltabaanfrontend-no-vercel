@@ -5,10 +5,10 @@ import { normalizeMediaList } from '@/utils/media';
 // import { console } from 'inspector';
 
 // Lazy load heavy components
-const Overview = lazy(() => import('@/pages/ProductPage/Sections/Overview'));
-const Specs = lazy(() => import('@/pages/ProductPage/Sections/Specs'));
-const Ratings = lazy(() => import('@/pages/ProductPage/Sections/Ratings'));
-const Reviews = lazy(() => import('@/pages/ProductPage/Sections/Reviews'));
+const Overview = lazy(() => import('@/_pages/ProductPage/Sections/Overview'));
+const Specs = lazy(() => import('@/_pages/ProductPage/Sections/Specs'));
+const Ratings = lazy(() => import('@/_pages/ProductPage/Sections/Ratings'));
+const Reviews = lazy(() => import('@/_pages/ProductPage/Sections/Reviews'));
 const RelatedProducts = lazy(() => import('@/components/UI/RelatedProducts/RelatedProducts'));
 
 export type ProductData = Product;

@@ -5,13 +5,13 @@ import styles from "./profile.module.css";
 import { useRouter, useSearchParams } from "next/navigation";
 
 // Components - Keep critical components for initial render
-import TopMetrics from "@/pages/ProfilePage/sections/TopScetion/Top";
-import InformationSection from "@/pages/ProfilePage/sections/InformationSection/InformationSection";
+import TopMetrics from "@/_pages/ProfilePage/sections/TopScetion/Top";
+import InformationSection from "@/_pages/ProfilePage/sections/InformationSection/InformationSection";
 import AccountList from "@/components/UI/Profile/RightSection/List";
 
 // PERFORMANCE: Lazy load EditProfileSection (only loads when box is selected)
 const EditProfileSection = dynamic(
-  () => import("@/pages/ProfilePage/sections/EditProfile/EditProfileSection"),
+  () => import("@/_pages/ProfilePage/sections/EditProfile/EditProfileSection"),
   {
     loading: () => (
       <div className={styles.loading_container}>
