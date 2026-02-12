@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import ContactSection from '@/pages/HomePage/sections/FooterSection/Sections/ContactSection/ContactSection';
-import QuickLinks from '@/pages/HomePage/sections/FooterSection/Sections/QuickLinksSection/QuickLinks';
-import CategoriesSection from '@/pages/HomePage/sections/FooterSection/Sections/CategoriesSection/CategoriesSection';
-import AboutUsSection from '@/pages/HomePage/sections/FooterSection/Sections/AboutUsSection/AboutUsSection';
+import Image from 'next/image';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import FooterColumn from './components/FooterColumn';
+import FooterSocials from './components/FooterSocials';
 
 // Dynamically import FloatingChat with SSR disabled
 const FloatingChat = dynamic(
@@ -14,49 +14,113 @@ const FloatingChat = dynamic(
 const Footer = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
-  const handleContactClick = () => {
-    setIsChatOpen(true);
-  };
-
   const handleChatClose = () => {
     setIsChatOpen(false);
   };
 
   return (
-    <footer className="relative w-full min-h-[300px] md:min-h-[400px] overflow-hidden bg-[#1e293b]">
-      {/* Background */}
-      <div className="absolute inset-0 flex items-center justify-center z-0">
-        <div className="relative w-full h-full bg-[#1e293b]"></div>
-      </div>
-      <div className="absolute top-0 left-1/2 w-[90%] h-px bg-[#f1f5f9]/20 -translate-x-1/2 -translate-y-1/2"></div>
+    <footer className="relative w-full overflow-hidden bg-slate-900" dir="rtl">
+      <div className="mx-auto flex max-w-6xl flex-col gap-12 px-4 py-12">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
+          <FooterColumn title="عن المنصة">
+            <div className="flex items-center gap-3">
+              <Image
+                src="/logo/logo2.png"
+                alt="منصة شق الثعبان"
+                width={56}
+                height={56}
+                className="h-14 w-14 object-contain"
+              />
+              <span className="text-lg font-semibold text-white">منصة شق الثعبان</span>
+            </div>
+            <p className="text-sm leading-6 text-slate-300">
+              سوق احترافي للرخام والجرانيت والكوارتز يربطك بالموردين الموثوقين.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {['موردين موثوقين', 'عروض متعددة', 'طلبات خاصة'].map((item) => (
+                <span
+                  key={item}
+                  className="rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-200"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          </FooterColumn>
 
-      <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col mt-[-20px]" >
-        
-        {/* Main Footer Content */}
-        <div className="w-full lg:w-[93%] mx-auto flex-1 flex flex-col lg:flex-row justify-between items-start gap-8 lg:gap-4 py-8">
-          <AboutUsSection /> 
-          <CategoriesSection />
-          <QuickLinks onContactClick={handleContactClick} />
-          <ContactSection />
+          <FooterColumn title="روابط سريعة">
+            <nav className="flex flex-col gap-2 text-sm">
+              <Link className="text-slate-300 transition hover:text-white" href="/">
+                الرئيسية
+              </Link>
+              <Link className="text-slate-300 transition hover:text-white" href="/products">
+                المنتجات
+              </Link>
+              <Link className="text-slate-300 transition hover:text-white" href="/inquiries">
+                طلباتك الخاصة
+              </Link>
+              <Link className="text-slate-300 transition hover:text-white" href="/marble-info">
+                ازاي تختار
+              </Link>
+              <Link className="text-slate-300 transition hover:text-white" href="/about">
+                من نحن
+              </Link>
+            </nav>
+          </FooterColumn>
+
+          <FooterColumn title="الفئات">
+            <ul className="flex flex-col gap-2 text-sm text-slate-300">
+              <li>
+                <Link className="transition hover:text-white" href="/products?category=رخام%20مصري">
+                  رخام مصري
+                </Link>
+              </li>
+              <li>
+                <Link className="transition hover:text-white" href="/products?category=جرانيت%20مصري">
+                  جرانيت مصري
+                </Link>
+              </li>
+              <li>
+                <Link className="transition hover:text-white" href="/products?category=رخام%20مستورد">
+                  رخام مستورد
+                </Link>
+              </li>
+              <li>
+                <Link className="transition hover:text-white" href="/products?category=جرانيت%20مستورد">
+                  جرانيت مستورد
+                </Link>
+              </li>
+              <li>
+                <Link className="transition hover:text-white" href="/products?category=كوارتز">
+                  كوارتز
+                </Link>
+              </li>
+            </ul>
+          </FooterColumn>
+
+          <FooterColumn title="تواصل معنا">
+            <div className="flex flex-col gap-2 text-sm text-slate-300">
+              <a className="transition hover:text-white" href="tel:+201204246538">
+                +201204246538
+              </a>
+              <a className="transition hover:text-white" href="mailto:info@shak-elt3ban.com">
+                info@shak-elt3ban.com
+              </a>
+              <a className="transition hover:text-white" href="https://wa.me/201204246538">
+                واتساب مباشر
+              </a>
+            </div>
+            <FooterSocials />
+          </FooterColumn>
         </div>
-           
-        {/* Copyright */}
-        <div className="w-full py-4 border-t border-[#f1f5f9]/20 text-center mb-[120px] relative">
-          <div className="absolute top-0 left-1/2 w-[90%] h-px bg-[#f1f5f9]/20 -translate-x-1/2 -translate-y-1/2"></div>
-          <p className="text-[#f1f5f9] font-beiruti font-medium text-sm">
-            2026 جميع الحقوق محفوظة
-          </p>
-          <p className="text-[#f1f5f9] font-beiruti font-medium text-sm mt-2">
-            رقم التسجيل الضريبى: ٧٧٣٩٠٢٦٥١
-          </p>
+
+        <div className="border-t border-slate-800 pt-6 text-center text-xs text-slate-400">
+          <p>2026 جميع الحقوق محفوظة</p>
+          <p className="mt-2">رقم التسجيل الضريبى: ٧٧٣٩٠٢٦٥١</p>
         </div>
       </div>
-      
-      {/* Floating Chat */}
-      <FloatingChat 
-        isOpen={isChatOpen} 
-        onOpenChange={handleChatClose}
-      />
+
+      <FloatingChat isOpen={isChatOpen} onOpenChange={handleChatClose} />
     </footer>
   );
 };

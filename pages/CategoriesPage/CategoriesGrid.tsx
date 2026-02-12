@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import Image from "next/image";
+import CategoryCard from "./CategoryCard";
 import styles from './CategoriesGrid.module.css';
 
 
@@ -15,6 +15,7 @@ export interface Category {
 interface CategoriesGridProps {
   categories: Category[];
   onCategoryClick?: (categoryId: string, categoryName: string) => void;
+  isLoading?: boolean;
 }
 
 const categoryImages: Record<string, string> = {
@@ -25,7 +26,26 @@ const categoryImages: Record<string, string> = {
   "كوارتز": "/categories/4.jpg",
   "رخام مصنع": "/categories/6.jpg",
 };
-export default function CategoriesGrid({ categories = [], onCategoryClick }: CategoriesGridProps) {
+const CATEGORY_FALLBACKS: Record<string, string> = {
+  "جرانيت مستورد": "جرانيت مستورد فاخر",
+  "جرانيت مصرى": "جرانيت مصري عالي المتانة",
+  "رخام مستورد": "رخام مستورد بتشطيبات راقية",
+  "رخام مصرى": "رخام مصري عالي الجودة",
+  "كوارتز": "كوارتز عملي ولمسات عصرية",
+  "رخام مصنع": "رخام مصنع بتكلفة اقتصادية",
+};
+
+const getCategoryType = (name: string): "رخام" | "جرانيت" | "كوارتز" => {
+  if (name.includes("جرانيت")) return "جرانيت";
+  if (name.includes("كوارتز")) return "كوارتز";
+  return "رخام";
+};
+
+export default function CategoriesGrid({
+  categories = [],
+  onCategoryClick,
+  isLoading = false,
+}: CategoriesGridProps) {
   const handleCategoryClick = (category: Category) => {
     if (onCategoryClick) {
       onCategoryClick(category.id, category.name);
@@ -34,41 +54,25 @@ export default function CategoriesGrid({ categories = [], onCategoryClick }: Cat
 
   return (
     <div className={styles.grid}>
-      {categories.length === 0 ? (
-        <div className={styles.categoryInfo}>
-          <h3 className={"marble-heading " + styles.categoryName}>لا توجد تصنيفات متاحة</h3>
+      {isLoading ? (
+        Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className={styles.skeletonCard} aria-hidden="true" />
+        ))
+      ) : categories.length === 0 ? (
+        <div className={styles.emptyState}>
+          <h3 className={styles.emptyTitle}>لا توجد تصنيفات متاحة</h3>
+          <p className={styles.emptySubtitle}>سنضيف المزيد من التصنيفات قريباً.</p>
         </div>
       ) : (
         categories.map((category) => (
-          <div
+          <CategoryCard
             key={category.id}
-            className={"marble-card " + styles.categoryCard}
+            title={category.name}
+            description={category.description || CATEGORY_FALLBACKS[category.name] || "تصنيفات مختارة بعناية"}
+            badge={getCategoryType(category.name)}
+            image={categoryImages[category.name] || "/acessts/placeholder.svg"}
             onClick={() => handleCategoryClick(category)}
-          >
-            <div className={styles.imageContainer}>
-              <Image
-                src={categoryImages[category.name] || '/acessts/placeholder.svg'}
-                alt={category.name}
-                width={320}
-                height={200}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                loading="lazy"
-                className={styles.categoryImage}
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = '/acessts/placeholder.svg';
-                }}
-              />
-
-            </div>
-            
-            <div className={styles.categoryInfo}>
-              <h3 className={"marble-heading " + styles.categoryName}>{category.name}</h3>
-              {category.description ? (
-                <p className={styles.categoryDescription}>{category.description}</p>
-              ) : null}
-            </div>
-          </div>
+          />
         ))
       )}
     </div>

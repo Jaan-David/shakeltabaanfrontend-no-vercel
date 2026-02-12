@@ -3,9 +3,8 @@ import { useEffect, useState } from "react";
 import { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { CustomMedia } from "@/components/UI/Image/Images";
 import { getPrimaryMedia } from "@/utils/media";
-import { useRouter } from "next/navigation";
+import Card from "@/components/UI/Card/Card";
 import CategoriesGrid from "@/pages/CategoriesPage/CategoriesGrid";
 import { Category as CategoryType } from '@/services/product/categories';
 import PartnersSection from "@/pages/HomePage/PartnersSection";
@@ -13,7 +12,6 @@ import { productService } from '@/services/api/products';
 
 
 export default function HomeContent() {
-  const router = useRouter();
   const apiBaseUrl =
     process.env.NEXT_PUBLIC_API_URL || "https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net/app/v1";
   const imageBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || apiBaseUrl).replace(
@@ -48,6 +46,13 @@ export default function HomeContent() {
     if (src.startsWith("http://") || src.startsWith("https://")) return src;
     if (src.startsWith("/")) return src;
     return `${imageBaseUrl}/${src.replace(/^\//, "")}`;
+  };
+
+  const getOfferStatus = (product: any): boolean => {
+    if (product?.isOffer) return true;
+    if (product?.offerLinearPrice && Number(product.offerLinearPrice) > 0) return true;
+    if (product?.offerCubicPrice && Number(product.offerCubicPrice) > 0) return true;
+    return false;
   };
 
   useEffect(() => {
@@ -107,10 +112,6 @@ export default function HomeContent() {
     }
   };
 
-  const handleProductClick = (productId: string) => {
-    router.push(`/product/${encodeURIComponent(productId)}`);
-  };
-
   const handleBackToCategories = () => {
     setShowProducts(false);
     setSelectedCategory('');
@@ -135,7 +136,7 @@ export default function HomeContent() {
   return (
     <div className="min-h-screen bg-white">
       {/* Slider */}
-      <section className="relative w-full mb-16 bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400 rounded-b-3xl overflow-hidden shadow-2xl border-b border-blue-200">
+      <section className="relative w-full -mt-2 sm:-mt-4 mb-16 bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400 rounded-b-3xl overflow-hidden shadow-2xl border-b border-blue-200">
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-white/10"></div>
         <div className="relative w-full h-[240px] sm:h-[380px] md:h-[520px]">
           <Image
@@ -197,22 +198,44 @@ export default function HomeContent() {
           </div>
         </div>
       </section>
-      {/* Custom Order CTA */}
-      <section className="px-4">
-        <div className="max-w-5xl mx-auto mb-16">
-          <div className="rounded-2xl border border-blue-100 inquiries-cta-bg p-8 sm:p-10 shadow-sm">
-            <div className="flex flex-col justify-between min-h-[180px]">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 text-right">
-                طلبك دلوقتي
-              </h2>
-              <div className="flex justify-end">
-                <button
-                  onClick={() => router.push('/inquiries')}
-                  aria-label="إنشئ طلبك الخاص"
-                  className="inline-flex items-center justify-center rounded-xl bg-primary px-8 py-3 text-white text-base sm:text-lg font-semibold transition-colors hover:bg-secondary"
+      {/* Custom Inquiries Hero */}
+      <section className="px-4 pt-10 pb-12">
+        <div className="mx-auto max-w-6xl">
+          <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50 via-white to-slate-100 p-6 shadow-lg sm:p-10">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.25),_transparent_55%)]" />
+            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between" dir="rtl">
+              <div className="max-w-2xl space-y-4">
+                <h1 className="text-3xl font-extrabold text-slate-900 md:text-4xl">
+                  اعمل طلبك على مزاجك
+                </h1>
+                <p className="text-base text-slate-600 md:text-lg">
+                  اكتب مواصفات الرخام أو الجرانيت اللي محتاجه، وارفق صور أو تصميمات، وخلي مصانع ومعارض شق التعبان تنافسك بأفضل سعر.
+                </p>
+                <ul className="space-y-3 text-sm text-slate-700">
+                  <li className="flex items-center gap-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-50 text-blue-600">✓</span>
+                    عروض أسعار من أكتر من مورد
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-50 text-blue-600">✓</span>
+                    توفير وقت ومجهود البحث
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-50 text-blue-600">✓</span>
+                    تواصل مباشر مع المصنع أو المعرض
+                  </li>
+                </ul>
+              </div>
+
+              <div className="flex flex-col items-start gap-4">
+                <Link
+                  href="/inquiries"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-blue-200/60 transition hover:-translate-y-0.5 hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
                 >
                   إنشئ طلبك الخاص
-                </button>
+                  <span aria-hidden="true">→</span>
+                </Link>
+                <p className="text-xs text-slate-500">جاهز تبدأ؟ أرسل الطلب واستلم العروض خلال ساعات.</p>
               </div>
             </div>
           </div>
@@ -226,16 +249,17 @@ export default function HomeContent() {
               التصنيفات
             </h2>
             <p className="text-lg text-slate-600">
-              اختر نوع الرخام أو الجرانيت
+              اختر نوع الرخام أو الجرانيت المناسب لك
+            </p>
+            <p className="text-sm text-slate-500 mt-2">
+              ابدأ التصفح حسب نوع الحجر لتسهيل عملية البحث
             </p>
           </div>
-          {categoriesLoading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
-            </div>
-          ) : (
-            <CategoriesGrid categories={categories} onCategoryClick={handleCategoryClick} />
-          )}
+          <CategoriesGrid
+            categories={categories}
+            onCategoryClick={handleCategoryClick}
+            isLoading={categoriesLoading}
+          />
         </section>
       ) : (
         /* Products Section */
@@ -273,110 +297,38 @@ export default function HomeContent() {
               <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500"></div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredProducts.map((product) => (
-                <div
-                  key={product._id || product.id}
-                  className="group marble-card p-6 hover:border-blue-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/20 transform hover:-translate-y-2 cursor-pointer relative"
-                >
-                  {/* Offer Badge */}
-                  {(product.isOffer || (product.offerLinearPrice !== null && product.offerLinearPrice !== undefined && Number(product.offerLinearPrice) > 0) || (product.offerCubicPrice !== null && product.offerCubicPrice !== undefined && Number(product.offerCubicPrice) > 0)) && (
-                    <div className="absolute top-2 left-2 z-10 bg-red-600 text-black text-xs font-extrabold px-3 py-1 rounded-md border-2 border-red-700 shadow-lg">
-                      عرض خاص
-                    </div>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {filteredProducts.map((product, index) => (
+                <Card
+                  key={product._id || product.id || index}
+                  productId={String(product._id || product.id || index)}
+                  productImg={normalizeProductImage(
+                    getPrimaryMedia(
+                      [product.imageList?.[0] || null, product.image || null],
+                      "/acessts/NoImage.jpg"
+                    )
                   )}
-                  
-                  <div className="relative overflow-hidden rounded-xl mb-4">
-                    <CustomMedia
-                      src={normalizeProductImage(
-                        getPrimaryMedia(
-                          [product.imageList?.[0] || null, product.image || null],
-                          "/acessts/NoImage.jpg"
-                        )
-                      )}
-                      alt={product.name || "صورة المنتج"}
-                      width={420}
-                      height={240}
-                      className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
-                  <div className="space-y-3">
-                    {/* Organization Name and ID */}
-                    {(product.organizationName || product.organizationId) && (
-                      <div className="flex items-center justify-center gap-2 bg-blue-50 border border-blue-200 rounded-lg p-2">
-                        <span className="text-xs font-semibold text-blue-700">
-                          {product.organizationName || product.organizationId}
-                        </span>
-                      </div>
-                    )}
-                    
-                    <h3 className="text-slate-900 font-bold text-lg leading-tight line-clamp-2 group-hover:text-blue-600 transition-colors">
-                      {product.name}
-                    </h3>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        <span className="text-yellow-400">★</span>
-                        <span className="text-slate-700 text-sm">
-                          {typeof product.averageRate === 'number' ? product.averageRate : 4.5}
-                        </span>
-                        <span className="text-slate-600 text-sm">
-                          ({Array.isArray(product.productReview) ? product.productReview.length : 0})
-                        </span>
-                      </div>
-                    </div>
-                    
-                    {/* Price Display - Marble/Granite Fields */}
-                    {(product.pricePerCubicMeter || product.pricePerLinearMeter) ? (
-                      <div className="flex flex-col gap-2 text-right">
-                        {product.pricePerLinearMeter && (
-                          <div className="flex flex-col">
-                            <span className="text-xs text-slate-600">المتر الطولي:</span>
-                            {product.offerLinearPrice !== null && product.offerLinearPrice !== undefined && Number(product.offerLinearPrice) > 0 ? (
-                              <>
-                                <span className="text-sm text-slate-500 line-through">{Number(product.pricePerLinearMeter).toLocaleString()} ج.م</span>
-                                <span className="text-xl font-bold text-red-600">{Number(product.offerLinearPrice).toLocaleString()} ج.م</span>
-                              </>
-                            ) : (
-                              <span className="text-xl font-bold text-green-400">{Number(product.pricePerLinearMeter).toLocaleString()} ج.م</span>
-                            )}
-                          </div>
-                        )}
-                        {product.pricePerCubicMeter && (
-                          <div className="flex flex-col">
-                            <span className="text-xs text-slate-600">المتر مربع:</span>
-                            {product.offerCubicPrice !== null && product.offerCubicPrice !== undefined && Number(product.offerCubicPrice) > 0 ? (
-                              <>
-                                <span className="text-sm text-slate-500 line-through">{Number(product.pricePerCubicMeter).toLocaleString()} ج.م</span>
-                                <span className="text-xl font-bold text-red-600">{Number(product.offerCubicPrice).toLocaleString()} ج.م</span>
-                              </>
-                            ) : (
-                              <span className="text-xl font-bold text-green-400">{Number(product.pricePerCubicMeter).toLocaleString()} ج.م</span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-green-400">
-                          {product.price} ج.م
-                        </p>
-                        {typeof product.PurchasePrice === 'number' && product.PurchasePrice < product.price ? (
-                          <p className="text-sm text-slate-500 line-through">
-                            {product.PurchasePrice} ج.م
-                          </p>
-                        ) : null}
-                      </div>
-                    )}
-                    
-                    <button
-                      onClick={() => handleProductClick(product._id || product.id)}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-                    >
-                      عرض التفاصيل
-                    </button>
-                  </div>
-                </div>
+                  productName={product.name || "منتج"}
+                  productCategory={product.category || "غير محدد"}
+                  productPrice={String(product.price || 0)}
+                  hasOffer={getOfferStatus(product)}
+                  IsKG={product.IsKG}
+                  IsTON={product.IsTON}
+                  IsLITER={product.IsLITER}
+                  IsCUBIC_METER={product.IsCUBIC_METER}
+                  pricePerLinearMeter={product.pricePerLinearMeter}
+                  pricePerCubicMeter={product.pricePerCubicMeter}
+                  offerLinearPrice={product.offerLinearPrice}
+                  offerCubicPrice={product.offerCubicPrice}
+                  color={product.color}
+                  qualityGrade={product.qualityGrade}
+                  isOffer={product.isOffer}
+                  organizationName={product.organizationName}
+                  organizationId={product.organizationId}
+                  showOrganizationInline
+                  showQualityGrade={false}
+                  showMinimalMarbleInfo
+                />
               ))}
             </div>
           )}

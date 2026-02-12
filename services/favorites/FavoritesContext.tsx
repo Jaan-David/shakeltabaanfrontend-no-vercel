@@ -10,6 +10,18 @@ export type FavoriteItem = {
   name: string;
   price: number;
   image: string;
+  // Extended marble/granite product fields
+  pricePerLinearMeter?: number;
+  pricePerCubicMeter?: number;
+  offerLinearPrice?: number | null;
+  offerCubicPrice?: number | null;
+  category?: string;
+  color?: string;
+  qualityGrade?: string;
+  isOffer?: boolean;
+  organizationName?: string;
+  organizationId?: string;
+  stockQty?: number;
 };
 
 type FavoritesContextValue = {
@@ -76,11 +88,33 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
               const images = p.imageList || p.images || [];
               const img = Array.isArray(images) ? (images[0] || '/acessts/NoImage.jpg') : (images || '/acessts/NoImage.jpg');
 
+              // Calculate price from marble/granite pricing (pricePerLinearMeter or pricePerCubicMeter)
+              let calculatedPrice = 0;
+              if (p.pricePerLinearMeter && Number(p.pricePerLinearMeter) > 0) {
+                calculatedPrice = Number(p.pricePerLinearMeter);
+              } else if (p.pricePerCubicMeter && Number(p.pricePerCubicMeter) > 0) {
+                calculatedPrice = Number(p.pricePerCubicMeter);
+              } else {
+                calculatedPrice = Number(p.price) || 0;
+              }
+
               return {
                 id: String(p._id ?? w.productId?._id ?? w._id),
                 name: p.name || p.title || 'منتج',
-                price: Number(p.price) || 0,
+                price: calculatedPrice,
                 image: typeof img === 'string' ? img : (img?.url || '/acessts/NoImage.jpg'),
+                // Include marble/granite specific fields
+                pricePerLinearMeter: p.pricePerLinearMeter ? Number(p.pricePerLinearMeter) : undefined,
+                pricePerCubicMeter: p.pricePerCubicMeter ? Number(p.pricePerCubicMeter) : undefined,
+                offerLinearPrice: p.offerLinearPrice ? Number(p.offerLinearPrice) : null,
+                offerCubicPrice: p.offerCubicPrice ? Number(p.offerCubicPrice) : null,
+                category: p.category || undefined,
+                color: p.color || undefined,
+                qualityGrade: p.qualityGrade || undefined,
+                isOffer: p.isOffer || false,
+                organizationName: p.organizationName || undefined,
+                organizationId: p.organizationId || undefined,
+                stockQty: p.stockQty !== undefined ? Number(p.stockQty) : undefined,
               };
             });
             setItems(mapped);
