@@ -1,5 +1,7 @@
 // config/seo.config.ts - Complete SEO Configuration
 
+export const canonicalBaseUrl = 'https://www.shkelteaban.com';
+
 export const seoConfig = {
   siteName: 'شق التعبان',
   siteDescription: "اول واكبر منصة للرخام",
@@ -99,7 +101,7 @@ export const generateSEO = ({
   type?: 'website' | 'article' | 'product';
   noIndex?: boolean;
 }) => {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.shkelteaban.com';
+  const baseUrl = canonicalBaseUrl;
   const fullUrl = url ? `${baseUrl}${url}` : baseUrl;
   const ogImage = image || `${baseUrl}${seoConfig.images.ogImage}`;
   
@@ -134,6 +136,7 @@ export const generateSEO = ({
       languages: {
         'ar': fullUrl,
         'en': `${baseUrl}/en${url || ''}`,
+        'x-default': baseUrl,
       },
     },
   };
@@ -147,8 +150,8 @@ export const organizationSchema = {
   '@type': 'Organization',
   'name': seoConfig.siteName,
   'description': seoConfig.siteDescription,
-  'url': process.env.NEXT_PUBLIC_BASE_URL || 'https://www.shkelteaban.com',
-  'logo': `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.shkelteaban.com'}${seoConfig.images.logo}`,
+  'url': canonicalBaseUrl,
+  'logo': `${canonicalBaseUrl}${seoConfig.images.logo}`,
   'contactPoint': {
     '@type': 'ContactPoint',
     'telephone': seoConfig.contact.phone,
@@ -174,12 +177,12 @@ export const websiteSchema = {
   '@type': 'WebSite',
   'name': seoConfig.siteName,
   'description': seoConfig.siteDescription,
-  'url': process.env.NEXT_PUBLIC_BASE_URL || 'https://www.shkelteaban.com',
+  'url': canonicalBaseUrl,
   'potentialAction': {
     '@type': 'SearchAction',
     'target': {
       '@type': 'EntryPoint',
-      'urlTemplate': `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.shkelteaban.com'}/search?q={search_term_string}`,
+      'urlTemplate': `${canonicalBaseUrl}/search?q={search_term_string}`,
     },
     'query-input': 'required name=search_term_string',
   },
@@ -190,7 +193,7 @@ export const websiteSchema = {
 // Breadcrumb Helper
 // ============================================
 export const generateBreadcrumb = (items: Array<{ name: string; url: string }>) => {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.shkelteaban.com';
+  const baseUrl = canonicalBaseUrl;
   
   return {
     '@context': 'https://schema.org',
