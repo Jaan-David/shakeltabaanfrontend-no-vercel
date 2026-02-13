@@ -3,8 +3,7 @@ import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import styles from './../../profile.module.css';
 
-// PERFORMANCE: Only import Welcome component (shown by default)
-import Welcome from '@/components/UI/Profile/leftSection/Welcome/Welcome';
+import DashboardHome from '@/_pages/ProfilePage/sections/Dashboard/DashboardHome';
 
 // PERFORMANCE: Lazy load ALL other components - they load ONLY when clicked
 const InfoDetails = dynamic(
@@ -92,9 +91,22 @@ interface EditProfileSectionProps {
   className?: any; 
   setUser?: React.Dispatch<React.SetStateAction<User | null>>;
   user?: User | null;
+  metrics?: Array<{
+    icon: React.ReactNode;
+    number: number;
+    title: string;
+    className?: string;
+    onClick?: () => void;
+  }>;
 }
 
-const EditProfileSection: React.FC<EditProfileSectionProps> = ({ box, setBox, user, setUser }) => {
+const EditProfileSection: React.FC<EditProfileSectionProps> = ({
+  box,
+  setBox,
+  user,
+  setUser,
+  metrics = [],
+}) => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [orders, setOrders] = useState<OrderItem[]>([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
@@ -103,10 +115,10 @@ const EditProfileSection: React.FC<EditProfileSectionProps> = ({ box, setBox, us
   // PERFORMANCE: Only fetch orders when the tab is selected
   useEffect(() => {
     const fetchOrders = async () => {
-      if (box === 'طلباتك') {
+      if (box === 'طلباتك' || box === '') {
         setIsLoadingOrders(true);
         setOrdersError(null);
-        
+
         try {
           orderService.debugAuth();
           const apiOrders = await orderService.getUserOrders();
@@ -185,7 +197,16 @@ const EditProfileSection: React.FC<EditProfileSectionProps> = ({ box, setBox, us
   const renderComponent = () => {
     // When box is empty or undefined, show Welcome component (no lazy loading needed)
     if (!box || box === '') {
-      return <Welcome name={user?.firstName || ""} />;
+      return (
+        <DashboardHome
+          name={user?.firstName || ''}
+          metrics={metrics}
+          onSelectSection={(value) => setBox?.(value)}
+          orders={orders}
+          isLoadingOrders={isLoadingOrders}
+          ordersError={ordersError}
+        />
+      );
     }
 
     // All other components are lazy loaded

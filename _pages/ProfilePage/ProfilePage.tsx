@@ -5,7 +5,6 @@ import styles from "./profile.module.css";
 import { useRouter, useSearchParams } from "next/navigation";
 
 // Components - Keep critical components for initial render
-import TopMetrics from "@/_pages/ProfilePage/sections/TopScetion/Top";
 import InformationSection from "@/_pages/ProfilePage/sections/InformationSection/InformationSection";
 import AccountList from "@/components/UI/Profile/RightSection/List";
 
@@ -326,6 +325,14 @@ const ProfilePage = () => {
     );
   }
 
+  const menuOptions = [
+    "تفاصيل الحساب",
+    "تغيير كلمة المرور",
+    "عناوينك",
+    "طلباتك",
+    "تسجيل الخروج",
+  ];
+
   return (
     <div className={styles.profile_page}>
       {/* Session warning banner */}
@@ -350,46 +357,69 @@ const ProfilePage = () => {
         </div>
       )}
 
-      <TopMetrics metrics={metricsData} className={styles.metric_card} />
+      <div className={styles.page_container}>
+        <div className={styles.layout_grid}>
+          <div
+            className={`${styles.main} ${
+              isMobile && (showMobileMain || !box) ? styles.mobile_active : ""
+            }`}
+          >
+            {/* Mobile Back Button */}
+            {isMobile && showMobileMain && box && (
+              <div
+                className={styles.mobile_back_button}
+                onClick={handleMobileBack}
+              >
+                <BackIcon />
+                <span>العودة</span>
+              </div>
+            )}
 
-      <div className={styles.mid}>
-        <div
-          className={`${styles.right_section} ${
-            isMobile && showMobileMain ? styles.mobile_hidden : ""
-          }`}
-        >
-          <InformationSection userProp={user} />
-          <hr />
-          <AccountList
-            onItemClick={handleMobileNavigation}
-            user={user}
-            setUser={setUser}
-          />
-        </div>
+            {/* PERFORMANCE: Always render EditProfileSection, it shows Welcome by default */}
+            <EditProfileSection
+              box={box}
+              setBox={setBox}
+              user={user}
+              setUser={setUser}
+              metrics={metricsData}
+            />
+          </div>
 
-        <div
-          className={`${styles.main} ${
-            isMobile && showMobileMain ? styles.mobile_active : ""
-          }`}
-        >
-          {/* Mobile Back Button */}
-          {isMobile && showMobileMain && (
-            <div
-              className={styles.mobile_back_button}
-              onClick={handleMobileBack}
-            >
-              <BackIcon />
-              <span>العودة</span>
-            </div>
-          )}
+          <aside
+            className={`${styles.right_section} ${
+              isMobile && showMobileMain && box ? styles.mobile_hidden : ""
+            }`}
+          >
+            <InformationSection userProp={user} />
+            <div className={styles.sidebar_divider}></div>
 
-          {/* PERFORMANCE: Always render EditProfileSection, it shows Welcome by default */}
-          <EditProfileSection
-            box={box}
-            setBox={setBox}
-            user={user}
-            setUser={setUser}
-          />
+            {isMobile ? (
+              <div className={styles.mobile_menu}>
+                <label className={styles.mobile_menu_label}>
+                  اختيار القسم
+                </label>
+                <select
+                  className={styles.mobile_menu_select}
+                  value={box}
+                  onChange={(event) => handleMobileNavigation(event.target.value)}
+                >
+                  <option value="">لوحة التحكم</option>
+                  {menuOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <AccountList
+                onItemClick={handleMobileNavigation}
+                user={user}
+                setUser={setUser}
+                activeItem={box}
+              />
+            )}
+          </aside>
         </div>
       </div>
     </div>

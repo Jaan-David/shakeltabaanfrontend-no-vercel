@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { KeyRound, LogOut, MapPin, ShoppingBag, User } from 'lucide-react';
 
 //styles
 import styles from '@/components/UI/Profile/profile.module.css';
@@ -32,20 +32,24 @@ interface AccountListProps {
   onItemClick?: (item: string) => void;
   user?: User | null;
   setUser?: React.Dispatch<React.SetStateAction<User | null>>;
+  activeItem?: string;
 }
 
-const AccountList: React.FC<AccountListProps> = ({ onItemClick, user, setUser }) => {
+const AccountList: React.FC<AccountListProps> = ({
+  onItemClick,
+  user,
+  setUser,
+  activeItem,
+}) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const router = useRouter();
 
   const menuItems = [
-    'تفاصيل الحساب',
-    'تغيير كلمة المرور',
-    'عناوينك',
-    'طلباتك',
-    // 'مدفوعاتك',
-    'تسجيل الخروج'
+    { label: 'تفاصيل الحساب', icon: User },
+    { label: 'تغيير كلمة المرور', icon: KeyRound },
+    { label: 'عناوينك', icon: MapPin },
+    { label: 'طلباتك', icon: ShoppingBag },
+    { label: 'تسجيل الخروج', icon: LogOut },
   ];
 
   
@@ -75,8 +79,9 @@ const AccountList: React.FC<AccountListProps> = ({ onItemClick, user, setUser })
     <div className={styles.container_list}>
       <div className={styles.list}>
         {menuItems.map((item, index) => {
-          const isLogout = item === 'تسجيل الخروج';
-          const isSelected = selectedIndex === index;
+          const isLogout = item.label === 'تسجيل الخروج';
+          const isSelected = activeItem ? activeItem === item.label : selectedIndex === index;
+          const Icon = item.icon;
           
           return (
             <div
@@ -90,7 +95,7 @@ const AccountList: React.FC<AccountListProps> = ({ onItemClick, user, setUser })
                     ? styles.selected 
                     : styles.default
               } ${isLoggingOut && isLogout ? styles.loading : ''}`}
-              onClick={() => handleItemClick(item, index)}
+              onClick={() => handleItemClick(item.label, index)}
               style={{
                 cursor: isLoggingOut && isLogout ? 'not-allowed' : 'pointer',
                 opacity: isLoggingOut && isLogout ? 0.6 : 1
@@ -102,7 +107,12 @@ const AccountList: React.FC<AccountListProps> = ({ onItemClick, user, setUser })
                   {/* You can add a loading spinner here if you have one */}
                 </span>
               ) : (
-                item
+                <>
+                  <span className={styles.listItemIcon}>
+                    <Icon />
+                  </span>
+                  <span className={styles.listItemText}>{item.label}</span>
+                </>
               )}
             </div>
           );
