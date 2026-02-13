@@ -5,6 +5,7 @@ import AppShell from "@/components/Layout/AppShell";
 import ClientProviders from "@/components/providers/ClientProvider";
 import { Metadata } from "next";
 import Head from "next/head";
+import Script from "next/script";
 import { canonicalBaseUrl, seoConfig, organizationSchema, websiteSchema } from "@/config/seo.config";
 
 // ============================================
@@ -98,6 +99,18 @@ export default function RootLayout({
         <link rel="alternate" hrefLang="x-default" href={`${canonicalBaseUrl}/`} />
       </Head>
       <head>
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-8V17H7W98Z"
+          strategy="afterInteractive"
+        />
+        <Script id="ga-gtag" strategy="afterInteractive">
+          {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+
+gtag('config', 'G-8V17H7W98Z');`}
+        </Script>
         {/* Preconnect to improve performance */}
         <link
           rel="preload"
