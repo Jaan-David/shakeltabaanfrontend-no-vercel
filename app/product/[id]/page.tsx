@@ -3,30 +3,37 @@ import ProductPage, { ProductData } from "@/_pages/ProductPage/ProductPage";
 import { fetchProductByIdISR } from "@/services/api/products";
 import { reviewService } from "@/services/api/reviews";
 
-import { generateSEO } from "@/config/seo.config";
+import { canonicalBaseUrl, generateSEO, seoConfig } from "@/config/seo.config";
 
-export const metadata = generateSEO({
-  title: "شراء رخام مصري اونلاين | رخام طبيعي للبيع",
-  description:
-    "اشترِ رخام مصري اونلاين وجرانيت وكوارتز للمطابخ والمشاريع مع خيارات بالجملة والتصدير من منصة شق التعبان.",
-  keywords: [
-    "شراء رخام مصري اونلاين",
-    "رخام طبيعي للبيع",
-    "رخام مطابخ للبيع",
-    "رخام حمامات جاهز",
-    "رخام ارضيات تقيل",
-    "مورد رخام في مصر",
-    "مصنع جرانيت في مصر",
-    "مورد جرانيت شق التعبان",
-    "توريد كوارتز للمطابخ",
-    "buy egyptian marble slabs",
+const buildProductKeywords = (product: any) => {
+  const name = product?.name || product?.nameAr || "";
+  const category = product?.category || "";
+  const organization = product?.organizationName || "";
+
+  const baseKeywords = [
+    name,
+    category,
+    organization,
+    "رخام",
+    "جرانيت",
+    "شق التعبان",
+    "شقه تعبان",
+    "شق الثعبان",
+    "رخام شق التعبان",
+    "جرانيت شق التعبان",
     "marble suppliers egypt",
-    "granite slabs for sale egypt",
-    "bulk marble suppliers",
-    "marble exporters egypt",
+    "granite suppliers egypt",
     "egypt stone marketplace",
-  ],
-});
+  ].filter(Boolean);
+
+  return Array.from(new Set([...seoConfig.defaultKeywords, ...baseKeywords]));
+};
+
+const buildProductDescription = (product: any) => {
+  const name = product?.name || product?.nameAr || "المنتج";
+  const category = product?.category ? `من فئة ${product.category}` : "";
+  return `اشترِ ${name} ${category} من منصة شق التعبان. رخام وجرانيت بجودة عالية وأسعار منافسة.`.trim();
+};
 
 function getImageList(
   p?: { imageList?: string[]; images?: string[]; image?: string } | null
@@ -164,7 +171,51 @@ export default async function ProductByIdPage({
     console.log(`📤 Data being passed to ProductPage:`, JSON.stringify(data, null, 2));
 
     //console.log(`✅ Product page data prepared successfully`);
-    return <ProductPage data={data} />;
+    const canonicalUrl = `${canonicalBaseUrl}/product/${encodeURIComponent(decodedId)}`;
+    const imageList = getImageList(apiProduct);
+    const primaryImage = imageList[0] || `${canonicalBaseUrl}/acessts/NoImage.jpg`;
+
+    const productJsonLd = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: data.title,
+      description: data.description || buildProductDescription(apiProduct),
+      image: imageList.map((img) => (img.startsWith("http") ? img : `${canonicalBaseUrl}${img.startsWith("/") ? img : `/${img}`}`)),
+      sku: String(apiProduct._id || apiProduct.id || decodedId),
+      brand: apiProduct.brand
+        ? {
+            "@type": "Brand",
+            name: String(apiProduct.brand),
+          }
+        : undefined,
+      offers: {
+        "@type": "Offer",
+        url: canonicalUrl,
+        priceCurrency: "EGP",
+        price: Number(apiProduct.price ?? 0),
+        availability: (apiProduct.stockQty ?? apiProduct.stockQuantity ?? 0) > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      },
+      aggregateRating:
+        ratingCount > 0
+          ? {
+              "@type": "AggregateRating",
+              ratingValue: rating || 0,
+              reviewCount: ratingCount,
+            }
+          : undefined,
+    };
+
+    return (
+      <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+        />
+        <ProductPage data={data} />
+      </>
+    );
   } catch (e: any) {
     console.error("❌ Error fetching product:", e.message);
 
@@ -269,5 +320,55 @@ export default async function ProductByIdPage({
     }
 
     return notFound();
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const decodedId = decodeURIComponent(id);
+  const canonicalUrl = `${canonicalBaseUrl}/product/${encodeURIComponent(decodedId)}`;
+
+  try {
+    const res = await fetchProductByIdISR(decodedId, 3600);
+    const apiProduct: any = (res as any)?.data?.product || (res as any)?.product;
+    if (!apiProduct) {
+      return generateSEO({
+        title: "منتج غير متوفر",
+        description: seoConfig.siteDescription,
+        keywords: seoConfig.defaultKeywords,
+        url: `/product/${decodedId}`,
+        noIndex: true,
+      });
+    }
+
+    const title = apiProduct.name || apiProduct.nameAr || "منتج";
+    const description = buildProductDescription(apiProduct);
+    const imageList = getImageList(apiProduct);
+    const image = imageList[0]
+      ? imageList[0].startsWith("http")
+        ? imageList[0]
+        : `${canonicalBaseUrl}${imageList[0].startsWith("/") ? imageList[0] : `/${imageList[0]}`}`
+      : `${canonicalBaseUrl}/acessts/NoImage.jpg`;
+
+    return generateSEO({
+      title,
+      description,
+      keywords: buildProductKeywords(apiProduct),
+      image,
+      url: `/product/${decodedId}`,
+      type: "product",
+    });
+  } catch {
+    return generateSEO({
+      title: "منتج غير متوفر",
+      description: seoConfig.siteDescription,
+      keywords: seoConfig.defaultKeywords,
+      url: `/product/${decodedId}`,
+      noIndex: true,
+    });
   }
 }
