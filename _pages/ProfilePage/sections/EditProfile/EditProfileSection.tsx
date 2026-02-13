@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import styles from './../../profile.module.css';
 
 import DashboardHome from '@/_pages/ProfilePage/sections/Dashboard/DashboardHome';
+import Welcome from '@/components/UI/Profile/leftSection/Welcome/Welcome';
 
 // PERFORMANCE: Lazy load ALL other components - they load ONLY when clicked
 const InfoDetails = dynamic(
