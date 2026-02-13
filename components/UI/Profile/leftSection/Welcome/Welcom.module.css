@@ -1,54 +1,49 @@
 .welcomeContainer {
   background: var(--background);
   border: 1.5px solid var(--black8);
-  min-width: 800px;
-  min-height: 70vh;
-  border-radius: 24px;
-  padding: 20px 24px;
-  margin: -5.9% 2%;
+  border-radius: 20px;
+  padding: 18px 24px;
   font-family: var(--font-primary);
   direction: rtl;
-  text-align: center;
+  text-align: right;
   display: flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-}
-
-.welcomeContainer:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(76, 147, 67, 0.15);
+  justify-content: space-between;
+  min-height: 140px;
+  max-height: 180px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
 }
 
 .welcomeContent {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 20px;
-  flex-direction: row-reverse; /* RTL layout: emoji on right, text on left */
-  flex-wrap: nowrap;
+  gap: 16px;
+  flex-direction: row-reverse;
+}
+
+.welcomeTextGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .welcomeText {
-  font-size: 7rem;
+  font-size: 32px;
   font-weight: 700;
   color: var(--primary);
   line-height: 1.2;
-  white-space: nowrap;
+  margin: 0;
 }
 
-.nameText {
-  font-size: 7rem;
-  font-weight: 700;
-  color: var(--black87);
+.welcomeSubtitle {
+  font-size: 14px;
+  color: var(--black60);
+  margin: 0;
 }
 
 .waveEmoji {
-  font-size: 10rem;
+  font-size: 40px;
   line-height: 1;
-  animation: wave 2s ease-in-out infinite;
-  transform-origin: 70% 70%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -58,81 +53,46 @@
   display: inline-block;
 }
 
-@keyframes wave {
-  0%, 100% {
-    transform: rotate(0deg);
-  }
-  10%, 30% {
-    transform: rotate(14deg);
-  }
-  20% {
-    transform: rotate(-8deg);
-  }
-  40% {
-    transform: rotate(14deg);
-  }
-  50% {
-    transform: rotate(0deg);
-  }
-}
-
-/* Responsive design */
 @media (max-width: 1024px) {
   .welcomeContainer {
-    min-width: 90%;
-    min-height: 50vh;
-    margin: 12px 2%;
+    min-height: 130px;
   }
-  
-  .welcomeText,
-  .nameText {
-    font-size: 5rem;
-  }
-  
-  .waveEmoji {
-    font-size: 7rem;
+
+  .welcomeText {
+    font-size: 28px;
   }
 }
 
 @media (max-width: 768px) {
   .welcomeContainer {
-    min-width: 95%;
-    padding: 16px 20px;
+    padding: 16px 18px;
+    min-height: 120px;
   }
-  
-  .welcomeContent {
-    gap: 12px;
+
+  .welcomeText {
+    font-size: 24px;
   }
-  
-  .welcomeText,
-  .nameText {
-    font-size: 3.5rem;
+
+  .welcomeSubtitle {
+    font-size: 13px;
   }
-  
+
   .waveEmoji {
-    font-size: 5rem;
+    font-size: 32px;
   }
 }
 
 @media (max-width: 480px) {
   .welcomeContainer {
-    padding: 16px 20px;
-    margin: 12px 0;
-    min-width: 100%;
+    padding: 14px 16px;
   }
-  
+
   .welcomeContent {
-    gap: 8px;
-    flex-wrap: wrap;
+    gap: 12px;
   }
-  
-  .welcomeText,
-  .nameText {
-    font-size: 2rem;
-  }
-  
-  .waveEmoji {
-    font-size: 3rem;
+
+  .welcomeText {
+    font-size: 20px;
   }
 }
 
