@@ -4,7 +4,8 @@ import AppShell from "@/components/Layout/AppShell";
 // import GoogleTranslate from "@/components/Layout/Translator/GoogleTranslator";
 import ClientProviders from "@/components/providers/ClientProvider";
 import { Metadata } from "next";
-import { seoConfig, organizationSchema, websiteSchema } from "@/config/seo.config";
+import Head from "next/head";
+import { canonicalBaseUrl, seoConfig, organizationSchema, websiteSchema } from "@/config/seo.config";
 
 // ============================================
 // ROOT METADATA (SEO) - Using Config
@@ -24,7 +25,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://www.shkelteaban.com'),
+  metadataBase: new URL(canonicalBaseUrl),
   alternates: {
     canonical: '/',
     languages: {
@@ -90,20 +91,26 @@ export default function RootLayout({
 }>) {
   return (
     <html lang={seoConfig.defaultLanguage} dir="rtl" suppressHydrationWarning>
+      <Head>
+        <link rel="canonical" href={`${canonicalBaseUrl}/`} />
+        <link rel="alternate" hrefLang="ar" href={`${canonicalBaseUrl}/`} />
+        <link rel="alternate" hrefLang="en" href={`${canonicalBaseUrl}/en`} />
+        <link rel="alternate" hrefLang="x-default" href={`${canonicalBaseUrl}/`} />
+      </Head>
       <head>
         {/* Preconnect to improve performance */}
-       <link 
-    rel="preload" 
-    href="/fonts/beiruti/static/Beiruti-Regular.ttf" 
-    as="font" 
-    type="font/truetype"
-    crossOrigin="anonymous"
-  />
-  
-  {/* Contact Information (for search engines) */}
-  <meta name="contact" content={seoConfig.contact.email} />
-  <meta name="geo.region" content="EG-C" />
-  <meta name="geo.placename" content="Cairo" />
+        <link
+          rel="preload"
+          href="/fonts/beiruti/static/Beiruti-Regular.ttf"
+          as="font"
+          type="font/truetype"
+          crossOrigin="anonymous"
+        />
+
+        {/* Contact Information (for search engines) */}
+        <meta name="contact" content={seoConfig.contact.email} />
+        <meta name="geo.region" content="EG-C" />
+        <meta name="geo.placename" content="Cairo" />
       </head>
       
       <body className="antialiased" suppressHydrationWarning={true}>
@@ -142,7 +149,7 @@ export default function RootLayout({
               '@type': 'LocalBusiness',
               'name': seoConfig.siteName,
               'description': seoConfig.siteDescription,
-              'image': `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.shkelteaban.com'}${seoConfig.images.logo}`,
+              'image': `${canonicalBaseUrl}${seoConfig.images.logo}`,
               'telephone': seoConfig.contact.phone,
               'email': seoConfig.contact.email,
               'address': {
@@ -156,7 +163,7 @@ export default function RootLayout({
                 'latitude': 30.0444,
                 'longitude': 31.2357
               },
-              'url': process.env.NEXT_PUBLIC_BASE_URL || 'https://www.shkelteaban.com',
+              'url': canonicalBaseUrl,
               'sameAs': Object.values(seoConfig.socialLinks),
               'priceRange': '$$',
               'openingHours': 'Mo-Su 09:00-18:00',
