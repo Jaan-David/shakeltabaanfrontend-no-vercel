@@ -244,3 +244,13 @@
     min-width: 80px;
   }
 }
+
+.scrollContainer {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollContainer::-webkit-scrollbar {
+  display: none;
+}

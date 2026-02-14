@@ -3,8 +3,6 @@ import React from "react";
 import CategoryCard from "./CategoryCard";
 import styles from './CategoriesGrid.module.css';
 
-
-
 export interface Category {
   id: string;
   name: string;
@@ -26,6 +24,7 @@ const categoryImages: Record<string, string> = {
   "كوارتز": "/categories/4.jpg",
   "رخام مصنع": "/categories/6.jpg",
 };
+
 const CATEGORY_FALLBACKS: Record<string, string> = {
   "جرانيت مستورد": "جرانيت مستورد فاخر",
   "جرانيت مصرى": "جرانيت مصري عالي المتانة",
@@ -53,15 +52,19 @@ export default function CategoriesGrid({
   };
 
   return (
-    <div className={styles.grid}>
+    <div className="grid gap-3 sm:gap-4 md:gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {isLoading ? (
         Array.from({ length: 6 }).map((_, index) => (
-          <div key={index} className={styles.skeletonCard} aria-hidden="true" />
+          <div
+            key={index}
+            className="aspect-square rounded-2xl bg-gradient-to-br from-slate-200 to-slate-100 animate-pulse"
+            aria-hidden="true"
+          />
         ))
       ) : categories.length === 0 ? (
-        <div className={styles.emptyState}>
-          <h3 className={styles.emptyTitle}>لا توجد تصنيفات متاحة</h3>
-          <p className={styles.emptySubtitle}>سنضيف المزيد من التصنيفات قريباً.</p>
+        <div className="col-span-full text-center py-16">
+          <h3 className="text-xl font-semibold text-slate-900 mb-2">لا توجد تصنيفات متاحة</h3>
+          <p className="text-slate-500">سنضيف المزيد من التصنيفات قريباً.</p>
         </div>
       ) : (
         categories.map((category) => (

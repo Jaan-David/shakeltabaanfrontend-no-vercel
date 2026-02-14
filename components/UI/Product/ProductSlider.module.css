@@ -59,9 +59,9 @@
 /* ✅ FIXED: Define grid for all screen sizes */
 .productGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  grid-auto-rows: 330px;
+  grid-auto-rows: 1fr;
   align-items: stretch;
   width: 100%;
   margin-bottom: 2rem;
@@ -92,9 +92,9 @@
 
 .loadingGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  grid-auto-rows: 330px;
+  grid-auto-rows: 1fr;
   width: 100%;
 }
 
@@ -303,12 +303,12 @@
 /* All mobile phones */
 @media (max-width: 480px) {
   .productGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: 8px;
   }
   
   .loadingGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
   
   .sliderContainer {
@@ -319,7 +319,7 @@
 /* Very small phones */
 @media (max-width: 375px) {
   .productGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: 6px;
   }
 }

@@ -65,9 +65,14 @@ async function loginWithBackend(accessToken: string, provider: 'google' | 'faceb
     }
   } catch (error: any) {
     console.error('❌ [NextAuth] Error calling backend:', error);
+    const rawMessage = typeof error?.message === 'string' ? error.message : '';
+    const normalized = rawMessage.toLowerCase();
+    const safeMessage = normalized.includes('<html') || normalized.includes('application error')
+      ? 'الخادم غير متاح حاليا. يرجى المحاولة مرة أخرى لاحقا.'
+      : rawMessage || 'Failed to connect to backend';
     return {
       success: false,
-      error: error.message || 'Failed to connect to backend'
+      error: safeMessage
     };
   }
 }

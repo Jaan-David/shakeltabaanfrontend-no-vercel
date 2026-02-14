@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Heart, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import { Minus, Plus } from "lucide-react";
 import { CustomMedia } from "@/components/UI/Image/Images";
 import PriceRow from "@/components/UI/Price/PriceRow";
@@ -390,16 +390,12 @@ const Overview: React.FC<Props> = ({
     setShowLoginAlert(false);
   };
 
-  const handleRequestQuote = () => {
-    router.push('/inquiries');
-  };
-
   return (
     <section className="bg-white max-w-6xl mx-auto rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-6 lg:p-8" dir="rtl">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-7 lg:order-2">
           <div
-            className="w-full aspect-[4/3] bg-slate-50 rounded-2xl overflow-hidden flex items-center justify-center relative border border-slate-200"
+            className="w-full aspect-[16/9] lg:aspect-[4/3] bg-slate-50 rounded-2xl overflow-hidden flex items-center justify-center relative border border-slate-200"
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
           >
@@ -543,13 +539,7 @@ const Overview: React.FC<Props> = ({
 
             <div className="mt-4 flex flex-col gap-2">
               <button
-                className="w-full rounded-xl bg-blue-600 py-3 text-white font-bold hover:bg-blue-700 transition-colors"
-                onClick={handleRequestQuote}
-              >
-                اطلب تسعيرة
-              </button>
-              <button
-                className="w-full rounded-xl border border-slate-200 bg-white py-3 text-slate-700 font-semibold hover:border-blue-300 hover:text-blue-700 transition-colors"
+                className="w-full rounded-xl bg-blue-600 py-3 text-white font-bold hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 disabled={stockQty === 0 || isAdding}
                 onClick={handleAddToCart}
               >

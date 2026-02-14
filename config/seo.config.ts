@@ -110,6 +110,7 @@ export const generateSEO = ({
   const baseUrl = canonicalBaseUrl;
   const fullUrl = url ? `${baseUrl}${url}` : baseUrl;
   const ogImage = image || `${baseUrl}${seoConfig.images.ogImage}`;
+  const normalizedType = type === 'product' ? 'article' : type;
   
   return {
     title: `${title} `,
@@ -121,7 +122,7 @@ export const generateSEO = ({
       title: `${title} | ${seoConfig.siteName}`,
       description: description || seoConfig.siteDescription,
       url: fullUrl,
-      type,
+      type: normalizedType,
       images: [
         {
           url: ogImage,

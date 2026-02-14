@@ -9,7 +9,6 @@ import { CustomMedia } from '@/components/UI/Image/Images';
 import Availablity from '@/components/UI/Card/Availablity';
 import { useFavorites } from '@/services/favorites/FavoritesContext';
 import Alert from '@/components/UI/Alert/alert';
-import PriceRow from '@/components/UI/Price/PriceRow';
 
 // Import Product type and helper function
 import type { Product } from '@/services/product/products';
@@ -111,8 +110,7 @@ function Card({
     showMinimalMarbleInfo = false,
     showActionButton = true,
     hasOffer = false,
-    isVerifiedSupplier = false,
-    alwaysShowBothPrices = false
+    isVerifiedSupplier = false
 }: CardProps) {
     const { toggle, isFavorite } = useFavorites();
     const router = useRouter();
@@ -132,6 +130,10 @@ function Card({
     const imageSrc: string = useMemo(() => {
         return typeof productImg === 'string' ? productImg : (productImg?.src || '/acessts/NoImage.jpg');
     }, [productImg]);
+
+    const isPlaceholderImage = useMemo(() => {
+        return !imageSrc || imageSrc.includes('NoImage');
+    }, [imageSrc]);
 
     const id = useMemo(() => productId || productName || imageSrc, [productId, productName, imageSrc]);
 
@@ -206,6 +208,44 @@ function Card({
         router.push(`/product/${slug}`);
     }, [router, productName, productId, isLoading]);
 
+    const normalizePrice = (value?: string | number | null): number | null => {
+        if (value === null || value === undefined) return null;
+        if (typeof value === 'string') {
+            const parsed = Number(value.replace(/[^0-9.]/g, ''));
+            return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+        }
+        return Number.isFinite(value) && value > 0 ? value : null;
+    };
+
+    const renderPriceChip = (
+        label: string,
+        price?: string | number | null,
+        offerPrice?: string | number | null
+    ) => {
+        const basePrice = normalizePrice(price);
+        const discountedPrice = normalizePrice(offerPrice);
+
+        if (!basePrice && !discountedPrice) return null;
+
+        const showOffer = !!(basePrice && discountedPrice && discountedPrice < basePrice);
+        const displayPrice = showOffer ? discountedPrice : (basePrice ?? discountedPrice);
+
+        return (
+            <div className={styles.priceChip}>
+                <span className={styles.priceChipLabel}>{label}</span>
+                {showOffer && basePrice && (
+                    <span className={styles.priceChipOld}>
+                        {formatPrice(basePrice)} ج.م
+                    </span>
+                )}
+                <div className={styles.priceChipMain}>
+                    <span className={styles.priceChipValue}>{formatPrice(displayPrice ?? 0)}</span>
+                    <span className={styles.priceChipUnit}>ج.م</span>
+                </div>
+            </div>
+        );
+    };
+
 
     if (isLoading) {
         return (
@@ -276,16 +316,28 @@ function Card({
                                 عرض التفاصيل
                             </button>
                         </div>
-                        <CustomMedia
-                            src={imageSrc}
-                            alt={productName || 'صورة المنتج'}
-                            width={320}
-                            height={240}
-                            rounded="md"
-                            className={styles.img}
-                            objectFit="cover"
-                            priority
-                        />
+                        {isPlaceholderImage ? (
+                            <div className={styles.placeholderImage}>
+                                <svg viewBox="0 0 24 24" aria-hidden="true" className={styles.placeholderIcon}>
+                                    <path
+                                        d="M4 5.5C4 4.12 5.12 3 6.5 3h11C18.88 3 20 4.12 20 5.5v13c0 1.38-1.12 2.5-2.5 2.5h-11C5.12 21 4 19.88 4 18.5v-13zm2.5-.5a.5.5 0 0 0-.5.5v13c0 .28.22.5.5.5h11a.5.5 0 0 0 .5-.5v-13a.5.5 0 0 0-.5-.5h-11zm2.25 3.25a.75.75 0 1 1 0 1.5.75.75 0 0 1 0-1.5zm-1.5 8.25 3.5-4.5 2.5 3 3.5-4.5 3.25 4.5v1.5H7.25v-0.5z"
+                                        fill="currentColor"
+                                    />
+                                </svg>
+                                <span className={styles.placeholderText}>بدون صورة</span>
+                            </div>
+                        ) : (
+                            <CustomMedia
+                                src={imageSrc}
+                                alt={productName || 'صورة المنتج'}
+                                width={320}
+                                height={240}
+                                rounded="md"
+                                className={styles.img}
+                                objectFit="cover"
+                                priority
+                            />
+                        )}
                     </div>
                 </div>
                 
@@ -336,23 +388,9 @@ function Card({
                         </div>
                     )}
 
-                    <div className={styles.priceBlock}>
-                        <PriceRow
-                            label="سعر المتر المربع"
-                            price={pricePerCubicMeter}
-                            offerPrice={offerCubicPrice}
-                            unitLabel="م مربع"
-                            size="primary"
-                            showPlaceholder={alwaysShowBothPrices}
-                        />
-                        <PriceRow
-                            label="سعر المتر الطولي"
-                            price={pricePerLinearMeter}
-                            offerPrice={offerLinearPrice}
-                            unitLabel="م طولي"
-                            size="secondary"
-                            showPlaceholder={alwaysShowBothPrices}
-                        />
+                    <div className={styles.priceChips}>
+                        {renderPriceChip('م مربع', pricePerCubicMeter, offerCubicPrice)}
+                        {renderPriceChip('م طولي', pricePerLinearMeter, offerLinearPrice)}
                         {!pricePerCubicMeter && !offerCubicPrice && !pricePerLinearMeter && !offerLinearPrice && (
                             <span className={styles.priceOnRequest}>السعر عند الطلب</span>
                         )}
@@ -361,7 +399,7 @@ function Card({
                     {showActionButton && !showMinimalMarbleInfo && (
                         <div className={styles.cardActions}>
                             <button type="button" className={styles.primaryButton} onClick={handleCardClick}>
-                                عرض التفاصيل
+                                تفاصيل المنتج
                             </button>
                         </div>
                     )}

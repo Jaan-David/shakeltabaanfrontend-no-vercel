@@ -5,6 +5,7 @@ import Card from '@/components/UI/Card/Card';
 
 export type FavoriteItem = {
   id: number | string;
+  productId?: string;
   name: string;
   price: number;
   image: string;
@@ -47,7 +48,7 @@ const FavoritesList: React.FC<Props> = ({ items, onRemove }) => {
         productImg: imageUrl,
         productName: item.name,
         productCategory: item.category || 'غير محدد',
-        productId: String(item.id),
+        productId: item.productId || String(item.id),
         productPrice: String(item.price || 0),
         available: (item.stockQty ?? 1) > 0,
         rating: 0,
@@ -61,10 +62,10 @@ const FavoritesList: React.FC<Props> = ({ items, onRemove }) => {
   return (
     <section className="bg-white">
       {/* Professional grid layout */}
-      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-5 lg:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 lg:gap-6">
         {mappedProducts.map((product) => (
           <div key={product.id} className="relative group">
-            <Link href={`/product/${product.id}`}>
+            <Link href={`/product/${product.productId || product.id}`}>
               <Card
                 productId={product.productId}
                 productImg={product.productImg}
@@ -96,9 +97,10 @@ const FavoritesList: React.FC<Props> = ({ items, onRemove }) => {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  onRemove(product.id);
+                  const idToRemove = product.productId || product.id;
+                  onRemove(idToRemove);
                 }}
-                className="absolute top-3 left-3 z-10 bg-white/95 backdrop-blur-sm hover:bg-red-50 text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-full p-2 shadow-lg transition-all duration-200 opacity-0 group-hover:opacity-100"
+                className="absolute top-3 left-3 z-10 bg-white/95 backdrop-blur-sm hover:bg-red-50 text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-full p-2 shadow-lg transition-all duration-200 opacity-90 md:opacity-0 md:group-hover:opacity-100 active:scale-95"
                 type="button"
                 aria-label={`حذف ${product.name} من المفضلة`}
               >

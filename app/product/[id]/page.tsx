@@ -58,16 +58,12 @@ export default async function ProductByIdPage({
   const decodedId = decodeURIComponent(id);
 
   try {
-    //console.log(`🔄 Loading product page for ID: ${decodedId}`);
-
     // ✅ Fetch product details
     const res = await fetchProductByIdISR(decodedId, 3600);
-    //console.log(`📦 Product fetch result:`, res);
 
     // Check if the response indicates an error
     if (res.status === "error") {
-      if (res.message?.includes("Product not found")) {
-        //console.log(`❌ Product not found: ${decodedId}`);
+      if (res.message?.includes("not found") || res.message?.includes("Product not found")) {
         return notFound();
       }
 
@@ -92,17 +88,25 @@ export default async function ProductByIdPage({
       }
     }
 
-    const apiProduct: any =
-      (res as any)?.data?.product || (res as any)?.product;
-    if (!apiProduct) {
-      //console.log(`❌ No product data received for ID: ${decodedId}`);
-      return notFound();
+    // Extract product from different response formats
+    let apiProduct: any = null;
+    
+    // Format 1: { status: 'success', data: { product: {...} } }
+    if ((res as any)?.data?.product) {
+      apiProduct = (res as any).data.product;
+    }
+    // Format 2: { status: 'success', data: {...product fields} }
+    else if (res.data && (res.data._id || res.data.id)) {
+      apiProduct = res.data;
+    }
+    // Format 3: { product: {...} }
+    else if ((res as any)?.product) {
+      apiProduct = (res as any).product;
     }
 
-    console.log(`✅ Product data received:`, apiProduct.title || apiProduct.name);
-    console.log(`📦 Organization Name:`, apiProduct.organizationName);
-    console.log(`📦 Organization ID:`, apiProduct.organizationId);
-    console.log(`📦 Full API Product:`, JSON.stringify(apiProduct, null, 2));
+    if (!apiProduct) {
+      return notFound();
+    }
 
     // ✅ Fetch reviews for this product
     let reviews: Array<{
@@ -217,6 +221,12 @@ export default async function ProductByIdPage({
       </>
     );
   } catch (e: any) {
+    // If notFound() was called, it throws an error - rethrow it to let Next.js handle it
+    if (e.message?.includes("NEXT_NOT_FOUND") || e.message?.includes("NEXT_HTTP_ERROR_FALLBACK;404")) {
+      // Don't log 404 errors - they're expected when products don't exist
+      throw e;
+    }
+
     console.error("❌ Error fetching product:", e.message);
 
     // Enhanced error handling for different types of errors
@@ -334,8 +344,22 @@ export async function generateMetadata({
 
   try {
     const res = await fetchProductByIdISR(decodedId, 3600);
-    const apiProduct: any = (res as any)?.data?.product || (res as any)?.product;
-    if (!apiProduct) {
+    
+    // Check if the response indicates an error
+    if (res.status === "error") {
+      if (res.message?.includes("not found") || res.message?.includes("Product not found")) {
+        return generateSEO({
+          title: "منتج غير متوفر",
+          description: seoConfig.siteDescription,
+          keywords: seoConfig.defaultKeywords,
+          url: `/product/${decodedId}`,
+          noIndex: true,
+        });
+      }
+    }
+    
+    const apiProduct: any = (res as any)?.data?.product || (res as any)?.product || res.data;
+    if (!apiProduct || !apiProduct._id) {
       return generateSEO({
         title: "منتج غير متوفر",
         description: seoConfig.siteDescription,

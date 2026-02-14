@@ -259,6 +259,15 @@ export class AuthError extends Error {
 // API Configuration
 const API_BASE_URL = Api;
 
+const sanitizeBackendMessage = (message?: string): string => {
+  if (!message) return 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.';
+  const normalized = message.toLowerCase();
+  if (normalized.includes('<html') || normalized.includes('application error')) {
+    return 'الخادم غير متاح حاليا. يرجى المحاولة مرة أخرى لاحقا.';
+  }
+  return message;
+};
+
 // Token expiration monitor
 class TokenExpirationMonitor {
   private checkInterval: NodeJS.Timeout | null = null;
@@ -518,19 +527,27 @@ export const socialLogin = async (socialData: SocialLoginData): Promise<LoginRes
       
       switch (response.status) {
         case 400:
-          errorMessage = data?.message || data?.error || 'بيانات تسجيل الدخول الاجتماعي غير صحيحة';
+          errorMessage = sanitizeBackendMessage(
+            data?.message || data?.error || 'بيانات تسجيل الدخول الاجتماعي غير صحيحة'
+          );
           break;
         case 401:
-          errorMessage = data?.message || 'فشل التحقق من هوية الحساب الاجتماعي';
+          errorMessage = sanitizeBackendMessage(
+            data?.message || 'فشل التحقق من هوية الحساب الاجتماعي'
+          );
           break;
         case 403:
-          errorMessage = data?.message || 'الحساب محظور أو غير مفعل';
+          errorMessage = sanitizeBackendMessage(
+            data?.message || 'الحساب محظور أو غير مفعل'
+          );
           break;
         case 500:
           errorMessage = 'خطأ في الخادم - يرجى المحاولة لاحقاً';
           break;
         default:
-          errorMessage = data?.message || `خطأ في تسجيل الدخول الاجتماعي (${response.status})`;
+          errorMessage = sanitizeBackendMessage(
+            data?.message || `خطأ في تسجيل الدخول الاجتماعي (${response.status})`
+          );
       }
 
       throw new AuthError(errorMessage, response.status, false, errorDetails);
@@ -539,7 +556,7 @@ export const socialLogin = async (socialData: SocialLoginData): Promise<LoginRes
     //console.log('✅ Social login successful!');
 
     if (data.status !== 'success') {
-      throw new AuthError(data.message || 'فشل تسجيل الدخول الاجتماعي');
+      throw new AuthError(sanitizeBackendMessage(data.message || 'فشل تسجيل الدخول الاجتماعي'));
     }
 
     if (!data.data || !data.data.user || !data.data.token) {

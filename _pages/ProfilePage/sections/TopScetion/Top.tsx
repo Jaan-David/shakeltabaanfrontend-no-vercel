@@ -23,7 +23,7 @@ const TopMetrics: React.FC<TopMetricsProps> = ({
   const safeMetrics = Array.isArray(metrics) ? metrics : [];
 
   return (
-    <div className={styles.top_metrics}>
+    <div className={`${styles.top_metrics} grid-cols-2 md:grid-cols-3 lg:grid-cols-3`}>
       {safeMetrics.map((metric, index) => (
         <MetricCard
           key={index}

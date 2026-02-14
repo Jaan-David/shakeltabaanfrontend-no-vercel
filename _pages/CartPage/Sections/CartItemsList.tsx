@@ -128,43 +128,44 @@ const CartItemsList: React.FC<Props> = React.memo(({
 
   return (
     <div className="rounded-2xl shadow-sm border border-slate-200 bg-white/85 backdrop-blur-md">
-      <div className="divide-y divide-slate-200 pt-[5px] max-h-[60vh] md:max-h-[70vh] overflow-y-auto scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      {/* Mobile-first list spacing to avoid cramped cards */}
+      <div className="flex flex-col gap-3 sm:gap-4 p-3 sm:p-4">
         {cartItems.map((item) => (
-          <div 
-            key={item.id} 
-            className="pt-[3px] sm:p-3 mt-[15px] mb-[15px] rounded-[12px] mx-[10px] bg-[#F7F9FC] border-[1px] border-slate-200"
+          <div
+            key={item.id}
+            className="rounded-xl bg-[#F7F9FC] border border-slate-200 p-3 sm:p-4"
           >
-            
-            <div className="flex sm:flex-row gap-4">
-              <div className="flex-shrink-0 m-auto">
-                {item.productId ? (
-                  <Link href={`/product/${item.productId}`} className="block">
+            {/* Mobile stack → desktop row */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+                <div className="flex-shrink-0">
+                  {item.productId ? (
+                    <Link href={`/product/${item.productId}`} className="block">
+                      <CartItemImage src={item.image} alt={item.name} />
+                    </Link>
+                  ) : (
                     <CartItemImage src={item.image} alt={item.name} />
-                  </Link>
-                ) : (
-                  <CartItemImage src={item.image} alt={item.name} />
-                )}
-              </div>
+                  )}
+                </div>
 
-              <div className="flex-1 flex justify-between min-w-0">
-                <div className="flex flex-col justify-between items-start w-[35%] mb-2">
+                <div className="min-w-0 flex-1">
                   {item.productId ? (
                     <Link
                       href={`/product/${item.productId}`}
-                      className="text-lg font-semibold text-slate-900 truncate hover:text-blue-600 transition-colors"
+                      className="text-base sm:text-lg font-semibold text-slate-900 truncate hover:text-blue-600 transition-colors"
                     >
                       {item.name}
                     </Link>
                   ) : (
-                    <h3 className="text-lg font-semibold text-slate-900 truncate">
+                    <h3 className="text-base sm:text-lg font-semibold text-slate-900 truncate">
                       {item.name}
                     </h3>
                   )}
-                  <h4 className="text-[14px] font-medium text-right leading-tight text-slate-500 font-beiruti mb-2 whitespace-nowrap">
+                  <h4 className="mt-1 text-xs sm:text-sm font-medium text-slate-500 whitespace-nowrap">
                     {item.unit}
                   </h4>
                   {item.availability ? (
-                    <h4 className="text-[14px] font-medium leading-[1] text-right w-[71px] h-[17px] text-emerald-500 font-beiruti mb-2">
+                    <h4 className="mt-1 text-xs sm:text-sm font-medium text-emerald-500 whitespace-nowrap">
                       {item.availability}
                     </h4>
                   ) : null}
@@ -174,48 +175,46 @@ const CartItemsList: React.FC<Props> = React.memo(({
                     state="default"
                     leftIcon={<Trash className="w-4 h-4 sm:w-5 sm:h-5" />}
                     onClick={() => onRemove(item.id)}
-                    className="text-red-500 hover:bg-red-500/10 hover:text-red-600 w-full sm:w-auto justify-start sm:justify-center p-1 sm:px-2 mt-2"
+                    className="mt-3 min-h-[44px] w-full sm:w-auto justify-center text-red-500 hover:bg-red-500/10 hover:text-red-600"
                   >
-                    <span className="text-sm sm:text-base whitespace-nowrap overflow-hidden text-ellipsis">
+                    <span className="text-sm sm:text-base whitespace-nowrap">
                       حذف المنتج من السلة
                     </span>
                   </Button>
                 </div>
-{/* /************************************************************/}
-                <div className="flex flex-col items-start  w-[35%] sm:flex-col sm:items-center pr-[10px] sm:pr-3 justify-between gap-4">
-                  <div className="text-left w-[100%] pl-2 sm:pl-3 ">
-                    <div className="text-l font-bold text-slate-900 whitespace-nowrap">
-                      {(item.totalPrice || item.price * item.quantity).toLocaleString()} ج.م / {item.unit}
-                    </div>
-                    <div className="text-xs text-slate-500 mt-1 whitespace-nowrap">
-                      {item.price.toLocaleString()} ج.م / {item.unit}
-                    </div>
+              </div>
+
+              {/* Price + quantity area with clear hierarchy */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 sm:ms-auto">
+                <div className="text-right sm:text-left">
+                  <div className="text-base sm:text-lg font-bold text-slate-900 whitespace-nowrap">
+                    {(item.totalPrice || item.price * item.quantity).toLocaleString()} ج.م / {item.unit}
                   </div>
-                  
-                  <div className="w-full flex justify-end  pr-2 sm:pr-4">
-                    <div className="flex items-center justify-end gap-3" dir="ltr">
-                      <IconButton
-                        aria-label="decrease quantity"
-                        title="إنقاص الكمية"
-                        className="w-8 h-8 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 transition-colors"
-                        onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                        disabled={item.quantity <= 1}
-                        icon={<Minus className="w-4 h-4" />}
-                      />
-                      <span className="w-8 text-center text-slate-900 font-medium">
-                        {/* item.quantity is already the display quantity after reverse conversion in cart.ts */}
-                        {Number(item.quantity.toFixed(3))} 
-                      </span>
-                      <IconButton
-                        aria-label="increase quantity"
-                        title="زيادة الكمية"
-                        className="w-8 h-8 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 transition-colors"
-                        onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                        icon={<Plus className="w-4 h-4" />}
-                      />
-                      {/* <span className="text-gray-500 text-sm mr-2">{item.unit}</span> */}
-                    </div>
+                  <div className="text-xs sm:text-sm text-slate-500 mt-1 whitespace-nowrap">
+                    {item.price.toLocaleString()} ج.م / {item.unit}
                   </div>
+                </div>
+
+                <div className="flex items-center justify-between sm:justify-end gap-2" dir="ltr">
+                  <IconButton
+                    aria-label="decrease quantity"
+                    title="إنقاص الكمية"
+                    className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 transition-colors"
+                    onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                    disabled={item.quantity <= 1}
+                    icon={<Minus className="w-4 h-4" />}
+                  />
+                  <span className="min-w-[36px] text-center text-slate-900 font-medium">
+                    {/* item.quantity is already the display quantity after reverse conversion in cart.ts */}
+                    {Number(item.quantity.toFixed(3))}
+                  </span>
+                  <IconButton
+                    aria-label="increase quantity"
+                    title="زيادة الكمية"
+                    className="w-10 h-10 min-w-[44px] min-h-[44px] rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 transition-colors"
+                    onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                    icon={<Plus className="w-4 h-4" />}
+                  />
                 </div>
               </div>
             </div>

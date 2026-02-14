@@ -7,6 +7,7 @@ import { UserStorage } from '@/services/auth/login';
 
 export type FavoriteItem = {
   id: number | string;
+  productId?: string;
   name: string;
   price: number;
   image: string;
@@ -38,6 +39,19 @@ type FavoritesContextValue = {
 const FavoritesContext = createContext<FavoritesContextValue | undefined>(undefined);
 
 const STORAGE_KEY = "shakeltaaban:favorites";
+
+const resolveProductId = (value: any): string | null => {
+  if (!value) return null;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'object') {
+    return value._id || value.id || null;
+  }
+  return null;
+};
+
+const getFavoriteKey = (item: FavoriteItem): string => {
+  return String(item.productId || item.id);
+};
 
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<FavoriteItem[]>([]);
@@ -81,44 +95,74 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
             const list = res?.data?.wishItems ?? [];
             console.log('🔍 Wishlist items count:', list.length);
 
-            const mapped: FavoriteItem[] = list.map((w: any) => {
-              // According to API documentation, productId should be populated with product details
-              const p = w.productId || {};
+            const mapped: FavoriteItem[] = list
+              .map((w: any) => {
+                // According to API documentation, productId should be populated with product details
+                const p = w.productId || {};
+                
+                // Extract actual product ID (the one API expects for DELETE)
+                // If productId is an object (populated), use its _id or id
+                // If productId is a string, use it directly
+                const actualProductId = typeof w.productId === 'string' 
+                  ? w.productId 
+                  : (p._id || p.id);
+                
+                // Skip items without valid product ID (MongoDB ObjectIds are 24 chars)
+                if (!actualProductId || actualProductId.length < 20) {
+                  console.warn('⚠️ Skipping wishlist item with invalid/missing product ID:', {
+                    wishlistItemId: w._id,
+                    productIdType: typeof w.productId,
+                    extractedProductId: actualProductId
+                  });
+                  return null;
+                }
+                
+                // Skip items where product was not populated (deleted products)
+                if (!p._id && !p.id && !p.name) {
+                  console.warn('⚠️ Skipping wishlist item - product data missing (may be deleted):', {
+                    wishlistItemId: w._id,
+                    productId: actualProductId
+                  });
+                  return null;
+                }
 
-              const images = p.imageList || p.images || [];
-              const img = Array.isArray(images) ? (images[0] || '/acessts/NoImage.jpg') : (images || '/acessts/NoImage.jpg');
+                const images = p.imageList || p.images || [];
+                const img = Array.isArray(images) ? (images[0] || '/acessts/NoImage.jpg') : (images || '/acessts/NoImage.jpg');
 
-              // Calculate price from marble/granite pricing (pricePerLinearMeter or pricePerCubicMeter)
-              let calculatedPrice = 0;
-              if (p.pricePerLinearMeter && Number(p.pricePerLinearMeter) > 0) {
-                calculatedPrice = Number(p.pricePerLinearMeter);
-              } else if (p.pricePerCubicMeter && Number(p.pricePerCubicMeter) > 0) {
-                calculatedPrice = Number(p.pricePerCubicMeter);
-              } else {
-                calculatedPrice = Number(p.price) || 0;
-              }
+                // Calculate price from marble/granite pricing (pricePerLinearMeter or pricePerCubicMeter)
+                let calculatedPrice = 0;
+                if (p.pricePerLinearMeter && Number(p.pricePerLinearMeter) > 0) {
+                  calculatedPrice = Number(p.pricePerLinearMeter);
+                } else if (p.pricePerCubicMeter && Number(p.pricePerCubicMeter) > 0) {
+                  calculatedPrice = Number(p.pricePerCubicMeter);
+                } else {
+                  calculatedPrice = Number(p.price) || 0;
+                }
 
-              return {
-                id: String(p._id ?? w.productId?._id ?? w._id),
-                name: p.name || p.title || 'منتج',
-                price: calculatedPrice,
-                image: typeof img === 'string' ? img : (img?.url || '/acessts/NoImage.jpg'),
-                // Include marble/granite specific fields
-                pricePerLinearMeter: p.pricePerLinearMeter ? Number(p.pricePerLinearMeter) : undefined,
-                pricePerCubicMeter: p.pricePerCubicMeter ? Number(p.pricePerCubicMeter) : undefined,
-                offerLinearPrice: p.offerLinearPrice ? Number(p.offerLinearPrice) : null,
-                offerCubicPrice: p.offerCubicPrice ? Number(p.offerCubicPrice) : null,
-                category: p.category || undefined,
-                color: p.color || undefined,
-                qualityGrade: p.qualityGrade || undefined,
-                isOffer: p.isOffer || false,
-                organizationName: p.organizationName || undefined,
-                organizationId: p.organizationId || undefined,
-                stockQty: p.stockQty !== undefined ? Number(p.stockQty) : undefined,
-              };
-            });
+                return {
+                  id: actualProductId, // Use actual product ID
+                  productId: actualProductId, // This is what API expects for DELETE
+                  name: p.name || p.title || 'منتج',
+                  price: calculatedPrice,
+                  image: typeof img === 'string' ? img : (img?.url || '/acessts/NoImage.jpg'),
+                  // Include marble/granite specific fields
+                  pricePerLinearMeter: p.pricePerLinearMeter ? Number(p.pricePerLinearMeter) : undefined,
+                  pricePerCubicMeter: p.pricePerCubicMeter ? Number(p.pricePerCubicMeter) : undefined,
+                  offerLinearPrice: p.offerLinearPrice ? Number(p.offerLinearPrice) : null,
+                  offerCubicPrice: p.offerCubicPrice ? Number(p.offerCubicPrice) : null,
+                  category: p.category || undefined,
+                  color: p.color || undefined,
+                  qualityGrade: p.qualityGrade || undefined,
+                  isOffer: p.isOffer || false,
+                  organizationName: p.organizationName || undefined,
+                  organizationId: p.organizationId || undefined,
+                  stockQty: p.stockQty !== undefined ? Number(p.stockQty) : undefined,
+                };
+              })
+              .filter((item): item is FavoriteItem => item !== null);
+              
             setItems(mapped);
-            console.log('✅ Mapped favorites:', mapped.length, 'items');
+            console.log('✅ Mapped favorites:', mapped.length, 'valid items (filtered out invalid/deleted products)');
             return;
           } catch (e: any) {
             console.error('❌ Exception loading wishlist:', e);
@@ -160,7 +204,8 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
 
   const add = useCallback(async (item: FavoriteItem) => {
     // Check if already in favorites to avoid duplicate API calls
-    const alreadyInFavorites = items.some(p => p.id === item.id);
+    const incomingKey = getFavoriteKey(item);
+    const alreadyInFavorites = items.some(p => getFavoriteKey(p) === incomingKey);
     if (alreadyInFavorites) {
       return; // Already in favorites, no need to add again
     }
@@ -172,7 +217,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     // Sync with backend if authenticated
     if (wishlistService.isAuthenticated()) {
       try {
-        const res = await wishlistService.add(String(item.id));
+        const res = await wishlistService.add(String(item.productId || item.id));
         
         // Check if response indicates error (not authenticated, or other error)
         if (res.status === 'error') {
@@ -189,17 +234,9 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
         
         // Success or already exists (treated as success)
         if (res.status === 'success' || res.wasAlreadyAdded) {
-          // Refresh the list to ensure consistency
-          const freshList = await wishlistService.getAll();
-          const mapped = (freshList.data?.wishItems || []).map((w: any) => ({
-            id: String(w.productId?._id || w.productId || w._id),
-            name: w.productId?.name || 'منتج',
-            price: w.productId?.price || 0,
-            image: Array.isArray(w.productId?.imageList) 
-              ? (w.productId.imageList[0] || '/acessts/NoImage.jpg')
-              : (w.productId?.imageList || '/acessts/NoImage.jpg')
-          }));
-          setItems(mapped);
+          // Just keep the optimistic update - no need to refresh from server
+          // This improves performance and reduces unnecessary API calls
+          return;
         }
       } catch (e: any) {
         // Unexpected errors (should rarely happen now)
@@ -215,11 +252,17 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const remove = useCallback(async (id: number | string) => {
+    const normalizedId = String(id);
+    
     // Store the item being removed for potential rollback
-    const itemToRemove = items.find(item => item.id === id);
+    const itemToRemove = items.find(item => (
+      String(item.productId || item.id) === normalizedId
+    ));
     
     // Optimistic update
-    setItems(prev => prev.filter(p => p.id !== id));
+    setItems(prev => prev.filter(p => (
+      String(p.productId || p.id) !== normalizedId
+    )));
     setError(null);
 
     if (!wishlistService.isAuthenticated()) {
@@ -233,10 +276,10 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      const res = await wishlistService.remove(String(id));
+      const res = await wishlistService.remove(normalizedId);
       
-      // Check if response indicates error
-      if (res.status === 'error') {
+      // Check if response indicates error (but not already removed)
+      if (res.status === 'error' && !res.wasAlreadyRemoved) {
         // Re-add the item if it exists
         if (itemToRemove) {
           setItems(prev => [...prev, itemToRemove].sort((a, b) => 
@@ -252,17 +295,44 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       
-      // On success, refresh the list to ensure consistency
-      const freshList = await wishlistService.getAll();
-      const mapped = (freshList.data?.wishItems || []).map((w: any) => ({
-        id: String(w.productId?._id || w.productId || w._id),
-        name: w.productId?.name || 'منتج',
-        price: w.productId?.price || 0,
-        image: Array.isArray(w.productId?.imageList) 
-          ? (w.productId.imageList[0] || '/acessts/NoImage.jpg')
-          : (w.productId?.imageList || '/acessts/NoImage.jpg')
-      }));
-      setItems(mapped);
+      // On success, show brief feedback and keep optimistic update
+      if (typeof window !== 'undefined' && itemToRemove) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = `
+          <div style="
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #10b981;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+            z-index: 9999;
+            font-family: 'Beiruti', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+          ">
+            ✓ تم الحذف من المفضلة
+          </div>
+        `;
+        document.body.appendChild(tempDiv);
+        requestAnimationFrame(() => {
+          const div = tempDiv.firstElementChild as HTMLElement;
+          if (div) div.style.opacity = '1';
+        });
+        setTimeout(() => {
+          const div = tempDiv.firstElementChild as HTMLElement;
+          if (div) div.style.opacity = '0';
+          setTimeout(() => tempDiv.remove(), 200);
+        }, 1500);
+      }
+      
+      // Optimistic update is enough - no need to refresh from server
+      // Item already removed from UI above
     } catch (e: any) {
       // Unexpected errors (should rarely happen now)
       console.error('Unexpected error removing from wishlist:', e);
