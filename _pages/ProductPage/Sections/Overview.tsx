@@ -123,8 +123,10 @@ const Overview: React.FC<Props> = ({
 }) => {
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
-  const hasLinearPrice = pricePerLinearMeter !== null && pricePerLinearMeter !== undefined;
-  const hasCubicPrice = pricePerCubicMeter !== null && pricePerCubicMeter !== undefined;
+  const hasLinearPrice = [pricePerLinearMeter, offerLinearPrice]
+    .some((value) => Number(value) > 0);
+  const hasCubicPrice = [pricePerCubicMeter, offerCubicPrice]
+    .some((value) => Number(value) > 0);
   const hasMarbleUnits = hasLinearPrice || hasCubicPrice;
   const hasAnyPrice = useMemo(() => {
     return [pricePerCubicMeter, offerCubicPrice, pricePerLinearMeter, offerLinearPrice]
@@ -568,7 +570,7 @@ const Overview: React.FC<Props> = ({
                 </div>
               </div>
 
-              {!pricePerLinearMeter && !pricePerCubicMeter && (
+              {!hasMarbleUnits && (
                 <div className="flex flex-wrap gap-2">
                   {Object.entries(availableUnits).map(([key, label]) => (
                     <button
@@ -587,26 +589,32 @@ const Overview: React.FC<Props> = ({
                 </div>
               )}
 
-              <div className="flex flex-wrap gap-3">
-                <label className="flex items-center gap-2 text-xs text-slate-600">
-                  <input
-                    type="radio"
-                    checked={selectedUnitType === 'linear'}
-                    onChange={() => setSelectedUnitType('linear')}
-                    className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  المتر الطولي
-                </label>
-                <label className="flex items-center gap-2 text-xs text-slate-600">
-                  <input
-                    type="radio"
-                    checked={selectedUnitType === 'cubic'}
-                    onChange={() => setSelectedUnitType('cubic')}
-                    className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  المتر مربع
-                </label>
-              </div>
+              {hasMarbleUnits && (
+                <div className="flex flex-wrap gap-3">
+                  {hasLinearPrice && (
+                    <label className="flex items-center gap-2 text-xs text-slate-600">
+                      <input
+                        type="radio"
+                        checked={selectedUnitType === 'linear'}
+                        onChange={() => setSelectedUnitType('linear')}
+                        className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      المتر الطولي
+                    </label>
+                  )}
+                  {hasCubicPrice && (
+                    <label className="flex items-center gap-2 text-xs text-slate-600">
+                      <input
+                        type="radio"
+                        checked={selectedUnitType === 'cubic'}
+                        onChange={() => setSelectedUnitType('cubic')}
+                        className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      المتر مربع
+                    </label>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
