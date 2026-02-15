@@ -871,18 +871,114 @@
    ========================================== */
 
 .container_newaddress {
-  width: 85%;
-  margin: 6% auto;
-  padding: 2rem;
-  background: var(--background);
-  min-height: 100vh;
+  width: 100%;
+  max-width: 920px;
+  margin: 40px auto 64px;
+  padding: 28px;
+  background: var(--background, #ffffff);
   direction: rtl;
-  border: 1.5px solid var(--black8);
+  border: 1.5px solid var(--black8, #e5e7eb);
   border-radius: 24px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
 }
 
 .header {
   margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--black87, #0f172a);
+  margin: 0 0 6px 0;
+}
+
+.editSubtitle {
+  font-size: 14px;
+  color: var(--black60, #475569);
+  margin: 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.input {
+  width: 100%;
+}
+
+.errorText {
+  font-size: 13px;
+  color: #dc2626;
+  margin: 2px 0 0;
+}
+
+.statusBanner {
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.statusError {
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  color: #b91c1c;
+}
+
+.statusSuccess {
+  background: rgba(22, 163, 74, 0.1);
+  border: 1px solid rgba(22, 163, 74, 0.2);
+  color: #15803d;
+}
+
+.mapToolbar {
+  margin-bottom: 20px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1.5px solid var(--black8, #e5e7eb);
+  background: var(--background, #ffffff);
+}
+
+.mapToolbarRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.mapToggleButton {
+  min-width: 160px;
+}
+
+.mapToggleIcon {
+  margin-left: 6px;
+}
+
+.mapSection {
+  margin-bottom: 24px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1.5px solid var(--black8, #e5e7eb);
+  background: var(--background, #ffffff);
+}
+
+.mapHint {
+  font-size: 12px;
+  color: #15803d;
+  margin-top: 4px;
+}
+
+.checkboxHint {
+  font-size: 12px;
+  color: #15803d;
+  margin-top: 4px;
+  margin-right: 24px;
 }
 
 .fieldGroup {
@@ -939,6 +1035,58 @@
   flex: 1;
   max-width: 150px;
   min-width: 120px;
+}
+
+.suspenseFallback {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 320px;
+}
+
+.suspenseText {
+  font-size: 16px;
+  color: var(--black60, #475569);
+}
+
+@media (max-width: 768px) {
+  .container_newaddress {
+    margin: 24px 16px 48px;
+    padding: 20px;
+    border-radius: 20px;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 640px) {
+  .container_newaddress {
+    margin: 16px 12px 40px;
+    padding: 16px;
+  }
+
+  .buttonGroup {
+    flex-direction: column;
+    direction: rtl;
+    align-items: stretch;
+  }
+
+  .cancelButton,
+  .saveButton {
+    max-width: none;
+    width: 100%;
+  }
+
+  .mapToolbarRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mapToggleButton {
+    width: 100%;
+  }
 }
 
 /* ==========================================

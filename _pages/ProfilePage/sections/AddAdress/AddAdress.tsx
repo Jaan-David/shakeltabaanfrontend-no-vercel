@@ -503,33 +503,13 @@ function AddressFormContent() {
       </div>
 
       {errors.general && (
-        <div
-          style={{
-            padding: "12px 16px",
-            marginBottom: "20px",
-            backgroundColor: "#fee",
-            border: "1px solid #fcc",
-            borderRadius: "8px",
-            color: "#c33",
-            textAlign: "center",
-          }}
-        >
+        <div className={`${styles.statusBanner} ${styles.statusError}`}>
           {errors.general}
         </div>
       )}
 
       {isSuccess && (
-        <div
-          style={{
-            padding: "12px 16px",
-            marginBottom: "20px",
-            backgroundColor: "#e8f5e9",
-            border: "1px solid #a5d6a7",
-            borderRadius: "8px",
-            color: "#2e7d32",
-            textAlign: "center",
-          }}
-        >
+        <div className={`${styles.statusBanner} ${styles.statusSuccess}`}>
           {successText} جاري التحويل...
         </div>
       )}
@@ -581,34 +561,21 @@ function AddressFormContent() {
           )}
         </div>
 
-        <div
-          style={{
-            marginBottom: "20px",
-            padding: "16px",
-            backgroundColor: "#f8f9fa",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: "12px",
-            }}
-          >
+        <div className={styles.mapToolbar}>
+          <div className={styles.mapToolbarRow}>
             <Button
               type="button"
               variant={inputMethod === "map" ? "primary" : "outline"}
               size="sm"
               onClick={toggleInputMethod}
               disabled={isSubmitting}
-              style={{ minWidth: "140px" }}
+              className={styles.mapToggleButton}
               rounded={true}
               leftIcon={
                 inputMethod === "manual" ? (
-                  <MapPin size={16} style={{ marginLeft: "6px" }} />
+                  <MapPin size={16} className={styles.mapToggleIcon} />
                 ) : (
-                  <Edit3 size={16} style={{ marginLeft: "6px" }} />
+                  <Edit3 size={16} className={styles.mapToggleIcon} />
                 )
               }
             >
@@ -618,7 +585,7 @@ function AddressFormContent() {
         </div>
 
         {inputMethod === "map" && showMap && (
-          <div style={{ marginBottom: "24px" }}>
+          <div className={styles.mapSection}>
             <MapLocationPicker
               onLocationSelect={handleLocationSelect}
               initialLocation={mapLocation || undefined}
@@ -641,15 +608,7 @@ function AddressFormContent() {
             <p className={styles.errorText}>{errors.address}</p>
           )}
           {inputMethod === "map" && formData.address && mapLocation && (
-            <p
-              style={{
-                fontSize: "12px",
-                color: "#4CAF50",
-                marginTop: "4px",
-              }}
-            >
-              تم التعبئة من الخريطة (يمكنك التعديل)
-            </p>
+            <p className={styles.mapHint}>تم التعبئة من الخريطة (يمكنك التعديل)</p>
           )}
         </div>
 
@@ -695,14 +654,7 @@ function AddressFormContent() {
             </span>
           </label>
           {formData.isDefault && (
-            <p
-              style={{
-                fontSize: "12px",
-                color: "#2e7d32",
-                marginTop: "4px",
-                marginRight: "24px",
-              }}
-            >
+            <p className={styles.checkboxHint}>
               سيتم إلغاء العنوان الافتراضي الحالي تلقائياً
             </p>
           )}
@@ -743,15 +695,8 @@ export default function NewAddressForm() {
   return (
     <Suspense
       fallback={
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "400px",
-          }}
-        >
-          <p>جاري التحميل...</p>
+        <div className={styles.suspenseFallback}>
+          <p className={styles.suspenseText}>جاري التحميل...</p>
         </div>
       }
     >

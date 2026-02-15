@@ -19,6 +19,16 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
 
   const handleClose = () => setIsOpen(false);
+  const resolveButtons = (config: AlertConfig | null) => {
+    if (!config?.buttons) return config?.buttons;
+    return config.buttons.map((button) => ({
+      ...button,
+      onClick: () => {
+        button.onClick();
+        handleClose();
+      },
+    }));
+  };
 
   return (
     <>
@@ -28,7 +38,7 @@ export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           isOpen={isOpen}
           message={alertConfig.message}
           type={alertConfig.type}
-          buttons={alertConfig.buttons}
+          buttons={resolveButtons(alertConfig)}
           setClose={handleClose}
           onConfirm={() => {
             alertConfig.onConfirm?.();
