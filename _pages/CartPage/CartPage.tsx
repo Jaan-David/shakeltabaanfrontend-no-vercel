@@ -229,11 +229,24 @@ const CartPage = () => {
 
   const handleMultiOrgCheckout = async () => {
     try {
+      if (!isAuthenticated()) {
+        AlertHandler.warning('يرجى تسجيل الدخول لإكمال الطلب', {
+          buttons: [
+            {
+              label: 'تسجيل الدخول',
+              onClick: () => router.push('/login'),
+              variant: 'primary'
+            }
+          ]
+        });
+        return;
+      }
       await ordersOrgService.createMultiOrgOrder();
       AlertHandler.success('تم إنشاء الطلب بنجاح');
       router.push('/profile?tab=orders');
     } catch (e: any) {
       const errorMessage = e?.response?.data?.message || 'يرجى إضافة عنوان في حسابك ثم إعادة المحاولة';
+      const normalizedMessage = String(errorMessage).toLowerCase();
 
       if (errorMessage.includes('Currently, we only accept orders from Egyptian customers')) {
         const extractedNumber = errorMessage.match(/\+?\d{8,}/)?.[0] || '201204246538';
@@ -243,6 +256,19 @@ const CartPage = () => {
             {
               label: 'التواصل عبر واتساب',
               onClick: () => window.open(whatsappUrl, '_blank'),
+              variant: 'primary'
+            }
+          ]
+        });
+        return;
+      }
+
+      if (normalizedMessage.includes('no default address')) {
+        AlertHandler.error('لا يوجد عنوان افتراضي. يرجى إضافة عنوان أو تعيين عنوان افتراضي من الملف الشخصي.', {
+          buttons: [
+            {
+              label: 'إضافة عنوان',
+              onClick: () => router.push('/addAddress'),
               variant: 'primary'
             }
           ]

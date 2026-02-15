@@ -9,6 +9,7 @@ import {
   type InquiryReply
 } from '@/services/api/inquiry';
 import { isUserAuthenticated } from '@/services/auth/login';
+import AlertHandler from '@/services/Utils/alertHandler';
 import Alert from '@/components/UI/Alert/alert';
 import HowItWorksSteps from './components/HowItWorksSteps';
 import InquiriesHeader from './components/InquiriesHeader';
@@ -39,6 +40,41 @@ export default function InquiriesPage() {
       if (typeof message === 'string') return message;
     }
     return fallback;
+  };
+
+  const extractErrorMessage = (value: unknown): string | null => {
+    if (!value || typeof value !== 'object') return null;
+
+    if ('response' in value) {
+      const response = (value as { response?: { data?: { message?: unknown } } }).response;
+      const message = response?.data && typeof response.data === 'object'
+        ? (response.data as { message?: unknown }).message
+        : undefined;
+      if (typeof message === 'string') return message;
+    }
+
+    if ('message' in value) {
+      const message = (value as { message?: unknown }).message;
+      if (typeof message === 'string') return message;
+    }
+
+    return null;
+  };
+
+  const parseInquiryError = (value: unknown, fallback: string) => {
+    const rawMessage = extractErrorMessage(value) || fallback;
+    const normalizedMessage = rawMessage.toLowerCase();
+
+    if (normalizedMessage.includes('only accept inquiries from egyptian customers')) {
+      const phoneMatch = rawMessage.match(/\+?\d{8,}/)?.[0] || '201204246538';
+      const cleanPhone = phoneMatch.replace(/^\+/, '');
+      return {
+        message: rawMessage,
+        whatsappUrl: `https://wa.me/${cleanPhone}`,
+      };
+    }
+
+    return { message: rawMessage };
   };
 
   const fetchInquiries = useCallback(async () => {
@@ -93,7 +129,21 @@ export default function InquiriesPage() {
         setActiveTab('list');
       }, 1500);
     } catch (error: unknown) {
-      setErrorMessage(getErrorMessage(error, 'فشل في إنشاء الطلب'));
+      const parsedError = parseInquiryError(error, 'فشل في إنشاء الطلب');
+      if (parsedError.whatsappUrl) {
+        AlertHandler.warning(parsedError.message, {
+          buttons: [
+            {
+              label: 'التواصل عبر واتساب',
+              onClick: () => window.open(parsedError.whatsappUrl as string, '_blank'),
+              variant: 'primary'
+            }
+          ]
+        });
+        return;
+      }
+
+      setErrorMessage(parsedError.message);
       console.error('Error creating inquiry:', error);
     }
     
@@ -172,7 +222,9 @@ export default function InquiriesPage() {
       {errorMessage && (
         <Alert
           message={errorMessage}
-          setClose={() => setErrorMessage('')}
+          setClose={() => {
+            setErrorMessage('');
+          }}
           type="error"
         />
       )}

@@ -19,7 +19,7 @@ export const metadata = generateSEO({
 });
 export default function AddAddressPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900/20 to-purple-900/20">
+    <div className="min-h-screen bg-gradient-to-b from-white via-blue-50/40 to-white">
       <NewAddressForm />
     </div>
   );

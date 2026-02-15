@@ -127,7 +127,10 @@ export const inquiryService = {
       const response = await apiClient.post(`${BASE_URL}/inquiries`, formData);
       return response.data;
     } catch (error: any) {
-      console.error('Failed to submit custom order:', error);
+      const status = error?.response?.status;
+      if (status !== 403) {
+        console.error('Failed to submit custom order:', error);
+      }
       throw new Error(error.response?.data?.message || 'Failed to submit custom order');
     }
   },
