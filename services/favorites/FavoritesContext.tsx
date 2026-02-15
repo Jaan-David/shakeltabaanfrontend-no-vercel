@@ -159,7 +159,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
                   stockQty: p.stockQty !== undefined ? Number(p.stockQty) : undefined,
                 };
               })
-              .filter((item): item is FavoriteItem => item !== null);
+              .filter((item: FavoriteItem | null): item is FavoriteItem => item !== null);
               
             setItems(mapped);
             console.log('✅ Mapped favorites:', mapped.length, 'valid items (filtered out invalid/deleted products)');

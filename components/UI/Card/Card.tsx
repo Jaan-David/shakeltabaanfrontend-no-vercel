@@ -1,18 +1,16 @@
 "use client"
 import { useMemo, useCallback, useState } from 'react';
-import type { StaticImageData } from "next/image";
+import Image, { type StaticImageData } from "next/image";
 
 import styles from '@/components/UI/Card/card.module.css';
 
 // Components
 import { CustomMedia } from '@/components/UI/Image/Images';
-import Availablity from '@/components/UI/Card/Availablity';
 import { useFavorites } from '@/services/favorites/FavoritesContext';
 import Alert from '@/components/UI/Alert/alert';
 
 // Import Product type and helper function
 import type { Product } from '@/services/product/products';
-import { getProductUnitLabel } from '@/services/product/products';
 
 // Sample Image
 import Img from '@/public/acessts/NoImage.jpg';
@@ -91,21 +89,14 @@ function Card({
     reviewsCount,
     badge,
     isLoading = false,
-    product,
-    IsKG,
-    IsTON,
-    IsLITER,
-    IsCUBIC_METER,
     pricePerLinearMeter,
     pricePerCubicMeter,
     offerLinearPrice = null,
     offerCubicPrice = null,
     color,
     qualityGrade,
-    isOffer = false,
     organizationName,
     organizationId,
-    showOrganizationInline = false,
     showQualityGrade = true,
     showMinimalMarbleInfo = false,
     showActionButton = true,
@@ -156,21 +147,6 @@ function Card({
         if (productCategory && productCategory !== 'غير محدد') return productCategory;
         return '';
     }, [badge, productCategory]);
-
-    // Get unit label using helper function
-    const unitLabel = useMemo(() => {
-        if (product) {
-            return getProductUnitLabel(product);
-        }
-        // Fallback to individual props
-        const mockProduct: Partial<Product> = {
-            IsKG,
-            IsTON,
-            IsLITER,
-            IsCUBIC_METER
-        };
-        return getProductUnitLabel(mockProduct as Product);
-    }, [product, IsKG, IsTON, IsLITER, IsCUBIC_METER]);
 
     const onHeartClick = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
@@ -273,10 +249,12 @@ function Card({
                         onClick={onHeartClick}
                         aria-label={loved ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'}
                     >
-                        <img
+                        <Image
                             src={loved ? FHEART_SRC : EHEART_SRC}
                             className={styles.heartIcon}
                             alt={loved ? 'مفضل' : 'غير مفضل'}
+                            width={22}
+                            height={22}
                         />
                     </button>
                     

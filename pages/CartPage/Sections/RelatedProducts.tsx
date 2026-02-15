@@ -102,7 +102,7 @@ const RelatedProducts: React.FC = () => {
   useEffect(() => {
     start();
     return () => stop();
-  }, [instanceRef]);
+  }, [start, stop]);
 
   if (loading) {
     return <div className="mt-12 text-black60">جاري التحميل...</div>;

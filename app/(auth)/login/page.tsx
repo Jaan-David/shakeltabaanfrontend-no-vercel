@@ -42,8 +42,6 @@ function LoginFormContent() {
   const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   
-  // ✅ NEW: Track if we've already processed this session
-  const [processedSession, setProcessedSession] = useState<string | null>(null);
   const[ allowAutoLogin, setAllowAutoLogin ] = useState(() => {
     // Initialize from sessionStorage to persist across OAuth redirects
     if (typeof window !== 'undefined') {
@@ -318,7 +316,7 @@ useEffect(() => {
   };
 
   handleSocialAuth();
-}, [session, status, router, searchParams]);
+}, [session, status, router, searchParams, allowAutoLogin]);
 
 // Keep your existing OAuth error handler
 useEffect(() => {
@@ -345,7 +343,6 @@ useEffect(() => {
   useEffect(() => {
     const handleLogout = () => {
       console.log('🚪 [LoginForm] Logout event detected');
-      setProcessedSession(null);
       sessionStorage.removeItem('oauth_initiated');
       localStorage.setItem('just_logged_out', 'true');
     };
@@ -471,30 +468,6 @@ useEffect(() => {
   }
 };
 
-const handleFacebookLogin = async () => {
-  try {
-    console.log('🔵 [LoginForm] Starting Facebook login...');
-    setIsLoading(true);
-    setErrors({});
-    
-    // Store in sessionStorage to persist across OAuth redirect
-    sessionStorage.setItem('oauth_initiated', 'true');
-    setAllowAutoLogin(true);
-    
-    sessionStorage.removeItem('user_logged_out');
-    
-    await signIn('facebook', { 
-      callbackUrl: '/login?oauth=callback',
-      redirect: true
-    });
-    
-  } catch (error) {
-    console.error('❌ [LoginForm] Facebook login error:', error);
-    setAlertMessage('حدث خطأ في تسجيل الدخول عبر Facebook');
-    setShowErrorAlert(true);
-    setIsLoading(false);
-  }
-};
  
   if (status === 'loading') {
     return (

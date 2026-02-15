@@ -111,7 +111,7 @@ const RelatedProducts: React.FC<{ currentProductId?: string }> = ({
   useEffect(() => {
     start();
     return () => stop();
-  }, [instanceRef]);
+  }, [start, stop]);
 
   if (loading)
     return <div className="mt-12 text-slate-600">جاري التحميل...</div>;

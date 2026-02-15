@@ -347,7 +347,7 @@ export const updateUserProfile = async (
       formData.append('image', profileData.image);
     }
 
-    const response = await fetch(`${Api}${API_ENDPOINTS.AUTH.UPDATE_PROFILE}`, {
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH.UPDATE_PROFILE}`, {
       method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${token}`,

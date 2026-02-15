@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useEffect } from "react"
+import Image from "next/image"
 
 //styles
 import styles from '@/components/UI/Chekout/Style.module.css'
@@ -218,10 +219,13 @@ const Form: React.FC<Form> = ({ Total, way, onDataChange }) => {
                             >
                                 {receiptImage ? (
                                     <div className={styles.uploadedImageContainer}>
-                                        <img 
+                                        <Image 
                                             src={receiptImage} 
                                             alt="Receipt" 
-                                            className={styles.uploadedImage} 
+                                            className={styles.uploadedImage}
+                                            width={480}
+                                            height={320}
+                                            sizes="100vw"
                                         />
                                         {!isConfirmed && (
                                             <div className={styles.imageOverlay}>

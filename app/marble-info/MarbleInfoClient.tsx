@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 
 const API_BASE_URL =
@@ -281,6 +282,7 @@ function MarbleInfoContent() {
                       >
                         {category.imageList && category.imageList.length > 0 ? (
                           <div className="mb-4 overflow-hidden rounded-lg border border-[#cbd5f5]">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={category.imageList[0]}
                               alt={category.title}
@@ -403,6 +405,7 @@ function MarbleInfoContent() {
                           >
                             {type.imageList && type.imageList.length > 0 ? (
                               <div className="mb-4 overflow-hidden rounded-lg border border-[#cbd5f5]">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                   src={type.imageList[0]}
                                   alt={type.name}
