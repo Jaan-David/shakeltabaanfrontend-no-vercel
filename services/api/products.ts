@@ -1,5 +1,6 @@
 import apiClient from './client';
 import { Api } from './endpoints';
+import { getApiBaseUrl } from './baseUrl';
 
 const isServer = typeof window === 'undefined';
 
@@ -256,7 +257,7 @@ export async function fetchProductsISR(
   filters: ProductFilters = {},
   revalidate: number = 60
 ): Promise<ApiResponse<Product[]>> {
-  const BASE_URL = Api;
+  const BASE_URL = getApiBaseUrl();
   
   const params = new URLSearchParams();
   params.set('lang', 'en');
@@ -320,7 +321,7 @@ export async function fetchProductByIdISR(
     throw new Error('Product ID is required');
   }
 
-  const BASE_URL = Api;
+  const BASE_URL = getApiBaseUrl();
   const url = `${BASE_URL}/products/${id}?lang=en`;
 
   try {
@@ -337,20 +338,89 @@ export async function fetchProductByIdISR(
     });
 
     if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unable to read error');
+      
       if (response.status === 404) {
+        console.log(`🔍 [ISR] Product ${id} not found (404)`);
         return {
           status: 'error',
           data: {} as Product,
           message: 'Product not found.'
         };
       }
+      
+      console.error(`❌ [ISR] Product ${id} failed with status ${response.status}:`, errorText);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
+    
+    // Normalize response structure - backend may return different formats
+    // Format 1: { status: 'success', data: { product: {...} } }
+    if (data?.status === 'success' && data?.data?.product) {
+      return {
+        status: 'success',
+        data: data.data.product
+      };
+    }
+    
+    // Format 2: { product: {...} }
+    if (data?.product) {
+      return {
+        status: 'success',
+        data: data.product
+      };
+    }
+    
+    // Format 3: Direct product object { _id: '...', name: '...' }
+    if (data?._id || data?.id) {
+      return {
+        status: 'success',
+        data: data
+      };
+    }
+    
+    // Format 4: Already normalized { status: 'success', data: {...} }
     return data;
   } catch (error: any) {
-    console.error(`Error fetching product ${id} (ISR):`, error);
+    // Fallback: If proxy fetch failed on server-side, try direct API
+    if (typeof window === 'undefined' && url.includes('/api/proxy')) {
+      try {
+        const directUrl = `${Api}/products/${id}?lang=en`;
+        const directResponse = await fetch(directUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          next: { 
+            revalidate,
+            tags: ['products', `product-${id}`]
+          },
+        });
+
+        if (directResponse.ok) {
+          const directData = await directResponse.json();
+          
+          // Normalize response
+          if (directData?.status === 'success' && directData?.data?.product) {
+            return { status: 'success', data: directData.data.product };
+          }
+          if (directData?.product) {
+            return { status: 'success', data: directData.product };
+          }
+          if (directData?._id || directData?.id) {
+            return { status: 'success', data: directData };
+          }
+          return directData;
+        }
+      } catch (fallbackError: any) {
+        console.error(`❌ [ISR] Failed to fetch product ${id}:`, fallbackError.message);
+      }
+    } else {
+      console.error(`❌ [ISR] Error fetching product ${id}:`, error.message);
+    }
+    
     return {
       status: 'error',
       data: {} as Product,

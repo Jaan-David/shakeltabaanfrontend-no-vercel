@@ -1,15 +1,15 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useRouter, useParams } from 'next/navigation';
 
 //components
 import OrderStepper from '@/components/UI/Profile/leftSection/Orders/OrderStepper';
 import type { OrderStatus } from '@/components/UI/Profile/leftSection/Orders/OrderStepper';
 import InfoCard from '@/components/UI/Profile/leftSection/Orders/InfoCard';
-import ItemCard from '@/components/UI/Profile/leftSection/Orders/ItemCard';
 
 // Import order service
-import orderService, { OrderItem, OrderStatusArabic } from '@/services/profile/orders';
+import orderService, { CartItem, OrderItem, OrderStatusArabic } from '@/services/profile/orders';
 
 // Status mapping from API to component
 const mapOrderStatus = (apiStatus: OrderItem['status']): OrderStatus => {
@@ -23,11 +23,12 @@ const mapOrderStatus = (apiStatus: OrderItem['status']): OrderStatus => {
 };
 
 // Helper to safely get item price
-const getItemPrice = (item: any): number => {
-  if (item.totalPrice) return item.totalPrice;
-  if (item.unitPrice) return item.unitPrice * (item.itemQty ?? 1);
-  if (item.productId?.pricePerLinearMeter)
-    return item.productId.pricePerLinearMeter * (item.itemQty ?? 1);
+const getItemPrice = (item: CartItem & { totalPrice?: number; unitPrice?: number }): number => {
+  if (typeof item.totalPrice === 'number') return item.totalPrice;
+  if (typeof item.unitPrice === 'number') return item.unitPrice * (item.itemQty ?? 1);
+  const product = item.productId as unknown as { pricePerLinearMeter?: number };
+  if (typeof product?.pricePerLinearMeter === 'number')
+    return product.pricePerLinearMeter * (item.itemQty ?? 1);
   return 0;
 };
 
@@ -145,10 +146,14 @@ export default function OrdWrapper() {
                     key={item._id}
                     className="flex flex-col items-center bg-slate-100 rounded-lg p-3 shadow hover:shadow-md transition"
                   >
-                    <img
+                    <Image
                       src={item.productId.imageList?.[0] ?? '/acessts/NoImage.jpg'}
-                      alt={item.productId?.name}
+                      alt={item.productId?.name ?? 'منتج'}
+                      width={240}
+                      height={160}
+                      sizes="(max-width: 768px) 100vw, 240px"
                       className="w-full h-32 object-contain mb-2 rounded-md"
+                      unoptimized
                     />
                     <h3 className="text-sm font-semibold text-slate-900 text-center">
                       {item.productId?.name ?? 'منتج غير متوفر'}

@@ -11,7 +11,7 @@ import Logo from '@/public/logo/logo2.png';
 import Background from './../../../components/UI/Background/Background';
 import Alert from '@/components/UI/Alert/alert';
 import styles from './../auth.module.css';
-import { AuthService, AuthError, LoginCredentials, UserStorage } from './../../../services/auth/login';
+import { AuthService, AuthError, LoginCredentials, UserStorage, type User } from './../../../services/auth/login';
 import { hasAcceptedPolicies } from '@/utils/policyConsent';
 
 interface PendingAuthData {
@@ -177,7 +177,7 @@ useEffect(() => {
           try {
             // Save to localStorage
             console.log('💾 [LoginForm] Saving to localStorage...');
-            UserStorage.saveUser(freshSession.user.backendUser);
+            UserStorage.saveUser(freshSession.user.backendUser as unknown as User);
             UserStorage.saveToken(freshSession.backendToken);
             
             // Verify save
@@ -268,7 +268,7 @@ useEffect(() => {
         try {
           // Save to localStorage
           console.log('💾 [LoginForm] Saving to localStorage...');
-          UserStorage.saveUser(session.user.backendUser);
+          UserStorage.saveUser(session.user.backendUser as unknown as User);
           UserStorage.saveToken(session.backendToken);
           
           // Verify save

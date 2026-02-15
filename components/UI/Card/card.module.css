@@ -3,7 +3,7 @@
   background: #FFFFFF;
   border-radius: 18px;
   border: 1px solid #E5E7EB;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
   overflow: hidden;
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
   width: 100%;
@@ -14,19 +14,22 @@
   align-items: stretch;
   gap: 0;
   box-sizing: border-box;
+  height: 100%;
 }
 
-.card:hover {
-  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.14);
-  border-color: #60A5FA;
-  transform: translateY(-4px);
+@media (hover: hover) and (min-width: 1024px) {
+  .card:hover {
+    box-shadow: 0 16px 30px rgba(15, 23, 42, 0.14);
+    border-color: #60A5FA;
+    transform: translateY(-4px);
+  }
 }
 
 /* Badge Styles */
 .badgeStack {
   position: absolute;
-  top: 12px;
-  inset-inline-start: 12px;
+  top: 10px;
+  inset-inline-start: 10px;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -121,10 +124,10 @@
 /* Heart Icon */
 .favoriteButton {
   position: absolute;
-  top: 12px;
-  inset-inline-end: 12px;
-  width: 36px;
-  height: 36px;
+  top: 10px;
+  inset-inline-end: 10px;
+  width: 32px;
+  height: 32px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.7);
   background: rgba(255, 255, 255, 0.9);
@@ -151,7 +154,7 @@
   position: relative;
   background: #F8FAFC;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -169,8 +172,39 @@
   transition: transform 0.4s ease;
 }
 
-.card:hover .img {
-  transform: scale(1.04);
+.placeholderImage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #94A3B8;
+  background: linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%);
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.placeholderIcon {
+  width: 28px;
+  height: 28px;
+}
+
+.placeholderText {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+@media (hover: hover) and (min-width: 1024px) {
+  .card:hover .img {
+    transform: scale(1.04);
+  }
+}
+
+@media (min-width: 1024px) {
+  .card {
+    min-height: 430px;
+  }
 }
 
 .quickActions {
@@ -255,9 +289,9 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.75rem;
+  gap: 0.6rem;
   flex: 1;
-  padding: 20px;
+  padding: 16px;
 }
 
 .cardInfo {
@@ -422,18 +456,18 @@
 .productName {
   display: -webkit-box;
   width: 100%;
-  font-size: 1.125rem;
-  font-weight: 900;
+  font-size: 1.05rem;
+  font-weight: 800;
   color: #0F172A;
-  line-height: 1.5;
+  line-height: 1.4;
   cursor: pointer;
   transition: color 0.3s ease;
   overflow: hidden;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
-  min-height: 3em;
-  margin-bottom: 0.5rem;
+  min-height: 2.8em;
+  margin-bottom: 0.35rem;
   letter-spacing: -0.01em;
 }
 
@@ -529,15 +563,58 @@
   font-size: 0.75rem;
 }
 
-.priceBlock {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 16px 12px;
-  margin-top: 8px;
-  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+.priceChips {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 10px;
+  padding: 10px;
+  margin-top: 6px;
+  background: #F8FAFC;
   border-radius: 12px;
   border: 1px solid #E2E8F0;
+}
+
+.priceChip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 10px;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  min-height: 64px;
+  justify-content: center;
+}
+
+.priceChipLabel {
+  font-size: 0.7rem;
+  color: #64748B;
+  font-weight: 700;
+}
+
+.priceChipOld {
+  font-size: 0.7rem;
+  color: #94A3B8;
+  font-weight: 600;
+  text-decoration: line-through;
+}
+
+.priceChipMain {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.priceChipValue {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1D4ED8;
+}
+
+.priceChipUnit {
+  font-size: 0.7rem;
+  color: #64748B;
+  font-weight: 600;
 }
 
 .priceRow {
@@ -608,29 +685,32 @@
 }
 
 .priceOnRequest {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 800;
   color: #64748B;
   text-align: center;
-  padding: 20px;
+  padding: 14px 10px;
+  grid-column: 1 / -1;
 }
 
 .cardActions {
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin-top: 4px;
+  margin-top: auto;
 }
 
 .primaryButton {
   background: #2563EB;
   color: #FFFFFF;
   border-radius: 12px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   font-weight: 700;
   font-size: 0.85rem;
   border: none;
   transition: background 0.2s ease, transform 0.2s ease;
+  width: 100%;
+  min-height: 44px;
 }
 
 .primaryButton:hover {
@@ -645,7 +725,7 @@
 
 .skeletonImage {
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 9;
   background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
   background-size: 200% 100%;
   animation: pulse 1.4s ease infinite;
@@ -687,7 +767,7 @@
 
   .cardImage {
     width: 100%;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 16 / 9;
   }
 
   .img {
@@ -729,7 +809,7 @@
   .card {
     width: 100%;
     max-width: none;
-    min-height: 240px;
+    min-height: 220px;
     border-radius: 14px;
   }
 
@@ -740,7 +820,7 @@
 
   .cardImage {
     margin: 0;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 16 / 9;
     width: 100%;
   }
 
@@ -932,11 +1012,11 @@
 /* Very small phones */
 @media screen and (max-width: 375px) {
   .card {
-    min-height: 220px;
+    min-height: 210px;
   }
 
   .cardImage {
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 16 / 9;
   }
 
   .productName {

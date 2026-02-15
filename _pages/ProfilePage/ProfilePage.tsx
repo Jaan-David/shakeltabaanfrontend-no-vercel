@@ -358,9 +358,11 @@ const ProfilePage = () => {
       )}
 
       <div className={styles.page_container}>
-        <div className={styles.layout_grid}>
+        <div
+          className={`${styles.layout_grid} grid grid-cols-1 md:grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-10 md:gap-8 lg:gap-8`}
+        >
           <div
-            className={`${styles.main} ${
+            className={`${styles.main} min-w-0 order-2 lg:order-none ${
               isMobile && (showMobileMain || !box) ? styles.mobile_active : ""
             }`}
           >
@@ -386,7 +388,7 @@ const ProfilePage = () => {
           </div>
 
           <aside
-            className={`${styles.right_section} ${
+            className={`${styles.right_section} min-w-0 order-1 lg:order-none ${
               isMobile && showMobileMain && box ? styles.mobile_hidden : ""
             }`}
           >

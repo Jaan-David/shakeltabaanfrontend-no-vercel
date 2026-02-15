@@ -1,10 +1,8 @@
 import axios from 'axios';
-import {Api ,  API_ENDPOINTS } from './endpoints';
+import { getApiBaseUrl } from './baseUrl';
 
 // Fallback to local backend if env is not set
-const BASE_URL =
-  Api ||
-  'https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net/app/v1';
+const BASE_URL = getApiBaseUrl();
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -41,9 +39,11 @@ apiClient.interceptors.request.use((config) => {
   }
 
   // Default language: use existing if provided, else 'en'
+  // Skip adding lang parameter for DELETE requests (not needed for deletions)
   const urlHasLang = typeof config.url === 'string' && /[?&]lang=/.test(config.url);
   const params = new URLSearchParams((config.params as any) || {});
-  if (!urlHasLang && !params.has('lang')) {
+  
+  if (config.method?.toLowerCase() !== 'delete' && !urlHasLang && !params.has('lang')) {
     params.set('lang', 'en');
     config.params = params;
   }

@@ -8,12 +8,13 @@ export interface Organization {
   photo?: string;
 }
 
-import { Api } from './endpoints';
+import { getApiBaseUrl } from './baseUrl';
 
 export const organizationService = {
   async getOrganizations(): Promise<Organization[]> {
     try {
-      const response = await fetch(`${Api}/organizations`, {
+      const baseUrl = getApiBaseUrl();
+      const response = await fetch(`${baseUrl}/organizations`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

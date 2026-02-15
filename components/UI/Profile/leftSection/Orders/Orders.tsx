@@ -151,7 +151,7 @@ const Orders: React.FC<OrdersProps> = ({orders}) => {
       </div>
 
       {/* Orders List */}
-      <div className={styles.ordersList_new}>
+      <div className={`${styles.ordersList_new} gap-4 md:gap-3`}>
         {filteredOrders.length === 0 ? (
           <div className={styles.emptyState}>
             <Package className={styles.emptyIcon} />
@@ -161,10 +161,12 @@ const Orders: React.FC<OrdersProps> = ({orders}) => {
         ) : (
           filteredOrders.map((order) => (
             <div key={order.id} className={styles.orderItem_new}>
-              <div className={styles.orderContent_new}>
+              <div
+                className={`${styles.orderContent_new} w-full flex flex-col items-start gap-3 lg:flex-row lg:items-center`}
+              >
                 <Box className={styles.orderIcon_new} />
                 
-                <div className={styles.orderInfo_new}>
+                <div className={`${styles.orderInfo_new} w-full min-w-0`}>
                   <div className={styles.orderNumber_new}>
                     رقم الطلب: {order.orderId}
                   </div>
@@ -176,9 +178,9 @@ const Orders: React.FC<OrdersProps> = ({orders}) => {
                   </span>
                 </div>
 
-                <div className={styles.orderRight_new}>
+                <div className={`${styles.orderRight_new} w-full items-start gap-2 lg:w-auto lg:items-end`}>
                   <button 
-                    className={styles.viewDetails_new}
+                    className={`${styles.viewDetails_new} w-full min-h-[44px] text-center lg:w-auto lg:min-h-0`}
                     onClick={() => router.push(`/order/${order.orderId}`)}
                   >
                     عرض التفاصيل

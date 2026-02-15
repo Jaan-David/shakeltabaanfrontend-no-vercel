@@ -68,7 +68,7 @@ export default function ProductsHeader({
         </div>
 
         <div className="lg:order-none">
-          <div className="sticky top-[110px] z-10 lg:static">
+          <div className="sticky top-16 z-10 sm:top-[110px] lg:static">
             <HeaderSearchBar
               value={search}
               onChange={onSearchChange}

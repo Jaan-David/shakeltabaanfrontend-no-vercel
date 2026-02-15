@@ -22,10 +22,12 @@ const RelatedProducts: React.FC<{ currentProductId?: string }> = ({
   const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
     loop: true,
     mode: "free-snap",
-    slides: { perView: 2, spacing: 12, origin: "auto" },
+    slides: { perView: 1.2, spacing: 12, origin: "auto" },
     breakpoints: {
+      "(min-width: 480px)": { slides: { perView: 2, spacing: 12, origin: "auto" } },
       "(min-width: 768px)": { slides: { perView: 3, spacing: 16, origin: "auto" } },
-      "(min-width: 1024px)": { slides: { perView: 6, spacing: 16, origin: "auto" } },
+      "(min-width: 1024px)": { slides: { perView: 4, spacing: 16, origin: "auto" } },
+      "(min-width: 1280px)": { slides: { perView: 6, spacing: 16, origin: "auto" } },
     },
   });
 
@@ -120,21 +122,21 @@ const RelatedProducts: React.FC<{ currentProductId?: string }> = ({
   if (!products.length) return null;
 
   return (
-    <div className="mt-12">
-      <h2 className="text-2xl font-bold mb-6">منتجات قد تعجبك</h2>
+    <div className="mt-10 sm:mt-12">
+      <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">منتجات قد تعجبك</h2>
 
       <div
         ref={sliderRef}
-        className="keen-slider px-2"
+        className="keen-slider px-3 sm:px-0"
         onMouseEnter={stop}
         onMouseLeave={start}
       >
         {products.map((product, index) => (
           <div
             key={`${product._id || product.id}-${index}`}
-            className="keen-slider__slide"
+            className="keen-slider__slide flex h-auto"
           >
-            <Link href={`/product/${product._id || product.id}`}>
+            <Link href={`/product/${product._id || product.id}`} className="block w-full">
               <Card
                 productId={String(product._id || product.id || index)}
                 productImg={getPrimaryImage(product)}

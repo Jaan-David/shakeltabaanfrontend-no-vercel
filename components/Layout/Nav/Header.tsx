@@ -1,14 +1,13 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { ChevronDown, Menu, Search, X } from "lucide-react";
+import { ChevronDown, Menu, Search, X, Heart, ShoppingCart, Bell } from "lucide-react";
 import styles from "./Header.module.css";
 import "../../../app/globals.css";
 
-// Import your authentication service
 import {
   getCurrentUser,
   isUserAuthenticated,
@@ -16,19 +15,10 @@ import {
   AuthService,
 } from "../../../services/auth/login";
 
-// Components
 import NotificationsComponent from "./../../UI/notification/notification";
-// import LanguageSelector from "./../../UI/Language/language";
 import { Button } from "../../UI/Buttons/Button";
-
-// Services
 import { getUnreadNotificationsCount } from "../../../services/notifications/notification";
-
-// Icons
 import Logo from "@/public/logo/logo1.png";
-import Heart from "./../../../public/icons/Header/Heart.svg";
-import Cart from "./../../../public/icons/Header/Cart Large 2.svg";
-import Notification from "./../../../public/icons/Header/Bell Bing.svg";
 
 export interface User {
   _id: string;
@@ -62,15 +52,18 @@ interface HeaderProps {
 type NavItem = {
   label: string;
   href: string;
+  icon?: React.ReactNode;
 };
 
 const MAIN_NAV_ITEMS: NavItem[] = [
+  { label: "الرئيسية", href: "/" },
   { label: "المنتجات", href: "/products" },
   { label: "طلباتك الخاصة", href: "/inquiries" },
   { label: "ازاي تختار", href: "/marble-info" },
+  { label: "من نحن", href: "/about" },
 ];
 
-const ACTION_LINKS: NavItem[] = [
+const ACTION_ITEMS: NavItem[] = [
   { label: "بحث", href: "/products" },
   { label: "المفضلة", href: "/favorites" },
   { label: "عربة التسوق", href: "/cart" },
@@ -101,8 +94,8 @@ function Header({
   const router = useRouter();
   const pathname = usePathname();
   const { data: session, status } = useSession();
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  // State for user data
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -111,14 +104,68 @@ function Header({
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Handle session-based auth (for social login)
+  // MOBILE MENU: Handle scroll lock
+  useEffect(() => {
+    if (!isMounted) return;
+    
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileMenuOpen, isMounted]);
+
+  // MOBILE MENU: Handle swipe close
+  useEffect(() => {
+    if (!isMobileMenuOpen || !menuRef.current) return;
+
+    let startX = 0;
+    const handleTouchStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const endX = e.changedTouches[0].clientX;
+      if (endX - startX > 80) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    menuRef.current?.addEventListener("touchstart", handleTouchStart);
+    menuRef.current?.addEventListener("touchend", handleTouchEnd);
+
+    return () => {
+      menuRef.current?.removeEventListener("touchstart", handleTouchStart);
+      menuRef.current?.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [isMobileMenuOpen]);
+
+  // ACCESSIBILITY: Focus trap in mobile menu
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isMobileMenuOpen]);
+
+  // Handle session-based auth
   useEffect(() => {
     setIsMounted(true);
     const handleSocialAuth = async () => {
       if (session?.backendToken && session?.user?.backendUser) {
-        UserStorage.saveUser(session.user.backendUser);
+        UserStorage.saveUser(session.user.backendUser as unknown as User);
         UserStorage.saveToken(session.backendToken);
-        setUser(session.user.backendUser);
+        setUser(session.user.backendUser as unknown as User);
         setIsLoading(false);
 
         AuthService.startTokenMonitoring(() => {
@@ -131,14 +178,13 @@ function Header({
     if (status !== "loading") {
       handleSocialAuth();
     }
-  }, [session, status]);
+  }, [session, status, router]);
 
-  // Load user data from localStorage when component mounts
+  // Load user data from localStorage
   useEffect(() => {
     const loadUserData = () => {
       try {
         setIsLoading(true);
-
         if (isUserAuthenticated()) {
           const userData = getCurrentUser();
           setUser(userData);
@@ -158,51 +204,42 @@ function Header({
     }
   }, [status]);
 
-
   // Fetch unread notifications count
   useEffect(() => {
     let isMounted = true;
     let intervalId: NodeJS.Timeout | null = null;
 
     const fetchUnreadCount = async () => {
-      if (!user || !isMounted) {
-        return;
-      }
+      if (!user || !isMounted) return;
 
       try {
         const count = await getUnreadNotificationsCount();
-
         if (isMounted) {
-          setUnreadCount(count);
+          setUnreadCount(count || 0);
         }
       } catch (error) {
         if (isMounted) {
-          console.error("❌ Error fetching unread count:", error);
+          console.error("Error fetching unread count:", error);
         }
       }
     };
 
     if (user) {
       fetchUnreadCount();
-
       intervalId = setInterval(() => {
         if (isMounted) {
           fetchUnreadCount();
         }
-      }, 300000);
+      }, 300000); // 5 minutes
     }
 
     return () => {
       isMounted = false;
-
-      if (intervalId) {
-        clearInterval(intervalId);
-        intervalId = null;
-      }
+      if (intervalId) clearInterval(intervalId);
     };
   }, [user]);
 
-  // Listen for storage changes AND custom events
+  // Listen for storage changes and custom events
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "user_data" || e.key === "auth_token") {
@@ -240,6 +277,7 @@ function Header({
     };
   }, [router]);
 
+  // Scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 8);
@@ -247,92 +285,53 @@ function Header({
 
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // MOBILE MENU: Close on route change to avoid stuck overlay
   useEffect(() => {
-    if (!isMounted) {
-      return;
+    if (isMobileMenuOpen) {
+      setIsMobileMenuOpen(false);
     }
+  }, [pathname]);
 
-    document.body.style.overflow = isMobileMenuOpen ? "hidden" : "";
+  const handleLogin = () => router.push("/login");
 
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isMobileMenuOpen, isMounted]);
-
-  const handleLogin = (): void => {
-    router.push("/login");
-  };
-
-  const handleNotificationClick = (): void => {
-    setIsNotificationsOpen(true);
-  };
+  const handleNotificationClick = () => setIsNotificationsOpen(true);
 
   const handleNotificationsClose = () => {
     setIsNotificationsOpen(false);
     if (user) {
-      getUnreadNotificationsCount().then(setUnreadCount).catch(console.error);
+      getUnreadNotificationsCount()
+        .then(setUnreadCount)
+        .catch(console.error);
     }
   };
-
-  const getVariantClass = (): string => {
-    switch (variant) {
-      case "auth":
-        return styles.headerAuth;
-      case "minimal":
-        return styles.headerMinimal;
-      case "transparent":
-        return styles.headerTransparent;
-      default:
-        return "";
-    }
-  };
-
-  const headerClasses = `${
-    styles.header
-  } ${isScrolled ? styles.headerScrolled : ""} ${getVariantClass()} ${className}`.trim();
-
-  const isAuthenticated = user !== null && !isLoading;
 
   const isPathActive = useMemo(() => {
     return (href: string) => {
-      if (!pathname) {
-        return false;
-      }
-
-      if (href === "/") {
-        return pathname === "/";
-      }
-
+      if (!pathname) return false;
+      if (href === "/") return pathname === "/";
       return pathname.startsWith(href);
     };
   }, [pathname]);
 
-  if (!isMounted) {
-    return null;
-  }
+  const headerClasses = `${styles.header} ${
+    isScrolled ? styles.headerScrolled : ""
+  } ${className}`.trim();
+
+  const actionButtonClass =
+    "min-w-[44px] min-h-[44px] flex items-center justify-center overflow-visible";
+
+  const isAuthenticated = user !== null && !isLoading;
+
+  if (!isMounted) return null;
 
   if ((isLoading || status === "loading") && showUserActions) {
     return (
       <header className={headerClasses} style={customStyles} dir="rtl">
         <div className={styles.headerInner}>
-          <div className={styles.rightSection}>
-            <Link href="/" className={styles.logoLink}>
-              <Image
-                src={Logo}
-                alt="Logo"
-                width={140}
-                height={40}
-                sizes="140px"
-                className={styles.logoImage}
-                priority
-              />
-            </Link>
-            <span className={styles.loadingText}>...</span>
-          </div>
+          <div className="h-10 w-10 animate-pulse rounded-full bg-slate-200" />
         </div>
       </header>
     );
@@ -340,78 +339,216 @@ function Header({
 
   return (
     <>
-      <Navbar className={headerClasses} customStyles={customStyles}>
-        <div className={styles.rightSection}>
-          <Link href="/" className={styles.logoLink} aria-label="الانتقال للصفحة الرئيسية">
-            <Image
-              src={Logo}
-              alt="Logo"
-              width={140}
-              height={40}
-              sizes="140px"
-              className={styles.logoImage}
-              priority
-            />
-          </Link>
-          <NavLink
-            href="/"
-            label="الرئيسية"
-            isActive={isPathActive("/")}
-            className={styles.homeLink}
-          />
-          {/* Inline primary nav links beside Home */}
-          <nav className={styles.navList} aria-label="القائمة الرئيسية">
-            {MAIN_NAV_ITEMS.map((item) => (
-              <NavLink
-                key={item.href}
-                href={item.href}
-                label={item.label}
-                isActive={isPathActive(item.href)}
+      <header className={headerClasses} style={customStyles} dir="rtl">
+        <div className={styles.headerInner}>
+          {/* START: Logo + Desktop Nav */}
+          <div className="flex items-center gap-3 md:gap-4 flex-1">
+            <Link href="/" className={styles.logoLink} aria-label="الرئيسية">
+              <Image
+                src={Logo}
+                alt="منصة شق الثعبان"
+                width={40}
+                height={40}
+                className={styles.logoImage}
+                priority
               />
-            ))}
-          </nav>
-        </div>
+            </Link>
 
-        <div className={styles.leftSection}>
-          {showUserActions && (
-            <>
-              <IconGroup
-                isAuthenticated={isAuthenticated}
-                unreadCount={unreadCount}
-                onNotificationsClick={handleNotificationClick}
-              />
-              <AuthButton
-                isAuthenticated={isAuthenticated}
-                user={user}
-                onLogin={handleLogin}
-              />
-            </>
-          )}
+            <nav className="hidden md:flex items-center gap-2">
+              {MAIN_NAV_ITEMS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    isPathActive(item.href)
+                      ? "text-blue-600 bg-blue-50"
+                      : "text-slate-600 hover:text-blue-600 hover:bg-slate-50"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
 
-          <button
-            type="button"
-            className={styles.menuButton}
-            aria-label={isMobileMenuOpen ? "إغلاق القائمة" : "فتح القائمة"}
-            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-          >
-            {isMobileMenuOpen ? (
-              <X className={styles.menuIcon} />
+          {/* END: Actions + Auth */}
+          <div className="flex items-center gap-1 md:gap-2">
+            {/* Desktop Action Links */}
+            <div className="hidden sm:flex items-center gap-1">
+              <Link
+                href={ACTION_ITEMS[0].href}
+                className={`p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-lg transition-colors ${actionButtonClass}`}
+                aria-label={ACTION_ITEMS[0].label}
+              >
+                <Search size={20} />
+              </Link>
+              <Link
+                href={ACTION_ITEMS[1].href}
+                className={`p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-lg transition-colors ${actionButtonClass}`}
+                aria-label={ACTION_ITEMS[1].label}
+              >
+                <Heart size={20} />
+              </Link>
+              {isAuthenticated ? (
+                <button
+                  onClick={handleNotificationClick}
+                  className={`relative p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-lg transition-colors ${actionButtonClass}`}
+                  aria-label="الإشعارات"
+                >
+                  <Bell size={20} />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-0 right-0 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-semibold">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
+                </button>
+              ) : (
+                <div className={`p-2 text-slate-300 cursor-not-allowed ${actionButtonClass}`}>
+                  <Bell size={20} />
+                </div>
+              )}
+              <Link
+                href={ACTION_ITEMS[2].href}
+                className={`p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-lg transition-colors ${actionButtonClass}`}
+                aria-label={ACTION_ITEMS[2].label}
+              >
+                <ShoppingCart size={20} />
+              </Link>
+            </div>
+
+            {/* Auth Button */}
+            {isAuthenticated && user ? (
+              <Link
+                href="/profile"
+                className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors"
+                aria-label="الملف الشخصي"
+              >
+                <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-semibold">
+                  {getUserInitial(user.firstName, user.lastName)}
+                </div>
+                <span className="hidden md:inline text-xs">
+                  {getUserDisplayName(user.firstName, user.lastName)}
+                </span>
+              </Link>
             ) : (
-              <Menu className={styles.menuIcon} />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogin}
+                className="hidden sm:inline-flex rounded-lg"
+              >
+                تسجيل دخول
+              </Button>
             )}
-          </button>
-        </div>
-      </Navbar>
 
-      <MobileMenu
-        isOpen={isMobileMenuOpen}
-        onClose={() => setIsMobileMenuOpen(false)}
-        navItems={MAIN_NAV_ITEMS}
-        isActive={isPathActive}
-        isAuthenticated={isAuthenticated}
-        user={user}
-        onLogin={handleLogin}
-      />
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className={`sm:hidden p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-lg transition-colors ${actionButtonClass}`}
+              aria-label="قائمة الملاحة"
+              aria-expanded={isMobileMenuOpen}
+            >
+              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* MOBILE MENU OVERLAY */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 top-16 z-40 bg-black/40 sm:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* MOBILE MENU PANEL */}
+      <div
+        ref={menuRef}
+        className={`fixed top-16 right-0 bottom-0 w-4/5 max-w-xs bg-white z-50 sm:hidden transition-transform duration-200 ease-out ${
+          isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+        dir="rtl"
+        role="dialog"
+        aria-modal="true"
+        aria-label="قائمة الملاحة"
+      >
+        <nav className="flex flex-col gap-1 p-4">
+          {MAIN_NAV_ITEMS.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                isPathActive(item.href)
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-slate-700 hover:text-blue-600 hover:bg-slate-50"
+              }`}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              {item.label}
+            </Link>
+          ))}
+
+          <hr className="my-2 border-slate-200" />
+
+          {/* Mobile Action Links */}
+          <Link
+            href={ACTION_ITEMS[0].href}
+            className="px-4 py-3 rounded-lg text-sm font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 transition-colors flex items-center gap-2"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            <Search size={18} />
+            {ACTION_ITEMS[0].label}
+          </Link>
+          <Link
+            href={ACTION_ITEMS[1].href}
+            className="px-4 py-3 rounded-lg text-sm font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 transition-colors flex items-center gap-2"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            <Heart size={18} />
+            {ACTION_ITEMS[1].label}
+          </Link>
+          <Link
+            href={ACTION_ITEMS[2].href}
+            className="px-4 py-3 rounded-lg text-sm font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 transition-colors flex items-center gap-2"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            <ShoppingCart size={18} />
+            {ACTION_ITEMS[2].label}
+          </Link>
+
+          <hr className="my-2 border-slate-200" />
+
+          {/* Auth Section */}
+          {isAuthenticated && user ? (
+            <>
+              <Link
+                href="/profile"
+                className="px-4 py-3 rounded-lg text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors flex items-center gap-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-semibold">
+                  {getUserInitial(user.firstName, user.lastName)}
+                </div>
+                {getUserDisplayName(user.firstName, user.lastName)}
+              </Link>
+            </>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                handleLogin();
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full rounded-lg mt-2"
+            >
+              تسجيل دخول
+            </Button>
+          )}
+        </nav>
+      </div>
 
       <NotificationsComponent
         isOpen={isNotificationsOpen}
@@ -423,230 +560,3 @@ function Header({
 }
 
 export default Header;
-
-function Navbar({
-  className,
-  customStyles,
-  children,
-}: {
-  className: string;
-  customStyles: React.CSSProperties;
-  children: React.ReactNode;
-}) {
-  return (
-    <header className={className} style={customStyles} dir="rtl">
-      <div className={styles.headerInner}>{children}</div>
-    </header>
-  );
-}
-
-function NavLink({
-  href,
-  label,
-  isActive,
-  className = "",
-}: {
-  href: string;
-  label: string;
-  isActive: boolean;
-  className?: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className={`${styles.navLink} ${isActive ? styles.navLinkActive : ""} ${
-        className || ""
-      }`.trim()}
-    >
-      <span className={styles.navLinkLabel}>{label}</span>
-    </Link>
-  );
-}
-
-function IconGroup({
-  isAuthenticated,
-  unreadCount,
-  onNotificationsClick,
-}: {
-  isAuthenticated: boolean;
-  unreadCount: number;
-  onNotificationsClick: () => void;
-}) {
-  return (
-    <div className={styles.iconGroup} aria-label="الإجراءات">
-      <Link
-        href={ACTION_LINKS[0].href}
-        className={styles.iconButton}
-        aria-label={ACTION_LINKS[0].label}
-      >
-        <Search className={styles.icon} />
-      </Link>
-
-      <Link
-        href={ACTION_LINKS[1].href}
-        className={styles.iconButton}
-        aria-label={ACTION_LINKS[1].label}
-      >
-        <Heart className={styles.icon} />
-      </Link>
-
-      {isAuthenticated ? (
-        <button
-          type="button"
-          className={styles.iconButton}
-          aria-label="الإشعارات"
-          onClick={onNotificationsClick}
-        >
-          <Notification className={styles.icon} />
-          {unreadCount > 0 && (
-            <span className={styles.iconBadge}>
-              {unreadCount > 99 ? "99+" : unreadCount}
-            </span>
-          )}
-        </button>
-      ) : (
-        <div className={styles.iconButtonMuted} aria-hidden="true">
-          <Notification className={styles.icon} />
-        </div>
-      )}
-
-      <Link
-        href={ACTION_LINKS[2].href}
-        className={styles.iconButton}
-        aria-label={ACTION_LINKS[2].label}
-      >
-        <Cart className={styles.icon} />
-      </Link>
-    </div>
-  );
-}
-
-function AuthButton({
-  isAuthenticated,
-  user,
-  onLogin,
-}: {
-  isAuthenticated: boolean;
-  user: User | null;
-  onLogin: () => void;
-}) {
-  if (isAuthenticated && user) {
-    const displayName = getUserDisplayName(user.firstName, user.lastName) || "حسابي";
-
-    return (
-      <Link href="/profile" className={styles.profileButton} aria-label="الملف الشخصي">
-        <div className={styles.profileAvatar}>
-          {user.image ? (
-            <Image
-              src={user.image}
-              alt="User Avatar"
-              width={36}
-              height={36}
-              className={styles.avatarImage}
-            />
-          ) : (
-            <span className={styles.profileInitial}>
-              {getUserInitial(user.firstName, user.lastName)}
-            </span>
-          )}
-        </div>
-        <span className={styles.profileName}>{displayName}</span>
-        <ChevronDown className={styles.dropdownIndicator} />
-      </Link>
-    );
-  }
-
-  return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={onLogin}
-      className={styles.loginButton}
-      rounded={true}
-    >
-      تسجيل دخول
-    </Button>
-  );
-}
-
-function MobileMenu({
-  isOpen,
-  onClose,
-  navItems,
-  isActive,
-  isAuthenticated,
-  user,
-  onLogin,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  navItems: NavItem[];
-  isActive: (href: string) => boolean;
-  isAuthenticated: boolean;
-  user: User | null;
-  onLogin: () => void;
-}) {
-  return (
-    <div className={`${styles.mobileMenu} ${isOpen ? styles.mobileMenuOpen : ""}`.trim()}>
-      <div className={styles.mobileMenuOverlay} onClick={onClose} aria-hidden="true" />
-      <div className={styles.mobileMenuPanel} role="dialog" aria-modal="true">
-        <div className={styles.mobileMenuHeader}>
-          <span className={styles.mobileMenuTitle}>القائمة</span>
-          <button type="button" className={styles.mobileMenuClose} onClick={onClose}>
-            <X className={styles.menuIcon} />
-          </button>
-        </div>
-
-        <nav className={styles.mobileMenuList} aria-label="القائمة الرئيسية">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onClose}
-              className={`${styles.mobileNavLink} ${
-                isActive(item.href) ? styles.mobileNavLinkActive : ""
-              }`.trim()}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className={styles.mobileMenuFooter}>
-          {isAuthenticated && user ? (
-            <Link href="/profile" onClick={onClose} className={styles.mobileProfile}>
-              <div className={styles.profileAvatar}>
-                {user.image ? (
-                  <Image
-                    src={user.image}
-                    alt="User Avatar"
-                    width={36}
-                    height={36}
-                    className={styles.avatarImage}
-                  />
-                ) : (
-                  <span className={styles.profileInitial}>
-                    {getUserInitial(user.firstName, user.lastName)}
-                  </span>
-                )}
-              </div>
-              <span className={styles.profileName}>
-                {getUserDisplayName(user.firstName, user.lastName) || "حسابي"}
-              </span>
-            </Link>
-          ) : (
-            <Button
-              variant="outline"
-              size="md"
-              onClick={onLogin}
-              className={styles.mobileLoginButton}
-              rounded={true}
-            >
-              تسجيل دخول
-            </Button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}

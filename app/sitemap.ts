@@ -15,12 +15,6 @@ const toAbsoluteUrl = (path: string) => {
   return `${BASE_URL}${normalized}`;
 };
 
-const safeDate = (value?: string | number | Date) => {
-  if (!value) return new Date();
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? new Date() : date;
-};
-
 const fetchJson = async <T,>(url: string): Promise<T | null> => {
   try {
     const response = await fetch(url, { next: { revalidate: 3600 } });

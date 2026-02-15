@@ -1,3 +1,5 @@
+import { useState } from "react";
+import Image from "next/image";
 import InquiryStatusBadge from "./InquiryStatusBadge";
 import type { Inquiry } from "@/services/api/inquiry";
 
@@ -12,6 +14,8 @@ export default function InquiryCard({ inquiry, onViewDetails, onViewOffers }: In
   const hasOffers = inquiry.reply.length > 0;
   const offerCount = inquiry.reply.length;
   const previewImage = inquiry.imageList?.[0];
+  const [previewError, setPreviewError] = useState(false);
+  const previewSrc = previewError ? "/acessts/NoImage.jpg" : previewImage;
 
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md md:p-6">
@@ -35,14 +39,16 @@ export default function InquiryCard({ inquiry, onViewDetails, onViewOffers }: In
 
         <div className="flex w-full flex-row items-center gap-3 md:w-auto md:flex-col">
           <div className="h-20 w-20 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
-            {previewImage ? (
-              <img
-                src={previewImage}
+            {previewSrc ? (
+              <Image
+                src={previewSrc}
                 alt="معاينة الطلب"
+                width={80}
+                height={80}
+                sizes="80px"
                 className="h-full w-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.src = "/acessts/NoImage.jpg";
-                }}
+                onError={() => setPreviewError(true)}
+                unoptimized
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">

@@ -21,6 +21,8 @@ const buildProductKeywords = (product: any) => {
     "شق الثعبان",
     "رخام شق التعبان",
     "جرانيت شق التعبان",
+    "marble egypt",
+    "granite egypt",
     "marble suppliers egypt",
     "granite suppliers egypt",
     "egypt stone marketplace",
@@ -32,7 +34,7 @@ const buildProductKeywords = (product: any) => {
 const buildProductDescription = (product: any) => {
   const name = product?.name || product?.nameAr || "المنتج";
   const category = product?.category ? `من فئة ${product.category}` : "";
-  return `اشترِ ${name} ${category} من منصة شق التعبان. رخام وجرانيت بجودة عالية وأسعار منافسة.`.trim();
+  return `اشترِ ${name} ${category} من شق التعبان في مصر. رخام وجرانيت بجودة عالية وأسعار منافسة لمشاريعك.`.trim();
 };
 
 function getImageList(
@@ -49,6 +51,19 @@ function getImageList(
   return ["/acessts/NoImage.jpg"]; // Fixed placeholder path
 }
 
+const getSiteUrl = () =>
+  process.env.NEXT_PUBLIC_SITE_URL
+    ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/+$/, "")
+    : canonicalBaseUrl;
+
+const toAbsoluteUrl = (value: string) => {
+  if (value.startsWith("http")) return value;
+  const baseUrl = getSiteUrl();
+  return `${baseUrl}${value.startsWith("/") ? value : `/${value}`}`;
+};
+
+const stripUndefined = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
+
 export default async function ProductByIdPage({
   params,
 }: {
@@ -58,16 +73,12 @@ export default async function ProductByIdPage({
   const decodedId = decodeURIComponent(id);
 
   try {
-    //console.log(`🔄 Loading product page for ID: ${decodedId}`);
-
     // ✅ Fetch product details
-    const res = await fetchProductByIdISR(decodedId, 3600);
-    //console.log(`📦 Product fetch result:`, res);
+    const res = await fetchProductByIdISR(decodedId, 300);
 
     // Check if the response indicates an error
     if (res.status === "error") {
-      if (res.message?.includes("Product not found")) {
-        //console.log(`❌ Product not found: ${decodedId}`);
+      if (res.message?.includes("not found") || res.message?.includes("Product not found")) {
         return notFound();
       }
 
@@ -92,17 +103,25 @@ export default async function ProductByIdPage({
       }
     }
 
-    const apiProduct: any =
-      (res as any)?.data?.product || (res as any)?.product;
-    if (!apiProduct) {
-      //console.log(`❌ No product data received for ID: ${decodedId}`);
-      return notFound();
+    // Extract product from different response formats
+    let apiProduct: any = null;
+    
+    // Format 1: { status: 'success', data: { product: {...} } }
+    if ((res as any)?.data?.product) {
+      apiProduct = (res as any).data.product;
+    }
+    // Format 2: { status: 'success', data: {...product fields} }
+    else if (res.data && (res.data._id || res.data.id)) {
+      apiProduct = res.data;
+    }
+    // Format 3: { product: {...} }
+    else if ((res as any)?.product) {
+      apiProduct = (res as any).product;
     }
 
-    console.log(`✅ Product data received:`, apiProduct.title || apiProduct.name);
-    console.log(`📦 Organization Name:`, apiProduct.organizationName);
-    console.log(`📦 Organization ID:`, apiProduct.organizationId);
-    console.log(`📦 Full API Product:`, JSON.stringify(apiProduct, null, 2));
+    if (!apiProduct) {
+      return notFound();
+    }
 
     // ✅ Fetch reviews for this product
     let reviews: Array<{
@@ -168,35 +187,42 @@ export default async function ProductByIdPage({
       name: "",
     };
 
-    console.log(`📤 Data being passed to ProductPage:`, JSON.stringify(data, null, 2));
-
     //console.log(`✅ Product page data prepared successfully`);
-    const canonicalUrl = `${canonicalBaseUrl}/product/${encodeURIComponent(decodedId)}`;
+    const canonicalUrl = `${getSiteUrl()}/product/${encodeURIComponent(decodedId)}`;
     const imageList = getImageList(apiProduct);
-    const primaryImage = imageList[0] || `${canonicalBaseUrl}/acessts/NoImage.jpg`;
+    const absoluteImages = imageList.map((img) => toAbsoluteUrl(img));
+    const priceValue = Number(apiProduct.price ?? 0);
+    const hasPrice = Number.isFinite(priceValue) && priceValue > 0;
 
-    const productJsonLd = {
+    const brandName =
+      typeof apiProduct.brand === "string" && apiProduct.brand.trim().length > 0
+        ? apiProduct.brand.trim()
+        : undefined;
+    const productJsonLd = stripUndefined({
       "@context": "https://schema.org",
       "@type": "Product",
       name: data.title,
       description: data.description || buildProductDescription(apiProduct),
-      image: imageList.map((img) => (img.startsWith("http") ? img : `${canonicalBaseUrl}${img.startsWith("/") ? img : `/${img}`}`)),
+      image: absoluteImages,
       sku: String(apiProduct._id || apiProduct.id || decodedId),
-      brand: apiProduct.brand
+      brand: brandName
         ? {
             "@type": "Brand",
-            name: String(apiProduct.brand),
+            name: brandName,
           }
         : undefined,
-      offers: {
-        "@type": "Offer",
-        url: canonicalUrl,
-        priceCurrency: "EGP",
-        price: Number(apiProduct.price ?? 0),
-        availability: (apiProduct.stockQty ?? apiProduct.stockQuantity ?? 0) > 0
-          ? "https://schema.org/InStock"
-          : "https://schema.org/OutOfStock",
-      },
+      offers: hasPrice
+        ? {
+            "@type": "Offer",
+            url: canonicalUrl,
+            priceCurrency: "EGP",
+            price: priceValue,
+            availability:
+              (apiProduct.stockQty ?? apiProduct.stockQuantity ?? 0) > 0
+                ? "https://schema.org/InStock"
+                : "https://schema.org/OutOfStock",
+          }
+        : undefined,
       aggregateRating:
         ratingCount > 0
           ? {
@@ -205,7 +231,7 @@ export default async function ProductByIdPage({
               reviewCount: ratingCount,
             }
           : undefined,
-    };
+    });
 
     return (
       <>
@@ -217,6 +243,12 @@ export default async function ProductByIdPage({
       </>
     );
   } catch (e: any) {
+    // If notFound() was called, it throws an error - rethrow it to let Next.js handle it
+    if (e.message?.includes("NEXT_NOT_FOUND") || e.message?.includes("NEXT_HTTP_ERROR_FALLBACK;404")) {
+      // Don't log 404 errors - they're expected when products don't exist
+      throw e;
+    }
+
     console.error("❌ Error fetching product:", e.message);
 
     // Enhanced error handling for different types of errors
@@ -330,29 +362,39 @@ export async function generateMetadata({
 }) {
   const { id } = await params;
   const decodedId = decodeURIComponent(id);
-  const canonicalUrl = `${canonicalBaseUrl}/product/${encodeURIComponent(decodedId)}`;
 
   try {
-    const res = await fetchProductByIdISR(decodedId, 3600);
-    const apiProduct: any = (res as any)?.data?.product || (res as any)?.product;
-    if (!apiProduct) {
+    const res = await fetchProductByIdISR(decodedId, 300);
+    
+    // Check if the response indicates an error
+    if (res.status === "error") {
+      if (res.message?.includes("not found") || res.message?.includes("Product not found")) {
+        return generateSEO({
+          title: "منتج غير متوفر",
+          description: seoConfig.siteDescription,
+          keywords: seoConfig.defaultKeywords,
+          url: `/product/${decodedId}`,
+        });
+      }
+    }
+    
+    const apiProduct: any = (res as any)?.data?.product || (res as any)?.product || res.data;
+    if (!apiProduct || (!apiProduct._id && !apiProduct.id)) {
       return generateSEO({
         title: "منتج غير متوفر",
         description: seoConfig.siteDescription,
         keywords: seoConfig.defaultKeywords,
         url: `/product/${decodedId}`,
-        noIndex: true,
       });
     }
 
-    const title = apiProduct.name || apiProduct.nameAr || "منتج";
-    const description = buildProductDescription(apiProduct);
+    const productName = apiProduct.name || apiProduct.nameAr || "منتج";
+    const title = `${productName} | رخام | جرانيت | شق التعبان | مصر`;
+    const description = apiProduct.description || apiProduct.descriptionAr || buildProductDescription(apiProduct);
     const imageList = getImageList(apiProduct);
     const image = imageList[0]
-      ? imageList[0].startsWith("http")
-        ? imageList[0]
-        : `${canonicalBaseUrl}${imageList[0].startsWith("/") ? imageList[0] : `/${imageList[0]}`}`
-      : `${canonicalBaseUrl}/acessts/NoImage.jpg`;
+      ? toAbsoluteUrl(imageList[0])
+      : `${getSiteUrl()}/acessts/NoImage.jpg`;
 
     return generateSEO({
       title,
@@ -368,7 +410,6 @@ export async function generateMetadata({
       description: seoConfig.siteDescription,
       keywords: seoConfig.defaultKeywords,
       url: `/product/${decodedId}`,
-      noIndex: true,
     });
   }
 }

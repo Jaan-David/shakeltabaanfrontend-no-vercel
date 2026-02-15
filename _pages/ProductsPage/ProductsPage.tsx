@@ -302,6 +302,13 @@ export default function ProductsPage() {
                     <option value="newest">الأحدث</option>
                   </select>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileFiltersOpen(true)}
+                  className="lg:hidden rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:text-blue-600 min-h-[44px]"
+                >
+                  فلتر البحث
+                </button>
               </div>
             </div>
 
@@ -319,7 +326,7 @@ export default function ProductsPage() {
                 لا توجد منتجات مطابقة للبحث الحالي.
               </div>
             ) : (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:gap-5 md:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {sortedProducts.map((product, index) => (
                   <Card
                     key={product._id || product.id || index}
@@ -356,9 +363,9 @@ export default function ProductsPage() {
       <button
         type="button"
         onClick={() => setIsMobileFiltersOpen(true)}
-        className="fixed bottom-5 right-5 z-30 flex items-center gap-2 rounded-full bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-lg lg:hidden"
+        className="fixed bottom-5 right-5 z-30 flex items-center gap-2 rounded-full bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-lg lg:hidden min-h-[44px]"
       >
-        فلترة
+        فلتر البحث
       </button>
 
       <MobileFilterDrawer

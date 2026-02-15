@@ -45,7 +45,7 @@ export default function FilterSidebar({
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="ابحث عن منتج..."
-          className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:outline-none"
+          className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-3 min-h-[44px] text-sm text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:outline-none"
         />
       </FilterSection>
 
@@ -58,7 +58,7 @@ export default function FilterSidebar({
             <select
               value={category}
               onChange={(event) => onCategoryChange(event.target.value)}
-              className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none"
+              className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-3 min-h-[44px] text-sm text-slate-900 focus:border-blue-600 focus:outline-none"
             >
               <option value="all">كل التصنيفات</option>
               {categories.map((item) => (
@@ -76,7 +76,7 @@ export default function FilterSidebar({
             <select
               value={organization}
               onChange={(event) => onOrganizationChange(event.target.value)}
-              className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none"
+              className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-3 min-h-[44px] text-sm text-slate-900 focus:border-blue-600 focus:outline-none"
             >
               <option value="all">كل المنظمات</option>
               {organizations.map((item) => (
@@ -100,7 +100,7 @@ export default function FilterSidebar({
               onChange={(event) =>
                 onRatingChange(Number(event.target.value) as RatingOption)
               }
-              className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-600 focus:outline-none"
+              className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-3 min-h-[44px] text-sm text-slate-900 focus:border-blue-600 focus:outline-none"
             >
               <option value={0}>الكل</option>
               <option value={3}>3 نجوم وأكثر</option>

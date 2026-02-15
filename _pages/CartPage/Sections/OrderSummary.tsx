@@ -54,30 +54,47 @@ const OrderSummary: React.FC<Props> = ({ itemCount, total, hasItems, order, onCh
   };
 
   return (
-    <div className="bg-white/85 backdrop-blur-md rounded-2xl shadow-sm border border-slate-200 p-6 sticky top-6">
-      <h2 className="text-xl font-bold text-slate-900 mb-6 text-center">إجمالي الطلب للتاجر</h2>
+    <>
+      <div className="bg-white/85 backdrop-blur-md rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 lg:sticky lg:top-24">
+        <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-5 text-center">إجمالي الطلب للتاجر</h2>
 
-      <div className="space-y-4 mb-6">
-        <div className="flex justify-between text-slate-900">
-          <span className="text-slate-600">عدد المنتجات</span>
-          <span className="font-medium">{totalItemQuantity}</span>
+        <div className="space-y-4 mb-6">
+          <div className="flex justify-between text-slate-900">
+            <span className="text-slate-600">عدد المنتجات</span>
+            <span className="font-medium">{totalItemQuantity}</span>
+          </div>
+          <div className="flex justify-between items-baseline">
+            <span className="text-slate-600">الإجمالي</span>
+            <span className="font-bold text-primary text-xl">{finalTotal.toLocaleString()} ج.م</span>
+          </div>
         </div>
-        <div className="flex justify-between items-baseline">
-          <span className="text-slate-600">الإجمالي</span>
-          <span className="font-bold text-primary text-xl">{finalTotal.toLocaleString()} ج.م</span>
+
+        <div className="hidden sm:block">
+          <Button
+            onClick={handleCheckout}
+            fullWidth
+            size="lg"
+            variant="primary"
+            rounded
+          >
+            إرسال الطلب للتاجر
+          </Button>
         </div>
       </div>
 
-      <Button 
-        onClick={handleCheckout} 
-        fullWidth 
-        size="lg" 
-        variant="primary" 
-        rounded
-      >
-        إرسال الطلب للتاجر
-      </Button>
-    </div>
+      {/* Mobile sticky CTA for thumb-friendly checkout */}
+      <div className="sm:hidden fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur-md px-4 py-3">
+        <Button
+          onClick={handleCheckout}
+          fullWidth
+          size="lg"
+          variant="primary"
+          rounded
+        >
+          إرسال الطلب للتاجر
+        </Button>
+      </div>
+    </>
   );
 };
 

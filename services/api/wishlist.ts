@@ -417,6 +417,16 @@ export const wishlistService = {
         // Handle network errors or API errors
         const isNetworkError = !error.response && (error.request || error.message);
 
+        // Only log critical errors (not 404s which are expected)
+        if (error?.response?.status !== 404) {
+          console.error('❌ DELETE request failed:', {
+            isNetworkError,
+            status: error?.response?.status,
+            errorMessage: error?.message,
+            url: error?.config?.url
+          });
+        }
+
         if (isNetworkError) {
           console.warn('Network error - unable to connect to server');
           // For network errors during removal, return success (optimistic update)
@@ -431,17 +441,7 @@ export const wishlistService = {
           // Clear cache to ensure we don't have stale data
           wishlistCache.clear();
           
-          // Check if the error message indicates the item is already removed
-          const errorMessage = error?.response?.data?.message || '';
-          if (errorMessage.includes('not found') || errorMessage.includes('غير موجود')) {
-            return { 
-              status: 'success', 
-              message: 'المنتج غير موجود في المفضلة',
-              wasAlreadyRemoved: true
-            };
-          }
-          
-          // For other 404 errors, still treat as success since the end result is the same
+          // For 404, treat as success since the end result is the item is not in wishlist
           return { 
             status: 'success', 
             message: 'تم حذف المنتج من المفضلة',

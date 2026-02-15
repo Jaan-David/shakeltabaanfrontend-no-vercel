@@ -1,10 +1,5 @@
 
 
-// Import order service
-import orderService, { OrderItem } from "@/services/profile/orders";
-
-// import { generateSEO } from '@/config/seo.config';
-
 import { generateSEO } from '@/config/seo.config';
 
 export const metadata = generateSEO({

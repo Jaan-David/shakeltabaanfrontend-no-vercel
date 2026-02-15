@@ -1,5 +1,6 @@
 // services/orders/orderService.ts
-import { API_ENDPOINTS, Api } from '../api/endpoints';
+import { API_ENDPOINTS } from '../api/endpoints';
+import { getApiBaseUrl } from '../api/baseUrl';
 
 // Order Types matching your API response
 export type OrderStatusArabic =
@@ -135,7 +136,7 @@ interface CacheEntry<T> {
 }
 
 class OrderService {
-  private baseUrl = Api;
+  private baseUrl = getApiBaseUrl();
   
   // In-memory cache
   private cache: Map<string, CacheEntry<any>> = new Map();

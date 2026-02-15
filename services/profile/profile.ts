@@ -1,5 +1,6 @@
 // services/profile/profile.ts
-import { API_ENDPOINTS, Api } from './../api/endpoints';
+import { API_ENDPOINTS } from './../api/endpoints';
+import { getApiBaseUrl } from '@/services/api/baseUrl';
 
 // Types
 export interface Address {
@@ -115,7 +116,7 @@ export class ProfileError extends Error {
 }
 
 // API Configuration
-const API_BASE_URL = Api;
+const API_BASE_URL = getApiBaseUrl();
 
 // Helper function to get auth token from localStorage
 const getAuthToken = (): string | null => {
