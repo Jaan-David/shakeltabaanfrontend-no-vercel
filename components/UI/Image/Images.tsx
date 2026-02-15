@@ -203,15 +203,12 @@ export function CustomImage({
       onClick={onClick}
     >
       {shouldUseImgTag ? (
-        <Image
+        <img
           src={displaySrc as string}
           alt={alt}
-          fill={fill}
-          width={!fill ? width : undefined}
-          height={!fill ? height : undefined}
           onError={handleError}
-          priority={priority}
-          unoptimized
+          loading={priority ? "eager" : "lazy"}
+          crossOrigin="anonymous"
           className={cn(
             objectFit === "cover" && "object-cover",
             objectFit === "contain" && "object-contain",

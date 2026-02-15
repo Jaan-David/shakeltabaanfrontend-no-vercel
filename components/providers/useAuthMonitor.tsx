@@ -1,5 +1,5 @@
 // hooks/useAuthMonitor.ts
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   isUserAuthenticated, 
@@ -43,7 +43,7 @@ export const useAuthMonitor = (options: UseAuthMonitorOptions = {}) => {
     redirectOnExpiry = true,
     redirectUrl = '/login',
     showWarning = true,
-    warningThresholdMinutes: _warningThresholdMinutes = 5,
+    warningThresholdMinutes = 5,
     onTokenExpired,
     onTokenExpiringSoon,
   } = options;
@@ -60,7 +60,7 @@ export const useAuthMonitor = (options: UseAuthMonitorOptions = {}) => {
   /**
    * Handle token expiration
    */
-  const handleTokenExpiry = useCallback(async () => {
+  const handleTokenExpiry = async () => {
     //console.log('🔒 useAuthMonitor: Token expired, handling logout...');
     
     // Call custom callback if provided
@@ -78,7 +78,7 @@ export const useAuthMonitor = (options: UseAuthMonitorOptions = {}) => {
     // Logout user
     try {
       await logoutUser();
-    } catch {
+    } catch (error) {
       //console.error('❌ Error during logout:', error);
     }
 
@@ -88,12 +88,12 @@ export const useAuthMonitor = (options: UseAuthMonitorOptions = {}) => {
         router.push(redirectUrl);
       }, 1500);
     }
-  }, [onTokenExpired, redirectOnExpiry, redirectUrl, router]);
+  };
 
   /**
    * Check authentication status and token validity
    */
-  const checkAuth = useCallback(() => {
+  const checkAuth = () => {
     const isAuth = isUserAuthenticated();
     
     if (!isAuth) {
@@ -127,7 +127,7 @@ export const useAuthMonitor = (options: UseAuthMonitorOptions = {}) => {
     }
 
     return true;
-  }, [onTokenExpiringSoon, showWarning]);
+  };
 
   /**
    * Initialize auth monitoring on mount
@@ -143,13 +143,15 @@ export const useAuthMonitor = (options: UseAuthMonitorOptions = {}) => {
     }
 
     // Start token expiration monitoring
-    AuthService.startTokenMonitoring(handleTokenExpiry);
+    AuthService.startTokenMonitoring(() => {
+      handleTokenExpiry();
+    });
 
     // Cleanup on unmount
     return () => {
       AuthService.stopTokenMonitoring();
     };
-  }, [checkAuth, handleTokenExpiry, redirectOnExpiry, redirectUrl, router]);
+  }, []);
 
   /**
    * Listen for token expiration events
@@ -165,7 +167,7 @@ export const useAuthMonitor = (options: UseAuthMonitorOptions = {}) => {
     return () => {
       window.removeEventListener('tokenExpired', handleTokenExpiredEvent);
     };
-  }, [handleTokenExpiry]);
+  }, []);
 
   /**
    * Periodic check for auth status (backup)
@@ -181,7 +183,7 @@ export const useAuthMonitor = (options: UseAuthMonitorOptions = {}) => {
     }, 30000); // Check every 30 seconds
 
     return () => clearInterval(intervalId);
-  }, [checkAuth, handleTokenExpiry]);
+  }, []);
 
   /**
    * Listen for storage changes (logout in another tab)
@@ -202,7 +204,7 @@ export const useAuthMonitor = (options: UseAuthMonitorOptions = {}) => {
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, [checkAuth, redirectOnExpiry, redirectUrl, router]);
+  }, []);
 
   return {
     ...authState,

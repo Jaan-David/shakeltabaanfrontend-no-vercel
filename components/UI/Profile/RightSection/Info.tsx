@@ -1,5 +1,4 @@
 import React, { useState, useRef, useCallback, memo } from 'react';
-import Image from 'next/image';
 
 // Styles
 import styles from '@/components/UI/Profile/profile.module.css';
@@ -214,13 +213,15 @@ const Info: React.FC<InfoProps> = ({ user, onChange, onError }) => {
       <div className={styles.avatarContainer}>
         <div className={styles.avatar}>
           {avatar ? (
-            <Image
+            <img
               src={avatar}
               alt={`${user.firstName} ${user.lastName}'s avatar`}
               className={styles.avatarImage}
+              // PERFORMANCE: Add loading="lazy" for images below the fold
+              loading="eager" // This is above fold, so load immediately
+              // PERFORMANCE: Prevent layout shift with explicit dimensions
               width={120}
               height={120}
-              priority
             />
           ) : (
             <div className={styles.avatarInitials}>

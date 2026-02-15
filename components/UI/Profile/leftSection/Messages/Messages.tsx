@@ -17,11 +17,11 @@ export type MessageComponentProps = {
 const MessageComponent: React.FC<MessageComponentProps> = ({
   message,
   timestamp,
-  isCurrentUser: _isCurrentUser = false,
-  senderName: _senderName,
+  isCurrentUser = false,
+  senderName,
   response,
   responseTimestamp,
-  responseSenderName: _responseSenderName,
+  responseSenderName,
 }) => {
   return (
     <div className={styles.chatContainer}>

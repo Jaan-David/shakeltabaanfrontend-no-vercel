@@ -1,5 +1,4 @@
 import React from 'react';
-import Image from 'next/image';
 import { MessageCircle } from 'lucide-react';
 import { IconButton } from '@/components/UI/Buttons/Button';
 
@@ -19,15 +18,7 @@ const ContactHelp: React.FC = () => {
         title="واتساب"
         size="lg"
         className="rounded-full bg-[#25D366] border-2 border-white shadow-[0_10px_30px_rgba(0,0,0,0.16)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.2)]"
-        icon={
-          <Image
-            src="/icons/whatsapp.svg"
-            alt="واتساب"
-            width={24}
-            height={24}
-            className="w-6 h-6"
-          />
-        }
+        icon={<img src="/icons/whatsapp.svg" alt="واتساب" className="w-6 h-6" />}
       />
     </div>
   );

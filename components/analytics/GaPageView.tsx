@@ -17,6 +17,8 @@ declare global {
   }
 }
 
+const GA_MEASUREMENT_ID = "G-8V17H7W98Z";
+
 export default function GaPageView() {
   const pathname = usePathname();
   const searchParams = useSearchParams();

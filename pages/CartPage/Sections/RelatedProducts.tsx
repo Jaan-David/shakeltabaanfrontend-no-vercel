@@ -30,19 +30,19 @@ const RelatedProducts: React.FC = () => {
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const start = useCallback(() => {
+  const start = () => {
     if (timerRef.current) return;
     const slider = instanceRef.current;
     if (!slider) return;
     timerRef.current = setInterval(() => slider.next(), 2500);
-  }, [instanceRef]);
+  };
 
-  const stop = useCallback(() => {
+  const stop = () => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
-  }, []);
+  };
 
   const BASE_IMAGE_URL =
     process.env.NEXT_PUBLIC_API_BASE_URL ||
@@ -102,7 +102,7 @@ const RelatedProducts: React.FC = () => {
   useEffect(() => {
     start();
     return () => stop();
-  }, [start, stop]);
+  }, [instanceRef]);
 
   if (loading) {
     return <div className="mt-12 text-black60">جاري التحميل...</div>;

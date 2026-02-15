@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { Menu, Search, X, Heart, ShoppingCart, Bell } from "lucide-react";
+import { ChevronDown, Menu, Search, X, Heart, ShoppingCart, Bell } from "lucide-react";
 import styles from "./Header.module.css";
 import "../../../app/globals.css";
 
@@ -87,7 +87,7 @@ const getUserDisplayName = (firstName?: string, lastName?: string): string => {
 
 function Header({
   className = "",
-  variant: _variant = "default",
+  variant = "default",
   customStyles = {},
   showUserActions = true,
 }: HeaderProps) {
@@ -135,13 +135,12 @@ function Header({
       }
     };
 
-    const menuNode = menuRef.current;
-    menuNode?.addEventListener("touchstart", handleTouchStart);
-    menuNode?.addEventListener("touchend", handleTouchEnd);
+    menuRef.current?.addEventListener("touchstart", handleTouchStart);
+    menuRef.current?.addEventListener("touchend", handleTouchEnd);
 
     return () => {
-      menuNode?.removeEventListener("touchstart", handleTouchStart);
-      menuNode?.removeEventListener("touchend", handleTouchEnd);
+      menuRef.current?.removeEventListener("touchstart", handleTouchStart);
+      menuRef.current?.removeEventListener("touchend", handleTouchEnd);
     };
   }, [isMobileMenuOpen]);
 
@@ -294,7 +293,7 @@ function Header({
     if (isMobileMenuOpen) {
       setIsMobileMenuOpen(false);
     }
-  }, [pathname, isMobileMenuOpen]);
+  }, [pathname]);
 
   const handleLogin = () => router.push("/login");
 

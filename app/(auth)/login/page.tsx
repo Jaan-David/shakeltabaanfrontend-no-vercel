@@ -42,7 +42,9 @@ function LoginFormContent() {
   const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   
-  const [allowAutoLogin, setAllowAutoLogin] = useState(() => {
+  // ✅ NEW: Track if we've already processed this session
+  const [processedSession, setProcessedSession] = useState<string | null>(null);
+  const[ allowAutoLogin, setAllowAutoLogin ] = useState(() => {
     // Initialize from sessionStorage to persist across OAuth redirects
     if (typeof window !== 'undefined') {
       return sessionStorage.getItem('oauth_initiated') === 'true';
@@ -316,7 +318,7 @@ useEffect(() => {
   };
 
   handleSocialAuth();
-}, [session, status, router, searchParams, allowAutoLogin]);
+}, [session, status, router, searchParams]);
 
 // Keep your existing OAuth error handler
 useEffect(() => {
@@ -343,6 +345,7 @@ useEffect(() => {
   useEffect(() => {
     const handleLogout = () => {
       console.log('🚪 [LoginForm] Logout event detected');
+      setProcessedSession(null);
       sessionStorage.removeItem('oauth_initiated');
       localStorage.setItem('just_logged_out', 'true');
     };
@@ -492,7 +495,6 @@ const handleFacebookLogin = async () => {
     setIsLoading(false);
   }
 };
-void handleFacebookLogin;
  
   if (status === 'loading') {
     return (

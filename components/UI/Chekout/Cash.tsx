@@ -23,16 +23,18 @@ interface Cash {
     onPaymentDataChange?: (data: PaymentData) => void;
 }
 
-const Cash: React.FC<Cash> = ({ Total, editProp: _editProp, setEditProp, onPaymentDataChange }) => {
+const Cash: React.FC<Cash> = ({ Total, editProp, setEditProp, onPaymentDataChange }) => {
     const [way, setWay] = useState<'cash' | 'online' | ''>('')
     const [paymentWith, setPaymentWith] = useState<'instaPay' | 'vodafone' | undefined>()
     const [opId, setOpId] = useState('')
     const [opImg, setOpImg] = useState<File | undefined>()
+    const [edit, setEdit] = useState(false)
 
     // Update parent component with payment data
     useEffect(() => {
         // Payment way is required - must be 'cash' or 'online'
         if (!way || (way !== 'cash' && way !== 'online')) {
+            setEdit(true);
             setEditProp(true);
             return;
         }
@@ -55,12 +57,15 @@ const Cash: React.FC<Cash> = ({ Total, editProp: _editProp, setEditProp, onPayme
             (way === 'cash' || (way === 'online' && paymentWith));
         
         if (isComplete) {
+            setEdit(false);
             setEditProp(false);
             onPaymentDataChange?.(paymentData);
         } else {
+            setEdit(true);
             setEditProp(true);
         }
-    }, [way, paymentWith, opId, opImg, setEditProp, onPaymentDataChange]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [way, paymentWith, opId, opImg]);
 
     const handleClick = (paymentMethod: 'cash' | 'online') => {
         setWay(paymentMethod)

@@ -3,7 +3,7 @@ import React, { useState } from "react";
 
 //styles
 import styles from '@/components/UI/Profile/leftSection/Orders/order.module.css';
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 
 interface ItemCardProps {
   image: string | string[] ;

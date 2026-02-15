@@ -1,5 +1,4 @@
 import React from 'react'
-import Image from 'next/image'
 
 const AboutUsSection = () => {
     return (
@@ -12,13 +11,10 @@ const AboutUsSection = () => {
           
           {/* logo - positioned on the right */}
           <div className="w-[50%] sm:w-[40%] md:w-[50%]   lg:w-[50%] h-[6vh] sm:h-[6.5vh] md:h-[7vh] lg:h-[100%] flex  ">
-            <Image
+            <img
             src="/logo/logo2.png"
             alt="شق التعبان"
-            width={160}
-            height={64}
             className="w-full h-full object-contain "
-            sizes="160px"
             />
           </div>
         </div>
