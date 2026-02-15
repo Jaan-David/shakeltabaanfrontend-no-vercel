@@ -1,6 +1,10 @@
+import { Suspense } from "react";
 import ProductsPage from "@/_pages/ProductsPage/ProductsPage";
 import { canonicalBaseUrl, generateSEO } from "@/config/seo.config";
-import { fetchProductsISR } from "@/services/api/products";
+
+// Force dynamic rendering to avoid ISR 401 errors during build
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 const getSiteUrl = () =>
   process.env.NEXT_PUBLIC_SITE_URL
@@ -39,18 +43,9 @@ export async function generateMetadata() {
 }
 
 export default async function ProductsRoutePage() {
-  let products: Array<{ _id?: string; id?: string; name?: string; nameAr?: string; imageList?: string[]; image?: string; images?: string[] }> = [];
-
-  try {
-    const res = await fetchProductsISR({ page: 1, limit: 60 }, 300);
-    if (Array.isArray(res?.data)) {
-      products = res.data;
-    } else if (Array.isArray((res as any)?.data?.products)) {
-      products = (res as any).data.products;
-    }
-  } catch {
-    products = [];
-  }
+  // Skip data fetching during build to avoid 401 errors
+  // Data will be fetched client-side by ProductsPage component
+  const products: Array<{ _id?: string; id?: string; name?: string; nameAr?: string; imageList?: string[]; image?: string; images?: string[] }> = [];
 
   const collectionPageJsonLd = {
     "@context": "https://schema.org",
@@ -102,7 +97,9 @@ export default async function ProductsRoutePage() {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
         />
       ) : null}
-      <ProductsPage />
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen">جاري التحميل...</div>}>
+        <ProductsPage />
+      </Suspense>
     </>
   );
 }
