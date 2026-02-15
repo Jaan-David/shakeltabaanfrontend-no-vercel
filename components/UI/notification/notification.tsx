@@ -193,7 +193,7 @@ const NotificationsComponent: React.FC<NotificationsComponentProps> = ({
       if (notification.actionUrl) {
         window.location.href = notification.actionUrl;
       }
-    } catch (err) {
+    } catch {
       //console.error("Error marking notification as read:", err);
     }
   };
@@ -209,7 +209,7 @@ const NotificationsComponent: React.FC<NotificationsComponentProps> = ({
       // Reset unread count
       setUnreadCount(0);
       onUnreadCountChange(0);
-    } catch (err) {
+    } catch {
       //console.error("Error marking all as read:", err);
     }
   };
@@ -236,7 +236,7 @@ const NotificationsComponent: React.FC<NotificationsComponentProps> = ({
 
       // Remove from local state
       setNotifications((prev) => prev.filter((n) => n._id !== notificationId));
-    } catch (err) {
+    } catch {
       //console.error("Error deleting notification:", err);
     }
   };

@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useEffect } from "react"
+import Image from "next/image"
 
 //styles
 import styles from '@/components/UI/Chekout/Style.module.css'
@@ -73,10 +74,12 @@ const Delivery: React.FC<DeliveryProp> = ({ deliveryInfo, orders, editProp, setE
                                 }}
                             >
                                 <div className={styles.orderImage}>
-                                    <img
+                                    <Image
                                         src={order.image}
                                         alt={order.name}
                                         className={styles.itemImage}
+                                        width={96}
+                                        height={96}
                                     />
                                 </div>
                                 <div className={styles.orderDetails}>

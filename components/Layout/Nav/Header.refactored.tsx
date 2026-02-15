@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { ChevronDown, Menu, Search, X, Heart, ShoppingCart, Bell } from "lucide-react";
+import { Menu, Search, X, Heart, ShoppingCart, Bell } from "lucide-react";
 import styles from "./Header.module.css";
 import "../../../app/globals.css";
 
@@ -87,7 +87,6 @@ const getUserDisplayName = (firstName?: string, lastName?: string): string => {
 
 function Header({
   className = "",
-  variant = "default",
   customStyles = {},
   showUserActions = true,
 }: HeaderProps) {
@@ -135,12 +134,13 @@ function Header({
       }
     };
 
-    menuRef.current?.addEventListener("touchstart", handleTouchStart);
-    menuRef.current?.addEventListener("touchend", handleTouchEnd);
+    const menuEl = menuRef.current;
+    menuEl?.addEventListener("touchstart", handleTouchStart);
+    menuEl?.addEventListener("touchend", handleTouchEnd);
 
     return () => {
-      menuRef.current?.removeEventListener("touchstart", handleTouchStart);
-      menuRef.current?.removeEventListener("touchend", handleTouchEnd);
+      menuEl?.removeEventListener("touchstart", handleTouchStart);
+      menuEl?.removeEventListener("touchend", handleTouchEnd);
     };
   }, [isMobileMenuOpen]);
 

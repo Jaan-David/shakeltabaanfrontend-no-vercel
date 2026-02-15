@@ -203,6 +203,7 @@ export function CustomImage({
       onClick={onClick}
     >
       {shouldUseImgTag ? (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={displaySrc as string}
           alt={alt}

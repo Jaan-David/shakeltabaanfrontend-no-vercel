@@ -36,11 +36,8 @@ const MessageComponent: React.FC<MessageComponentProps> = ({
           <div className={styles.messageText}>
             {message}
           </div>
-          <div className={styles.messageFooter}>
-            {/* <span className={styles.signature}>شكراً لكم</span> */}
             <div className={styles.timestamp}>
               {timestamp}
-            </div>
           </div>
         </div>
 

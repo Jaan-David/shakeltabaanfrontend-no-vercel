@@ -38,11 +38,9 @@ interface AccountListProps {
 const AccountList: React.FC<AccountListProps> = ({
   onItemClick,
   user,
-  setUser,
   activeItem,
 }) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const menuItems = [
     { label: 'تفاصيل الحساب', icon: User },
@@ -94,26 +92,13 @@ const AccountList: React.FC<AccountListProps> = ({
                   : isSelected 
                     ? styles.selected 
                     : styles.default
-              } ${isLoggingOut && isLogout ? styles.loading : ''}`}
+              }`}
               onClick={() => handleItemClick(item.label, index)}
-              style={{
-                cursor: isLoggingOut && isLogout ? 'not-allowed' : 'pointer',
-                opacity: isLoggingOut && isLogout ? 0.6 : 1
-              }}
             >
-              {isLoggingOut && isLogout ? (
-                <span>
-                  جاري تسجيل الخروج...
-                  {/* You can add a loading spinner here if you have one */}
-                </span>
-              ) : (
-                <>
-                  <span className={styles.listItemIcon}>
-                    <Icon />
-                  </span>
-                  <span className={styles.listItemText}>{item.label}</span>
-                </>
-              )}
+              <span className={styles.listItemIcon}>
+                <Icon />
+              </span>
+              <span className={styles.listItemText}>{item.label}</span>
             </div>
           );
         })}

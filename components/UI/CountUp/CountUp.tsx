@@ -15,8 +15,7 @@ const CountUp: React.FC<CountUpProps> = ({
   to,
   duration = 1,
   separator = ',',
-  className = '',
-  direction = 'up'
+  className = ''
 }) => {
   const [count, setCount] = useState(from);
   const startTimeRef = useRef<number | null>(null);

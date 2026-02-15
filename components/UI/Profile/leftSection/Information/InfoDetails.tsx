@@ -173,7 +173,7 @@ const AccountForm: React.FC<InfoDetailsProps> = ({firstName , lastName , email ,
       //console.log('Form submitted:', formData);
       showAlert('تم تحديث بيانات الحساب بنجاح!', 'success');
       setEdit(false);
-    } catch (error) {
+    } catch {
       //console.error('Error submitting form:', error);
       showAlert('فشل تحديث بيانات الحساب. يرجى المحاولة مرة أخرى.', 'error');
     } finally {
@@ -181,7 +181,7 @@ const AccountForm: React.FC<InfoDetailsProps> = ({firstName , lastName , email ,
     }
   };
 
-  const handleIconClick = (field: string) => {
+  const handleIconClick = (_field: string) => {
     //console.log(`Icon clicked for ${field}`);
     // Add any icon click logic here
   };
