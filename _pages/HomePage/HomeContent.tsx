@@ -10,6 +10,7 @@ import CategoriesGrid from "@/_pages/CategoriesPage/CategoriesGrid";
 import { Category as CategoryType } from '@/services/product/categories';
 import { productService } from '@/services/api/products';
 import { ProfileService } from '@/services/profile/profile';
+import { isUserAuthenticated } from '@/services/auth/login';
 
 const PartnersSection = dynamicImport(
   () => import("@/_pages/HomePage/PartnersSection"),
@@ -70,6 +71,11 @@ export default function HomeContent() {
     setHasHydrated(true);
 
     const fetchUserProfile = async () => {
+      // Only fetch profile if user is authenticated
+      if (!isUserAuthenticated()) {
+        return;
+      }
+
       try {
         const response = await ProfileService.getProfile();
         const profileData = response?.data?.user;

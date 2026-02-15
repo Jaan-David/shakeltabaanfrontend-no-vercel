@@ -217,15 +217,13 @@ useEffect(() => {
             return;
           }
         } else {
-          console.error('❌ [LoginForm] Fresh session missing data after manual fetch');
-          setAlertMessage('فشل في الحصول على بيانات المستخدم. يرجى المحاولة مرة أخرى.');
-          setShowErrorAlert(true);
+          console.warn('⚠️ [LoginForm] Fresh session missing data after manual fetch');
+          sessionStorage.removeItem('oauth_initiated');
+          setAllowAutoLogin(false);
           setIsLoading(false);
-          
-          // Clean up the URL
-          setTimeout(() => {
-            router.replace('/login');
-          }, 2000);
+
+          // Clean up the URL and reset login state
+          router.replace('/login');
           return;
         }
       } catch (error) {

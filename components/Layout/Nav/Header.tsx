@@ -290,10 +290,9 @@ function Header({
 
   // MOBILE MENU: Close on route change to avoid stuck overlay
   useEffect(() => {
-    if (isMobileMenuOpen) {
-      setIsMobileMenuOpen(false);
-    }
-  }, [pathname, isMobileMenuOpen]);
+    setIsMobileMenuOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   const handleLogin = () => router.push("/login");
 
