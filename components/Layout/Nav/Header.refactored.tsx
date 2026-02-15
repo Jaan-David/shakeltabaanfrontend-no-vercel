@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { ChevronDown, Menu, Search, X, Heart, ShoppingCart, Bell } from "lucide-react";
+import { Menu, Search, X, Heart, ShoppingCart, Bell } from "lucide-react";
 import styles from "./Header.module.css";
 import "../../../app/globals.css";
 
@@ -87,7 +87,7 @@ const getUserDisplayName = (firstName?: string, lastName?: string): string => {
 
 function Header({
   className = "",
-  variant = "default",
+  variant: _variant = "default",
   customStyles = {},
   showUserActions = true,
 }: HeaderProps) {
@@ -135,12 +135,13 @@ function Header({
       }
     };
 
-    menuRef.current?.addEventListener("touchstart", handleTouchStart);
-    menuRef.current?.addEventListener("touchend", handleTouchEnd);
+    const menuNode = menuRef.current;
+    menuNode?.addEventListener("touchstart", handleTouchStart);
+    menuNode?.addEventListener("touchend", handleTouchEnd);
 
     return () => {
-      menuRef.current?.removeEventListener("touchstart", handleTouchStart);
-      menuRef.current?.removeEventListener("touchend", handleTouchEnd);
+      menuNode?.removeEventListener("touchstart", handleTouchStart);
+      menuNode?.removeEventListener("touchend", handleTouchEnd);
     };
   }, [isMobileMenuOpen]);
 
@@ -163,9 +164,9 @@ function Header({
     setIsMounted(true);
     const handleSocialAuth = async () => {
       if (session?.backendToken && session?.user?.backendUser) {
-        UserStorage.saveUser(session.user.backendUser);
+        UserStorage.saveUser(session.user.backendUser as unknown as User);
         UserStorage.saveToken(session.backendToken);
-        setUser(session.user.backendUser);
+        setUser(session.user.backendUser as unknown as User);
         setIsLoading(false);
 
         AuthService.startTokenMonitoring(() => {

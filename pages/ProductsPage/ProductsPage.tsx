@@ -9,9 +9,9 @@ import {
   type Product as ApiProduct,
   type ProductFilters,
 } from "@/services/api/products";
-import ProductsHeader from "./components/ProductsHeader";
-import FilterSidebar from "./components/FilterSidebar";
-import MobileFilterDrawer from "./components/MobileFilterDrawer";
+import ProductsHeader from "@/_pages/ProductsPage/components/ProductsHeader";
+import FilterSidebar from "@/_pages/ProductsPage/components/FilterSidebar";
+import MobileFilterDrawer from "@/_pages/ProductsPage/components/MobileFilterDrawer";
 
 const PLACEHOLDER_SRC = "/acessts/NoImage.jpg";
 const DEFAULT_LIMIT = 200;

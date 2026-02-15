@@ -1,36 +1,70 @@
 import HomePage from "@/_pages/HomePage/HomePage";
 
 import style from "./page.module.css";
-import { generateSEO } from "@/config/seo.config";
+import { canonicalBaseUrl, generateSEO, seoConfig } from "@/config/seo.config";
 
 export const dynamic = "force-dynamic";
 
+const getSiteUrl = () =>
+  process.env.NEXT_PUBLIC_SITE_URL
+    ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/+$/, "")
+    : canonicalBaseUrl;
+
+const stripUndefined = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
+
 export const metadata = generateSEO({
-  title: "منصة بيع رخام اونلاين مصر | سوق الرخام المصري",
+  title: "أفضل أنواع الرخام والجرانيت في مصر | منصة شق التعبان",
   description:
-    "منصة بيع رخام اونلاين مصر وسوق الرخام المصري لشراء رخام وجرانيت وكوارتز للمطابخ والمشاريع بجودة عالية.",
+    "منصة شق التعبان تقدم أفضل أنواع الرخام والجرانيت الطبيعي في مصر. تصفح الرخام الأبيض والأسود وجرانيت المطابخ وأسعار الرخام في مصر.",
   keywords: [
-    "منصة بيع رخام اونلاين مصر",
-    "سوق الرخام المصري",
-    "منصة موردين الرخام",
-    "دليل مصانع شق التعبان",
-    "شراء رخام في مصر",
-    "رخام للبيع في القاهرة",
-    "رخام شق التعبان للبيع",
-    "جرانيت مطابخ للبيع",
-    "شراء كوارتز للمطابخ",
-    "stone marketplace egypt",
-    "marble trading platform",
-    "buy marble online egypt",
-    "marble slabs for sale egypt",
-    "granite suppliers egypt",
-    "quartz countertop supplier egypt",
+    "شق التعبان",
+    "شقت التعبان",
+    "شقه التعبان",
+    "رخام",
+    "جرانيت",
+    "رخام شق التعبان",
+    "جرانيت شق التعبان",
+    "رخام مصر",
+    "جرانيت مصر",
+    "marble Egypt",
+    "granite Egypt",
+    "رخام المطبخ",
+    "رخام أبيض طبيعي",
+    "جرانيت أسود",
+    "رخام أرضيات",
+    "جرانيت مطابخ",
+    "أسعار الرخام في مصر",
+    "سعر الرخام",
+    "سعر الرخامه",
+    "رخامه سلم",
+    "رخامه مطبخ",
+    "الفرق بين الرخام والجرانيت",
+    "أنواع الرخام",
+    "كوارتز",
   ],
+  image: seoConfig.images.logo,
+  url: "/",
 });
 
 export default function Home() {
+  const homeUrl = `${getSiteUrl()}/`;
+  const homeJsonLd = stripUndefined({
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "منصة شق التعبان",
+    headline: "رخام وجرانيت شق التعبان",
+    description:
+      "منصة شق التعبان للرخام والجرانيت الطبيعي في مصر مع أفضل الأسعار والتشكيلات.",
+    url: homeUrl,
+    inLanguage: "ar",
+  });
+
   return (
     <div className={style.container}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }}
+      />
       <HomePage />
     </div>
   );

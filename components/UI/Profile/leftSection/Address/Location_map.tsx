@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 // styles
 import styles from '@/components/UI/Profile/leftSection/Address/map.module.css';
@@ -84,71 +84,8 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({
     };
   }, []);
 
-  // Initialize Map
-  useEffect(() => {
-    if (isLoading || !mapRef.current || !window.L || mapInstanceRef.current) return;
-
-    const defaultLocation = initialLocation || {
-      lat: 30.0444,
-      lng: 31.2357
-    };
-
-    try {
-      // Create map
-      const map = window.L.map(mapRef.current).setView(
-        [defaultLocation.lat, defaultLocation.lng],
-        13
-      );
-
-      // Add OpenStreetMap tile layer (FREE!)
-      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19
-      }).addTo(map);
-
-      // Create custom icon
-      const customIcon = window.L.divIcon({
-        html: '<div style="background-color: #ff4444; width: 24px; height: 24px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
-        iconSize: [24, 24],
-        iconAnchor: [12, 24],
-        className: 'custom-marker'
-      });
-
-      // Add marker
-      const marker = window.L.marker(
-        [defaultLocation.lat, defaultLocation.lng],
-        { 
-          draggable: true,
-          icon: customIcon
-        }
-      ).addTo(map);
-
-      // Handle marker drag with debouncing
-      marker.on('dragend', () => {
-        const position = marker.getLatLng();
-        handleLocationSelectDebounced(position.lat, position.lng);
-      });
-
-      // Handle map click with debouncing
-      map.on('click', (e: any) => {
-        marker.setLatLng(e.latlng);
-        handleLocationSelectDebounced(e.latlng.lat, e.latlng.lng);
-      });
-
-      mapInstanceRef.current = map;
-      markerRef.current = marker;
-
-      if (initialLocation) {
-        handleLocationSelectDebounced(initialLocation.lat, initialLocation.lng);
-      }
-    } catch (err) {
-      console.error('Error initializing map:', err);
-      setError('خطأ في تهيئة الخريطة');
-    }
-  }, [isLoading, initialLocation]);
-
   // Debounced location select to prevent rapid API calls
-  const handleLocationSelectDebounced = (lat: number, lng: number) => {
+  const handleLocationSelectDebounced = useCallback((lat: number, lng: number) => {
     // Clear any pending geocoding request
     if (geocodingTimeoutRef.current) {
       clearTimeout(geocodingTimeoutRef.current);
@@ -163,10 +100,10 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({
     geocodingTimeoutRef.current = setTimeout(() => {
       handleLocationSelect(lat, lng);
     }, 800); 
-  };
+  }, [handleLocationSelect, onLocationSelect]);
 
   // Reverse geocoding using Nominatim (FREE OpenStreetMap service)
-  const handleLocationSelect = async (lat: number, lng: number) => {
+  const handleLocationSelect = useCallback(async (lat: number, lng: number) => {
     // Rate limiting: ensure at least 1.5 seconds between requests
     const now = Date.now();
     const timeSinceLastRequest = now - lastGeocodingTimeRef.current;
@@ -232,7 +169,70 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({
     } finally {
       setIsGeocoding(false);
     }
-  };
+  }, [onLocationSelect]);
+
+  // Initialize Map
+  useEffect(() => {
+    if (isLoading || !mapRef.current || !window.L || mapInstanceRef.current) return;
+
+    const defaultLocation = initialLocation || {
+      lat: 30.0444,
+      lng: 31.2357
+    };
+
+    try {
+      // Create map
+      const map = window.L.map(mapRef.current).setView(
+        [defaultLocation.lat, defaultLocation.lng],
+        13
+      );
+
+      // Add OpenStreetMap tile layer (FREE!)
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+      }).addTo(map);
+
+      // Create custom icon
+      const customIcon = window.L.divIcon({
+        html: '<div style="background-color: #ff4444; width: 24px; height: 24px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
+        iconSize: [24, 24],
+        iconAnchor: [12, 24],
+        className: 'custom-marker'
+      });
+
+      // Add marker
+      const marker = window.L.marker(
+        [defaultLocation.lat, defaultLocation.lng],
+        { 
+          draggable: true,
+          icon: customIcon
+        }
+      ).addTo(map);
+
+      // Handle marker drag with debouncing
+      marker.on('dragend', () => {
+        const position = marker.getLatLng();
+        handleLocationSelectDebounced(position.lat, position.lng);
+      });
+
+      // Handle map click with debouncing
+      map.on('click', (e: any) => {
+        marker.setLatLng(e.latlng);
+        handleLocationSelectDebounced(e.latlng.lat, e.latlng.lng);
+      });
+
+      mapInstanceRef.current = map;
+      markerRef.current = marker;
+
+      if (initialLocation) {
+        handleLocationSelectDebounced(initialLocation.lat, initialLocation.lng);
+      }
+    } catch (err) {
+      console.error('Error initializing map:', err);
+      setError('خطأ في تهيئة الخريطة');
+    }
+  }, [isLoading, initialLocation, handleLocationSelectDebounced]);
 
   // Get current location
   const handleGetCurrentLocation = () => {

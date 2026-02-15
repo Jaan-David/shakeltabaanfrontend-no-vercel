@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { useRouter, useParams } from 'next/navigation';
 import { inquiryService, type Inquiry, type UpdateInquiryData } from '@/services/api/inquiry';
 import { Button } from '@/components/UI/Buttons/Button';
@@ -20,6 +21,28 @@ export default function InquiryDetailsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const getErrorMessage = (value: unknown, fallback: string) => {
+    if (value && typeof value === 'object' && 'message' in value) {
+      const message = (value as { message?: unknown }).message;
+      if (typeof message === 'string') return message;
+    }
+    return fallback;
+  };
+
+  const fetchInquiry = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await inquiryService.getInquiryById(inquiryId);
+      setInquiry(response.inquiry);
+      setEditData({ description: response.inquiry.description });
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'فشل تحميل الطلب'));
+      console.error('Error fetching inquiry:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [inquiryId]);
+
   useEffect(() => {
     if (!isAuthenticated()) {
       router.push('/login');
@@ -28,21 +51,7 @@ export default function InquiryDetailsPage() {
     if (inquiryId) {
       fetchInquiry();
     }
-  }, [inquiryId, router]);
-
-  const fetchInquiry = async () => {
-    try {
-      setLoading(true);
-      const response = await inquiryService.getInquiryById(inquiryId);
-      setInquiry(response.inquiry);
-      setEditData({ description: response.inquiry.description });
-    } catch (err: any) {
-      setError(err.message || 'فشل تحميل الطلب');
-      console.error('Error fetching inquiry:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [inquiryId, router, fetchInquiry]);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -69,8 +78,8 @@ export default function InquiryDetailsPage() {
       setEditing(false);
       setSelectedImages([]);
       fetchInquiry();
-    } catch (err: any) {
-      setError(err.message || 'فشل تحديث الطلب');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'فشل تحديث الطلب'));
     } finally {
       setSubmitting(false);
     }
@@ -82,8 +91,8 @@ export default function InquiryDetailsPage() {
     try {
       await inquiryService.acceptReply(inquiryId, replyId);
       fetchInquiry();
-    } catch (err: any) {
-      alert(err.message || 'فشل قبول الرد');
+    } catch (err: unknown) {
+      alert(getErrorMessage(err, 'فشل قبول الرد'));
     }
   };
 
@@ -93,8 +102,8 @@ export default function InquiryDetailsPage() {
     try {
       await inquiryService.rejectReply(inquiryId);
       fetchInquiry();
-    } catch (err: any) {
-      alert(err.message || 'فشل رفض الرد');
+    } catch (err: unknown) {
+      alert(getErrorMessage(err, 'فشل رفض الرد'));
     }
   };
 
@@ -104,8 +113,8 @@ export default function InquiryDetailsPage() {
     try {
       await inquiryService.endInquiry(inquiryId);
       fetchInquiry();
-    } catch (err: any) {
-      alert(err.message || 'فشل إنهاء الطلب');
+    } catch (err: unknown) {
+      alert(getErrorMessage(err, 'فشل إنهاء الطلب'));
     }
   };
 
@@ -247,14 +256,15 @@ export default function InquiryDetailsPage() {
               {inquiry.imageList && inquiry.imageList.length > 0 && (
                 <div className="grid grid-cols-4 gap-2">
                   {inquiry.imageList.map((img, index) => (
-                    <img
+                    <Image
                       key={index}
                       src={img}
                       alt={`صورة ${index + 1}`}
+                      width={160}
+                      height={128}
+                      sizes="(max-width: 768px) 25vw, 160px"
                       className="w-full h-32 object-cover rounded-lg"
-                      onError={(e) => {
-                        e.currentTarget.src = '/acessts/NoImage.jpg';
-                      }}
+                      unoptimized
                     />
                   ))}
                 </div>

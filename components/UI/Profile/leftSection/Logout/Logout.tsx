@@ -1,5 +1,4 @@
 'use client';
-import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react'; // Import NextAuth signOut
 
 import { AuthService } from '@/services/auth/login';
@@ -12,8 +11,7 @@ interface LogoutProps {
   onLogout?: () => void;
 }
 
-export default function Logout({ onCancel, onLogout }: LogoutProps) {
-  const router = useRouter();
+export default function Logout({ onCancel, onLogout: _onLogout }: LogoutProps) {
   
   const handleLogout = async () => {
   try {

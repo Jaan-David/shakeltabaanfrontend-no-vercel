@@ -1,6 +1,6 @@
 "use client"
 import { useMemo, useCallback, useState } from 'react';
-import type { StaticImageData } from "next/image";
+import Image, { type StaticImageData } from "next/image";
 
 import styles from '@/components/UI/Card/card.module.css';
 
@@ -223,22 +223,26 @@ function Card({
                 <div className={styles.cardHeader}>
                     <div className={styles.icon}>
                         {loved ? (
-                            <img
+                            <Image
                                 src={FHEART_SRC}
                                 onClick={onHeartClick}
                                 className={styles.heartIcon}
                                 role="button"
                                 aria-label="إزالة من المفضلة"
                                 alt="مفضل"
+                                width={20}
+                                height={20}
                             />
                         ) : (
-                            <img
+                            <Image
                                 src={EHEART_SRC}
                                 onClick={onHeartClick}
                                 className={styles.heartIcon}
                                 role="button"
                                 aria-label="إضافة إلى المفضلة"
                                 alt="غير مفضل"
+                                width={20}
+                                height={20}
                             />
                         )}
                     </div>

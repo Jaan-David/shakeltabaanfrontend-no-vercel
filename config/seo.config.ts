@@ -1,6 +1,10 @@
 // config/seo.config.ts - Complete SEO Configuration
 
-export const canonicalBaseUrl = 'https://www.shkelteaban.com';
+const normalizeBaseUrl = (value: string) => value.replace(/\/+$/, '');
+
+export const canonicalBaseUrl = normalizeBaseUrl(
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shkelteaban.com'
+);
 
 export const seoConfig = {
   siteName: 'شق التعبان',
@@ -108,20 +112,28 @@ export const generateSEO = ({
   noIndex?: boolean;
 }) => {
   const baseUrl = canonicalBaseUrl;
-  const fullUrl = url ? `${baseUrl}${url}` : baseUrl;
-  const ogImage = image || `${baseUrl}${seoConfig.images.ogImage}`;
+  const normalizedUrl = url?.startsWith('http') ? url : url ? `${baseUrl}${url}` : baseUrl;
+  const normalizeImage = (value?: string) => {
+    if (!value) return `${baseUrl}${seoConfig.images.ogImage}`;
+    return value.startsWith('http')
+      ? value
+      : `${baseUrl}${value.startsWith('/') ? value : `/${value}`}`;
+  };
+  const ogImage = normalizeImage(image || seoConfig.images.ogImage);
+  const twitterImage = normalizeImage(image || seoConfig.images.twitterImage);
   const normalizedType = type === 'product' ? 'article' : type;
+  const mergedKeywords = Array.from(new Set([...seoConfig.defaultKeywords, ...keywords]));
   
   return {
-    title: `${title} `,
+    title,
     description: description || seoConfig.siteDescription,
-    keywords: [...seoConfig.defaultKeywords, ...keywords],
+    keywords: mergedKeywords,
     robots: noIndex ? { index: false, follow: false } : seoConfig.robots,
     openGraph: {
       ...seoConfig.openGraph,
       title: `${title} | ${seoConfig.siteName}`,
       description: description || seoConfig.siteDescription,
-      url: fullUrl,
+      url: normalizedUrl,
       type: normalizedType,
       images: [
         {
@@ -136,12 +148,12 @@ export const generateSEO = ({
       ...seoConfig.twitter,
       title: `${title} | ${seoConfig.siteName}`,
       description: description || seoConfig.siteDescription,
-      images: [image || `${baseUrl}${seoConfig.images.twitterImage}`],
+      images: [twitterImage],
     },
     alternates: {
-      canonical: fullUrl,
+      canonical: normalizedUrl,
       languages: {
-        'ar': fullUrl,
+        'ar': normalizedUrl,
         'en': `${baseUrl}/en${url || ''}`,
         'x-default': baseUrl,
       },

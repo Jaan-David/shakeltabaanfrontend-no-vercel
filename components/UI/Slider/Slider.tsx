@@ -42,15 +42,15 @@ const Slider: React.FC<SliderProps> = ({
   autoPlay = true,
   intervalMs = 5000,
   className = "",
-  rounded = false, // Changed default to false
+  rounded: _rounded = false, // Changed default to false
   showArrows = true,
   showButtons,
   showDots = true,
   aspectClassName,
-  titleClassName,
-  captionClassName,
+  titleClassName: _titleClassName,
+  captionClassName: _captionClassName,
   useAspect = true,
-  dotsGapPx = 8,
+  dotsGapPx: _dotsGapPx = 8,
   width,
   height,
 }) => {

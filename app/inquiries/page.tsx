@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
   inquiryService,
@@ -32,31 +33,39 @@ export default function InquiriesPage() {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Fetch inquiries on mount
-  useEffect(() => {
-    if (!isUserAuthenticated()) {
-      router.push(`/login?redirect=${encodeURIComponent('/inquiries')}`);
-      return;
+  const getErrorMessage = (value: unknown, fallback: string) => {
+    if (value && typeof value === 'object' && 'message' in value) {
+      const message = (value as { message?: unknown }).message;
+      if (typeof message === 'string') return message;
     }
-    fetchInquiries();
-  }, []);
+    return fallback;
+  };
 
-  async function fetchInquiries() {
+  const fetchInquiries = useCallback(async () => {
     setIsLoading(true);
     try {
       const statusParam = activeStatus === 'all' ? undefined : activeStatus;
       const result = await inquiryService.getInquiries({ 
         page: 1, 
         limit: 100,
-        status: statusParam as any
+        status: statusParam
       });
       setInquiries(result.inquiries || []);
-    } catch (error: any) {
-      setErrorMessage(error.message || 'فشل في تحميل الطلبات');
+    } catch (error: unknown) {
+      setErrorMessage(getErrorMessage(error, 'فشل في تحميل الطلبات'));
       console.error('Error fetching inquiries:', error);
     }
     setIsLoading(false);
-  }
+  }, [activeStatus]);
+
+  // Fetch inquiries on mount and when filters change
+  useEffect(() => {
+    if (!isUserAuthenticated()) {
+      router.push(`/login?redirect=${encodeURIComponent('/inquiries')}`);
+      return;
+    }
+    fetchInquiries();
+  }, [fetchInquiries, router]);
 
   async function handleCreateInquiry(e: React.FormEvent) {
     e.preventDefault();
@@ -69,7 +78,7 @@ export default function InquiriesPage() {
     setIsSubmitting(true);
     
     try {
-      const result = await inquiryService.createInquiry({
+      await inquiryService.createInquiry({
         description,
         images,
       });
@@ -83,8 +92,8 @@ export default function InquiriesPage() {
         fetchInquiries();
         setActiveTab('list');
       }, 1500);
-    } catch (error: any) {
-      setErrorMessage(error.message || 'فشل في إنشاء الطلب');
+    } catch (error: unknown) {
+      setErrorMessage(getErrorMessage(error, 'فشل في إنشاء الطلب'));
       console.error('Error creating inquiry:', error);
     }
     
@@ -93,40 +102,40 @@ export default function InquiriesPage() {
 
   async function handleAcceptReply(inquiry: Inquiry, reply: InquiryReply) {
     try {
-      const result = await inquiryService.acceptReply(inquiry._id, reply._id);
+      await inquiryService.acceptReply(inquiry._id, reply._id);
       setSuccessMessage('تم قبول العرض بنجاح');
       setSelectedInquiry(null);
       setActiveTab('list');
       setActiveStatus('accepted');
       fetchInquiries();
-    } catch (error: any) {
-      setErrorMessage(error.message || 'فشل في قبول العرض');
+    } catch (error: unknown) {
+      setErrorMessage(getErrorMessage(error, 'فشل في قبول العرض'));
       console.error('Error accepting reply:', error);
     }
   }
 
   async function handleRejectReply(inquiry: Inquiry) {
     try {
-      const result = await inquiryService.rejectReply(inquiry._id);
+      await inquiryService.rejectReply(inquiry._id);
       setSuccessMessage('تم رفض العرض');
       setSelectedInquiry(null);
       setActiveTab('list');
       setActiveStatus('active');
       fetchInquiries();
-    } catch (error: any) {
-      setErrorMessage(error.message || 'فشل في رفض العرض');
+    } catch (error: unknown) {
+      setErrorMessage(getErrorMessage(error, 'فشل في رفض العرض'));
       console.error('Error rejecting reply:', error);
     }
   }
 
   async function handleEndInquiry(inquiry: Inquiry) {
     try {
-      const result = await inquiryService.endInquiry(inquiry._id);
+      await inquiryService.endInquiry(inquiry._id);
       setSuccessMessage('تم إغلاق الطلب بنجاح');
       fetchInquiries();
       setSelectedInquiry(null);
-    } catch (error: any) {
-      setErrorMessage(error.message || 'فشل في إغلاق الطلب');
+    } catch (error: unknown) {
+      setErrorMessage(getErrorMessage(error, 'فشل في إغلاق الطلب'));
       console.error('Error ending inquiry:', error);
     }
   }
@@ -134,12 +143,12 @@ export default function InquiriesPage() {
   async function handleDeleteInquiry(inquiryId: string) {
     if (confirm('هل أنت متأكد من حذف هذا الطلب؟')) {
       try {
-        const result = await inquiryService.deleteInquiry(inquiryId);
+        await inquiryService.deleteInquiry(inquiryId);
         setSuccessMessage('تم حذف الطلب بنجاح');
         fetchInquiries();
         setSelectedInquiry(null);
-      } catch (error: any) {
-        setErrorMessage(error.message || 'فشل في حذف الطلب');
+      } catch (error: unknown) {
+        setErrorMessage(getErrorMessage(error, 'فشل في حذف الطلب'));
         console.error('Error deleting inquiry:', error);
       }
     }
@@ -288,10 +297,14 @@ export default function InquiriesPage() {
                   {images.map((img, idx) => (
                     <div key={idx} className="relative group">
                       <div className="w-full aspect-square bg-slate-100 rounded-lg overflow-hidden">
-                        <img
+                        <Image
                           src={URL.createObjectURL(img)}
                           alt="preview"
+                          width={160}
+                          height={160}
+                          sizes="(max-width: 768px) 30vw, 160px"
                           className="w-full h-full object-cover"
+                          unoptimized
                         />
                       </div>
                       <button
@@ -377,7 +390,15 @@ export default function InquiriesPage() {
                     <div className="grid grid-cols-4 gap-2">
                       {selectedInquiry.imageList.map((img, idx) => (
                         <div key={idx} className="aspect-square rounded-lg overflow-hidden bg-slate-100">
-                          <img src={img} alt="inquiry" className="w-full h-full object-cover" />
+                          <Image
+                            src={img}
+                            alt="inquiry"
+                            width={160}
+                            height={160}
+                            sizes="(max-width: 768px) 25vw, 160px"
+                            className="w-full h-full object-cover"
+                            unoptimized
+                          />
                         </div>
                       ))}
                     </div>

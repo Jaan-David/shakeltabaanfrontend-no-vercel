@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import dynamic from "next/dynamic";
+import dynamicImport from "next/dynamic";
 import { ArrowLeft, Star, Zap, Users } from "lucide-react";
 import { getPrimaryMedia } from "@/utils/media";
 import Card from "@/components/UI/Card/Card";
@@ -11,7 +11,7 @@ import { Category as CategoryType } from '@/services/product/categories';
 import { productService } from '@/services/api/products';
 import { ProfileService } from '@/services/profile/profile';
 
-const PartnersSection = dynamic(
+const PartnersSection = dynamicImport(
   () => import("@/_pages/HomePage/PartnersSection"),
   { ssr: false }
 );

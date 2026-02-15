@@ -38,11 +38,10 @@ interface AccountListProps {
 const AccountList: React.FC<AccountListProps> = ({
   onItemClick,
   user,
-  setUser,
+  setUser: _setUser,
   activeItem,
 }) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const menuItems = [
     { label: 'تفاصيل الحساب', icon: User },

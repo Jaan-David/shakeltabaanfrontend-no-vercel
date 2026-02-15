@@ -36,8 +36,8 @@ const Address: React.FC<AddressProp> = ({
     Addresses, 
     setDef,
     isLoading = false,
-    onRefresh,
-    fetchAddresses
+    onRefresh: _onRefresh,
+        onRefresh: _onRefresh,
 }) => {
     const [edit, setEdit] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -53,7 +53,7 @@ const Address: React.FC<AddressProp> = ({
                     setLoading(true)
                     try {
                         await fetchAddresses()
-                    } catch (error) {
+                    } catch (_error) {
                         //console.error('Error fetching addresses:', error)
                     } finally {
                         setLoading(false)
@@ -63,8 +63,8 @@ const Address: React.FC<AddressProp> = ({
         }
 
         loadAddresses()
-    }, []) // Run only on mount
-
+    }, [Addresses, fetchAddresses])
+        }, [Addresses, fetchAddresses]) // Run on Addresses or fetchAddresses change
     const handleEditClick = () => {
         setEdit(true)
     }

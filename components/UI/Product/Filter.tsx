@@ -200,15 +200,6 @@ function Filter({
     getByLetter(letter);
   };
 
-  const clearAllFilters = () => {
-    if (disabled) return;
-
-    setSelectedCategories([]);
-    const allLabel = currentLanguage === 'ar' ? 'الكل' : 'All';
-    setSelectedLetter(allLabel);
-    getByCategory([]);
-    getByLetter(allLabel);
-  };
 
   const retryLoadCategories = async () => {
     try {
@@ -223,16 +214,6 @@ function Filter({
       setIsCategoriesLoading(false);
     }
   };
-
-  const getActiveFiltersCount = () => {
-    let count = 0;
-    if (selectedCategories.length > 0) count += selectedCategories.length;
-    if (!isAllLetter(selectedLetter)) count += 1;
-    return count;
-  };
-
-  const activeFiltersCount = getActiveFiltersCount();
-  const isAllSelected = isAllLetter(selectedLetter);
 
   return (
     <div className={`${styles.filterContainer} ${disabled ? styles.disabled : ''}`}>

@@ -8,6 +8,7 @@ import TopMetrics from '@/_pages/ProfilePage/sections/TopScetion/Top';
 import Welcome from '@/components/UI/Profile/leftSection/Welcome/Welcome';
 
 import type { CartItem, OrderItem, Product } from '@/services/profile/orders';
+import type { Product as ApiProduct } from '@/services/api/products';
 import { normalizeOrderStatus } from '@/services/profile/orders';
 import { wishlistService, type WishItemResponse } from '@/services/api/wishlist';
 import { productService } from '@/services/api/products';
@@ -181,7 +182,7 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
     return `${value.toFixed(2)} ج`;
   };
 
-  const mapProductToPreview = (product: Partial<Product>, fallbackId: string): ProductPreviewItem | null => {
+  const mapProductToPreview = (product: Partial<ApiProduct>, fallbackId: string): ProductPreviewItem | null => {
     const productId = product._id || product.id || fallbackId;
     
     // Validate product ID - must be at least 20 characters (MongoDB ObjectId is 24 chars)
@@ -218,7 +219,7 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
   const mapWishItem = (item: WishItemResponse): ProductPreviewItem | null => {
     // Extract product data - may be populated object or just an ID string
     const product = typeof item.productId === 'object' && item.productId
-      ? (item.productId as Partial<Product>)
+      ? (item.productId as Partial<ApiProduct>)
       : {};
 
     const fallbackId =
@@ -254,10 +255,13 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
 
       try {
         const response = await wishlistService.getAll();
-        const wishItems = response?.data?.wishItems ?? [];
+        const wishItems: WishItemResponse[] = response?.data?.wishItems ?? [];
         const mappedItems = wishItems
           .map(mapWishItem)
-          .filter((item): item is ProductPreviewItem => item !== null)
+          .filter(
+            (item: ProductPreviewItem | null): item is ProductPreviewItem =>
+              item !== null
+          )
           .slice(0, 6);
 
         if (isActive) {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Minus, Plus, Trash } from 'lucide-react';
 import { Button, IconButton } from '@/components/UI/Buttons/Button';
 import Link from 'next/link';
@@ -81,12 +82,13 @@ const CartItemImage: React.FC<{ src: string; alt: string }> = ({ src, alt }) => 
 
   return (
     <div className="w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center bg-[#F7F9FC] rounded-lg overflow-hidden border border-slate-200">
-      <img
+      <Image
         src={imageSource}
         alt={alt}
         onError={handleError}
         className="w-full h-full object-contain p-1"
-        loading="lazy"
+        width={64}
+        height={64}
       />
     </div>
   );

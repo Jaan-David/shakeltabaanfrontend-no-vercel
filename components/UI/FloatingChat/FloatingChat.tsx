@@ -1,20 +1,7 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import { User } from '@/services/auth/login';
+import React, { useState } from 'react';
 import { FaWhatsapp } from 'react-icons/fa';
-import { MessageCircle } from 'lucide-react';
 import { inquiryService } from '@/services/api/inquiry';
-import { UserStorage } from '@/services/auth/login';
-
-/**
- * Get auth token from localStorage (optional)
- */
-const getAuthToken = (): string | null => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('authToken'); // Optional; sends if available
-  }
-  return null;
-};
 
 interface FloatingChatProps {
   isOpen?: boolean;
@@ -22,7 +9,6 @@ interface FloatingChatProps {
 }
 
 export default function FloatingChat({ isOpen: externalOpen, onOpenChange }: FloatingChatProps) {
-  const [isMounted, setIsMounted] = useState(false);
   const [internalOpen, setInternalOpen] = useState(false);
   
   // Use externalOpen if provided, otherwise use internal state
@@ -44,24 +30,6 @@ export default function FloatingChat({ isOpen: externalOpen, onOpenChange }: Flo
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{ success?: boolean; message: string } | null>(null);
   const whatsappHref = 'https://wa.me/201204246538';
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    setIsMounted(true);
-    const storedUser = UserStorage.getUser();
-    if (storedUser) {
-      setUser(storedUser);
-    }
-  }, []);
-
-  useEffect(() => {
-    // Format user's name from first and last name
-    const formatUserName = (user: User | null): string => {
-      if (!user) return '';
-      return `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
-    };
-  }, []);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({

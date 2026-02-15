@@ -11,7 +11,7 @@ import Logo from '@/public/logo/logo2.png';
 import Background from './../../../components/UI/Background/Background';
 import Alert from '@/components/UI/Alert/alert';
 import styles from './../auth.module.css';
-import { AuthService, AuthError, LoginCredentials, UserStorage } from './../../../services/auth/login';
+import { AuthService, AuthError, LoginCredentials, UserStorage, type User } from './../../../services/auth/login';
 import { hasAcceptedPolicies } from '@/utils/policyConsent';
 
 interface PendingAuthData {
@@ -42,9 +42,7 @@ function LoginFormContent() {
   const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   
-  // ✅ NEW: Track if we've already processed this session
-  const [processedSession, setProcessedSession] = useState<string | null>(null);
-  const[ allowAutoLogin, setAllowAutoLogin ] = useState(() => {
+  const [allowAutoLogin, setAllowAutoLogin] = useState(() => {
     // Initialize from sessionStorage to persist across OAuth redirects
     if (typeof window !== 'undefined') {
       return sessionStorage.getItem('oauth_initiated') === 'true';
@@ -177,7 +175,7 @@ useEffect(() => {
           try {
             // Save to localStorage
             console.log('💾 [LoginForm] Saving to localStorage...');
-            UserStorage.saveUser(freshSession.user.backendUser);
+            UserStorage.saveUser(freshSession.user.backendUser as unknown as User);
             UserStorage.saveToken(freshSession.backendToken);
             
             // Verify save
@@ -268,7 +266,7 @@ useEffect(() => {
         try {
           // Save to localStorage
           console.log('💾 [LoginForm] Saving to localStorage...');
-          UserStorage.saveUser(session.user.backendUser);
+          UserStorage.saveUser(session.user.backendUser as unknown as User);
           UserStorage.saveToken(session.backendToken);
           
           // Verify save
@@ -318,7 +316,7 @@ useEffect(() => {
   };
 
   handleSocialAuth();
-}, [session, status, router, searchParams]);
+}, [session, status, router, searchParams, allowAutoLogin]);
 
 // Keep your existing OAuth error handler
 useEffect(() => {
@@ -345,7 +343,6 @@ useEffect(() => {
   useEffect(() => {
     const handleLogout = () => {
       console.log('🚪 [LoginForm] Logout event detected');
-      setProcessedSession(null);
       sessionStorage.removeItem('oauth_initiated');
       localStorage.setItem('just_logged_out', 'true');
     };
@@ -495,6 +492,7 @@ const handleFacebookLogin = async () => {
     setIsLoading(false);
   }
 };
+void handleFacebookLogin;
  
   if (status === 'loading') {
     return (

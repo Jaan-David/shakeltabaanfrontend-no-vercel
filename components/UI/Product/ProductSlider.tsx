@@ -1,5 +1,4 @@
 "use client"
-import { useState, useRef } from 'react';
 import Card from '@/components/UI/Card/Card';
 import styles from '@/components/UI/Product/ProductSlider.module.css';
 import { Product } from '@/services/product/products';
@@ -13,7 +12,7 @@ interface ProductSliderProps {
 
 function ProductSlider({ 
   products = [],
-  title = "المنتجات المميزة",
+  title: _title = "المنتجات المميزة",
   isLoading = false,
   error = null
 }: ProductSliderProps) {

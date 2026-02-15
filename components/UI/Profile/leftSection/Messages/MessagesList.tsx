@@ -23,7 +23,7 @@ const MessagesList = () => {
   const [messages, setMessages] = useState<ProfileMessages[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<MessageStatus | 'all'>('all');
+  const [filterStatus, _setFilterStatus] = useState<MessageStatus | 'all'>('all');
 
   useEffect(() => {
     loadMessages();

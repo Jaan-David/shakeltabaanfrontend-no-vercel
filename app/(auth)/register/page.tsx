@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "./../../../components/UI/Buttons/Button";
@@ -194,21 +195,26 @@ export default function RegistrationForm() {
           router.push("/active-code");
         }, 1200);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       //console.error("❌ Registration failed:", error);
 
       // Enhanced error handling with Arabic translations
       let errorMessage = "حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى.";
-      let fieldErrors = {};
+      let fieldErrors: Record<string, string> = {};
+      const apiError = error as {
+        message?: string;
+        response?: { status?: number; data?: unknown };
+        status?: number;
+        errors?: Record<string, string>;
+      };
 
       // Handle network errors
-      if (error.message && error.message.includes("Network error")) {
+      if (apiError.message && apiError.message.includes("Network error")) {
         errorMessage =
           "لا يمكن الوصول إلى الخادم. يرجى التحقق من الاتصال بالإنترنت.";
-      } else if (error.response || error.status) {
+      } else if (apiError.response || apiError.status) {
         // Server responded with an error
-        const status = error.status || error.response?.status;
-        const responseData = error.response?.data;
+        const status = apiError.status || apiError.response?.status;
 
         //console.log("🔍 Error details:", {
         //   status,
@@ -220,11 +226,11 @@ export default function RegistrationForm() {
         switch (status) {
           case 400:
             errorMessage = "البيانات المدخلة غير صحيحة. يرجى مراجعة المعلومات.";
-            if (error.message && error.message !== "Registration failed") {
-              errorMessage = error.message;
+            if (apiError.message && apiError.message !== "Registration failed") {
+              errorMessage = apiError.message;
             }
-            if (error.errors) {
-              fieldErrors = error.errors;
+            if (apiError.errors) {
+              fieldErrors = apiError.errors;
             }
             break;
           case 409:
@@ -234,8 +240,8 @@ export default function RegistrationForm() {
           case 422:
             errorMessage =
               "البيانات المدخلة لا تتوافق مع المتطلبات. يرجى مراجعة المعلومات.";
-            if (error.errors) {
-              fieldErrors = error.errors;
+            if (apiError.errors) {
+              fieldErrors = apiError.errors;
             }
             break;
           case 500:
@@ -243,12 +249,12 @@ export default function RegistrationForm() {
             break;
           default:
             errorMessage =
-              error.message ||
+              apiError.message ||
               `خطأ غير متوقع (${status}). يرجى المحاولة مرة أخرى.`;
         }
       } else {
         // Handle other error types
-        errorMessage = error.message || errorMessage;
+        errorMessage = apiError.message || errorMessage;
       }
 
       // Translate common field errors to Arabic if needed
@@ -287,7 +293,15 @@ export default function RegistrationForm() {
         <div className={styles.formWrapper}>
           {/* Logo and Title */}
           <div className={styles.header}>
-              <img src={Logo.src} alt="Logo" className={styles.logo} />
+              <Image
+                src={Logo}
+                alt="Logo"
+                width={160}
+                height={48}
+                sizes="160px"
+                className={styles.logo}
+                priority
+              />
 
             <h2 className={styles.title}>إنشاء حساب جديد</h2>
           </div>
