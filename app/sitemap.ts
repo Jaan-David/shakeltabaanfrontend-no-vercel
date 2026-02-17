@@ -120,12 +120,15 @@ const getProductEntries = async (): Promise<SitemapItem[]> => {
     maxPages: 30,
   });
 
+  const hasProductId = (product: ApiEntity): product is ApiEntity & { _id?: string; id: string } =>
+    typeof (product._id || product.id) === "string";
+
   return products
+    .filter(hasProductId)
     .map((product) => ({
       id: product._id || product.id,
-      updatedAt: product.updatedAt,
+      updatedAt: product.updatedAt ?? undefined,
     }))
-    .filter((entry): entry is { id: string; updatedAt?: string } => Boolean(entry.id))
     .map((entry) =>
       buildEntry(`/product/${encodeURIComponent(entry.id)}`, {
         changeFrequency: "weekly",
@@ -139,17 +142,16 @@ const getCategoryEntries = async (): Promise<SitemapItem[]> => {
   const result = await fetchJson<any>(`${Api}${API_ENDPOINTS.CATEGORIES.LIST}`);
   const categories = extractArray<ApiEntity>(result);
 
+  const hasCategoryValue = (category: ApiEntity): category is ApiEntity & { name: string } =>
+    typeof (category._id || category.id || category.name) === "string";
+
   return categories
-    .map((category) => ({
-      value: category._id || category.id || category.name,
-      updatedAt: category.updatedAt,
-    }))
-    .filter((entry): entry is { value: string; updatedAt?: string } => Boolean(entry.value))
-    .map((entry) =>
-      buildEntry(`/categories/${slugify(entry.value)}`, {
+    .filter(hasCategoryValue)
+    .map((category) =>
+      buildEntry(`/categories/${slugify(category._id || category.id || category.name)}`, {
         changeFrequency: "weekly",
         priority: 0.9,
-        lastModified: toLastModified(entry.updatedAt),
+        lastModified: toLastModified(category.updatedAt),
       })
     );
 };
@@ -158,17 +160,16 @@ const getOrganizationEntries = async (): Promise<SitemapItem[]> => {
   const result = await fetchJson<any>(`${Api}/organizations`);
   const organizations = extractArray<ApiEntity>(result);
 
+  const hasOrganizationValue = (org: ApiEntity): org is ApiEntity & { name: string } =>
+    typeof (org.organizationId || org.id || org.name) === "string";
+
   return organizations
-    .map((org) => ({
-      value: org.organizationId || org.id || org.name,
-      updatedAt: org.updatedAt,
-    }))
-    .filter((entry): entry is { value: string; updatedAt?: string } => Boolean(entry.value))
-    .map((entry) =>
-      buildEntry(`/organization/${slugify(entry.value)}`, {
+    .filter(hasOrganizationValue)
+    .map((org) =>
+      buildEntry(`/organization/${slugify(org.organizationId || org.id || org.name)}`, {
         changeFrequency: "weekly",
         priority: 0.3,
-        lastModified: toLastModified(entry.updatedAt),
+        lastModified: toLastModified(org.updatedAt),
       })
     );
 };
@@ -177,17 +178,16 @@ const getProfileEntries = async (): Promise<SitemapItem[]> => {
   const result = await fetchJson<any>(`${Api}/users/public`);
   const users = extractArray<ApiEntity>(result);
 
+  const hasProfileValue = (user: ApiEntity): user is ApiEntity & { username: string } =>
+    typeof (user.slug || user.username) === "string";
+
   return users
-    .map((user) => ({
-      value: user.slug || user.username,
-      updatedAt: user.updatedAt,
-    }))
-    .filter((entry): entry is { value: string; updatedAt?: string } => Boolean(entry.value))
-    .map((entry) =>
-      buildEntry(`/profile/${slugify(entry.value)}`, {
+    .filter(hasProfileValue)
+    .map((user) =>
+      buildEntry(`/profile/${slugify(user.slug || user.username)}`, {
         changeFrequency: "monthly",
         priority: 0.3,
-        lastModified: toLastModified(entry.updatedAt),
+        lastModified: toLastModified(user.updatedAt),
       })
     );
 };
