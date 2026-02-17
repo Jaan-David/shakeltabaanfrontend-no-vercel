@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { generateSEO, seoConfig } from "@/config/seo.config";
+import RevealOnScroll from "@/components/UI/RevealOnScroll";
 import {
   buildAltText,
   buildBreadcrumbJsonLd,
@@ -188,6 +189,23 @@ export default async function OrganizationProfilePage({
     logo,
   };
 
+  const heroImageRaw = orgProfile.logo;
+  const normalizeHeroImage = (path?: string | null) => {
+    if (!path) return "/categories/rokham10.jpeg";
+    if (
+      path.startsWith("/logo/") ||
+      path.startsWith("/categories/") ||
+      path.startsWith("/acessts/")
+    ) {
+      return path;
+    }
+    return normalizeApiImage(path);
+  };
+  const heroImage = normalizeHeroImage(heroImageRaw);
+  const heroImageIsRemote = heroImage.startsWith("http://") || heroImage.startsWith("https://");
+  const hasDescription = Boolean(orgProfile.description?.trim());
+  const hasRating = typeof orgProfile.rating === "number";
+
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
   const organizationUrl = `${baseUrl}/organization/${encodeURIComponent(organizationId)}`;
   const areaServed = ["EG", "SA", "AE", "KW", "LY", "JO"];
@@ -221,7 +239,7 @@ export default async function OrganizationProfilePage({
   ]);
 
   return (
-    <div className="min-h-screen bg-white font-beiruti mt-[93px]">
+    <main className="min-h-screen bg-slate-50 font-beiruti">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -240,80 +258,120 @@ export default async function OrganizationProfilePage({
           __html: JSON.stringify(breadcrumbSchema),
         }}
       />
-      <div className="mx-auto max-w-[95%] px-4 py-10 space-y-8">
-        <div className="flex items-center justify-between">
-          <Link
-            href="/"
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            العودة للرئيسية
-          </Link>
-          <div className="text-center">
-            
-          </div>
-          <div className="w-[140px]" />
-        </div>
 
-        <div className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 shadow-sm">
-          <div className="w-28 h-28 md:w-32 md:h-32 rounded-2xl bg-white border border-gray-200 flex items-center justify-center overflow-hidden">
+      <div className="mx-auto max-w-6xl px-4 pb-16 pt-6 md:pt-8 space-y-12">
+        <RevealOnScroll className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div className="relative h-56 md:h-72">
             <Image
-              src={orgProfile.logo}
+              src={heroImage}
               alt={orgProfile.name}
-              width={128}
-              height={128}
-              sizes="(max-width: 768px) 112px, 128px"
-              className="w-full h-full object-contain p-3"
+              fill
+              className="object-cover"
               priority
-              unoptimized={logoIsRemote}
+              unoptimized={heroImageIsRemote}
             />
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-900/20 via-slate-900/50 to-slate-900/80 backdrop-blur-[2px]" />
           </div>
-          <div className="flex-1 text-center md:text-right space-y-3">
-            <h2 className="text-2xl md:text-3xl font-bold text-blue-900">
-              {orgProfile.name}
-            </h2>
-            <p className="text-slate-600 leading-relaxed">
-              {orgProfile.description}
-            </p>
-            {orgProfile.location ? (
-              <p className="text-slate-500 text-sm">{orgProfile.location}</p>
-            ) : null}
-            <div className="flex items-center justify-center md:justify-end gap-2">
-              <div className="flex items-center gap-1 text-yellow-400 text-lg">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <span key={i}>{i < Math.round(orgProfile.rating) ? "★" : "☆"}</span>
-                ))}
+          <div className="relative -mt-10 md:-mt-14 mx-4 md:mx-8 mb-6 rounded-2xl border border-slate-200 bg-white/95 p-5 md:p-8 shadow-lg">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">ملف الشريك</p>
+                <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
+                  {orgProfile.name}
+                </h1>
+                {hasDescription ? (
+                  <p className="text-sm md:text-base text-slate-600 leading-relaxed">
+                    {orgProfile.description}
+                  </p>
+                ) : null}
               </div>
-              <span className="text-slate-600 text-sm">
-                {orgProfile.rating} ({orgProfile.reviewsCount})
-              </span>
+              <div className="flex flex-col gap-3 md:items-end">
+                {hasRating ? (
+                  <div className="flex items-center gap-2 rounded-full bg-slate-50 px-4 py-2 text-sm text-slate-700">
+                    <div className="flex items-center gap-1 text-yellow-400">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <span key={i}>{i < Math.round(orgProfile.rating) ? "★" : "☆"}</span>
+                      ))}
+                    </div>
+                    <span className="text-slate-600">
+                      {orgProfile.rating} ({orgProfile.reviewsCount})
+                    </span>
+                  </div>
+                ) : null}
+                <div className="flex w-full flex-col gap-3 sm:flex-row sm:w-auto">
+                  <Link
+                    href="/"
+                    className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition-all duration-200 hover:border-blue-200 hover:text-blue-700"
+                  >
+                    العودة للرئيسية
+                  </Link>
+                  <Link
+                    href="#organization-products"
+                    className="inline-flex h-11 items-center justify-center rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-blue-700"
+                  >
+                    منتجات المعرض
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </RevealOnScroll>
 
-        <section className="space-y-6">
+        <RevealOnScroll className="rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
+          <div className="flex flex-col gap-6 md:flex-row md:items-center">
+            <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl border border-slate-200 bg-white flex items-center justify-center overflow-hidden">
+              <Image
+                src={orgProfile.logo}
+                alt={orgProfile.name}
+                width={112}
+                height={112}
+                sizes="(max-width: 768px) 96px, 112px"
+                className="w-full h-full object-contain p-3"
+                priority
+                unoptimized={logoIsRemote}
+              />
+            </div>
+            <div className="flex-1 space-y-3 text-right">
+              <h2 className="text-2xl md:text-3xl font-bold text-slate-900">{orgProfile.name}</h2>
+              {hasDescription ? (
+                <p className="text-sm md:text-base text-slate-600 leading-relaxed">
+                  {orgProfile.description}
+                </p>
+              ) : null}
+              {hasRating ? (
+                <div className="flex items-center justify-end gap-2">
+                  <div className="flex items-center gap-1 text-yellow-400 text-lg">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <span key={i}>{i < Math.round(orgProfile.rating) ? "★" : "☆"}</span>
+                    ))}
+                  </div>
+                  <span className="text-sm text-slate-600">
+                    {orgProfile.rating} ({orgProfile.reviewsCount})
+                  </span>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </RevealOnScroll>
+
+        <RevealOnScroll className="rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm" id="organization-products">
           <div className="flex items-center justify-between">
-            <h3 className="text-2xl md:text-3xl font-bold text-blue-900">
-              المنتجات
-            </h3>
+            <h3 className="text-2xl md:text-3xl font-bold text-slate-900">منتجات المعرض</h3>
           </div>
           {products.length === 0 ? (
-            <div className="text-center py-16 bg-white border border-gray-200 rounded-2xl">
-              <div className="text-6xl mb-4">📦</div>
-              <h3 className="text-2xl font-bold text-blue-900 mb-2">لا توجد منتجات</h3>
+            <div className="text-center py-12 bg-slate-50 border border-slate-200 rounded-2xl mt-6">
+              <div className="text-5xl mb-4">📦</div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">لا توجد منتجات</h3>
               <p className="text-slate-600">لم نتمكن من العثور على منتجات لهذا الشريك</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {products.map((product, index) => {
                 const id = product._id || product.id || "";
                 const name = product.nameAr || product.name || "منتج";
                 const rawImage = product.imageList?.[0] || product.image || "";
                 const image = rawImage ? normalizeApiImage(rawImage) : "/acessts/NoImage.jpg";
                 const imageIsRemote = image.startsWith("http://") || image.startsWith("https://");
-                const ratingCount = Array.isArray(product.productReview) ? product.productReview.length : 0;
                 const altText = buildAltText({
                   productName: name,
                   stoneType: product.category || "رخام",
@@ -323,90 +381,31 @@ export default async function OrganizationProfilePage({
                 return (
                   <div
                     key={id}
-                    className="group marble-card p-6 hover:border-blue-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/20 transform hover:-translate-y-2"
+                    className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
                   >
-                    {(product.isOffer || (product.offerLinearPrice !== null && product.offerLinearPrice !== undefined && Number(product.offerLinearPrice) > 0) || (product.offerCubicPrice !== null && product.offerCubicPrice !== undefined && Number(product.offerCubicPrice) > 0)) && (
-                      <div className="absolute top-2 left-2 z-10 bg-red-600 text-black text-xs font-extrabold px-3 py-1 rounded-md border-2 border-red-700 shadow-lg">
-                        عرض خاص
-                      </div>
-                    )}
-                    <div className="relative overflow-hidden rounded-xl mb-4">
+                    <div className="relative aspect-[4/3] w-full overflow-hidden">
                       <Image
                         src={image}
                         alt={altText}
                         width={420}
-                        height={240}
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                        className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                        height={320}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                         unoptimized={imageIsRemote}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
-                    <div className="space-y-3">
-                      {(product.organizationName || product.organizationId) && (
-                        <div className="flex items-center justify-center gap-2 bg-blue-50 border border-blue-200 rounded-lg p-2">
-                          <span className="text-xs font-semibold text-blue-700">
-                            {product.organizationName || product.organizationId}
-                          </span>
-                        </div>
-                      )}
-                      <h3 className="text-slate-900 font-bold text-lg leading-tight line-clamp-2 group-hover:text-blue-600 transition-colors">
+                    <div className="p-5 space-y-3">
+                      <h3 className="text-lg font-semibold text-slate-900 leading-tight line-clamp-2">
                         {name}
                       </h3>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1">
-                          <span className="text-yellow-400">★</span>
-                          <span className="text-slate-600 text-sm">
-                            {typeof product.averageRate === "number" ? product.averageRate : 4.5}
-                          </span>
-                          <span className="text-slate-500 text-sm">({ratingCount})</span>
-                        </div>
-                      </div>
-                      {(product.pricePerCubicMeter || product.pricePerLinearMeter) ? (
-                        <div className="flex flex-col gap-2 text-right">
-                          {product.pricePerLinearMeter && (
-                            <div className="flex flex-col">
-                              <span className="text-xs text-slate-600">المتر الطولي:</span>
-                              {product.offerLinearPrice !== null && product.offerLinearPrice !== undefined && Number(product.offerLinearPrice) > 0 ? (
-                                <>
-                                  <span className="text-sm text-slate-500 line-through">{Number(product.pricePerLinearMeter).toLocaleString("ar-EG")} ج.م</span>
-                                  <span className="text-xl font-bold text-red-600">{Number(product.offerLinearPrice).toLocaleString("ar-EG")} ج.م</span>
-                                </>
-                              ) : (
-                                <span className="text-xl font-bold text-green-400">{Number(product.pricePerLinearMeter).toLocaleString("ar-EG")} ج.م</span>
-                              )}
-                            </div>
-                          )}
-                          {product.pricePerCubicMeter && (
-                            <div className="flex flex-col">
-                              <span className="text-xs text-slate-600">المتر مربع:</span>
-                              {product.offerCubicPrice !== null && product.offerCubicPrice !== undefined && Number(product.offerCubicPrice) > 0 ? (
-                                <>
-                                  <span className="text-sm text-slate-500 line-through">{Number(product.pricePerCubicMeter).toLocaleString("ar-EG")} ج.م</span>
-                                  <span className="text-xl font-bold text-red-600">{Number(product.offerCubicPrice).toLocaleString("ar-EG")} ج.م</span>
-                                </>
-                              ) : (
-                                <span className="text-xl font-bold text-green-400">{Number(product.pricePerCubicMeter).toLocaleString("ar-EG")} ج.م</span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-green-400">
-                            {Number(product.price ?? 0).toLocaleString("ar-EG")} ج.م
-                          </p>
-                          {typeof product.PurchasePrice === "number" &&
-                          product.PurchasePrice < Number(product.price ?? 0) ? (
-                            <p className="text-sm text-slate-500 line-through">
-                              {product.PurchasePrice.toLocaleString("ar-EG")} ج.م
-                            </p>
-                          ) : null}
-                        </div>
-                      )}
+                      {product.category ? (
+                        <p className="text-sm text-slate-600 line-clamp-2">
+                          {product.category}
+                        </p>
+                      ) : null}
                       <Link
                         href={`/product/${encodeURIComponent(id)}`}
-                        className="w-full inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                        className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-blue-600 text-sm font-semibold text-white transition-all duration-200 hover:bg-blue-700"
                       >
                         عرض التفاصيل
                       </Link>
@@ -416,20 +415,18 @@ export default async function OrganizationProfilePage({
               })}
             </div>
           )}
-        </section>
+        </RevealOnScroll>
 
-        <section className="pt-8 border-t border-gray-200 space-y-6">
-          <h3 className="text-2xl md:text-3xl font-bold text-blue-900">
-            الأعمال السابقة
-          </h3>
+        <RevealOnScroll className="rounded-3xl border border-slate-200 bg-slate-100/70 p-6 md:p-8 shadow-sm">
+          <h3 className="text-2xl md:text-3xl font-bold text-slate-900">الأعمال السابقة</h3>
           {previousWorks.length === 0 ? (
-            <div className="text-center py-16 bg-white border border-gray-200 rounded-2xl">
+            <div className="text-center py-12 bg-white border border-slate-200 rounded-2xl mt-6">
               <div className="text-5xl mb-3">🧱</div>
-              <h4 className="text-xl font-bold text-blue-900 mb-2">لا توجد أعمال سابقة</h4>
+              <h4 className="text-xl font-bold text-slate-900 mb-2">لا توجد أعمال سابقة</h4>
               <p className="text-slate-600">لم نتمكن من العثور على أعمال سابقة لهذا الشريك</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {previousWorks.map((work) => {
                 const id = work._id || work.id || work.title || "work";
                 const rawImage = work.photoList?.[0] || "";
@@ -438,35 +435,32 @@ export default async function OrganizationProfilePage({
                 return (
                   <div
                     key={id}
-                    className="group bg-white border border-gray-200 rounded-2xl p-6 hover:border-blue-500/50 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/20"
+                    className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
                   >
-                    <div className="relative overflow-hidden rounded-xl mb-4">
+                    <div className="relative aspect-[16/10] w-full">
                       <Image
                         src={image}
                         alt={work.title || "عمل سابق"}
-                        width={420}
-                        height={240}
+                        width={520}
+                        height={340}
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                         unoptimized={imageIsRemote}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-                    <div className="space-y-2">
-                      <h4 className="text-slate-900 font-bold text-lg leading-tight line-clamp-2 group-hover:text-blue-600 transition-colors">
-                        {work.title || "مشروع"}
-                      </h4>
-                      <p className="text-slate-600 text-sm leading-relaxed line-clamp-4">
-                        {work.description || "لا يوجد وصف متاح"}
-                      </p>
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent opacity-70 transition-opacity duration-300 group-hover:opacity-100" />
+                      <div className="absolute bottom-4 right-4 left-4">
+                        <h4 className="text-base md:text-lg font-semibold text-white line-clamp-2">
+                          {work.title || "مشروع"}
+                        </h4>
+                      </div>
                     </div>
                   </div>
                 );
               })}
             </div>
           )}
-        </section>
+        </RevealOnScroll>
       </div>
-    </div>
+    </main>
   );
 }
