@@ -192,7 +192,7 @@ const getProfileEntries = async (): Promise<SitemapItem[]> => {
     );
 };
 
-// Dedupe URLs to avoid duplicate entries in the sitemap.
+// Dedupe URLs to avoid duplicate entries in the sitemapوببوبوبو.
 const dedupeEntries = (entries: SitemapItem[]): SitemapItem[] => {
   const map = new Map<string, SitemapItem>();
   entries.forEach((entry) => {
