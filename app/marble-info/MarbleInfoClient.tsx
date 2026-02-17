@@ -91,7 +91,8 @@ const renderLimitedList = (items?: string[], limit = 3) => {
 interface ExpandableCategoryCardProps {
   id: string;
   title: string;
-  description: string;
+  previewDescription: string;
+  fullDescription: string;
   image: string;
   badge: string;
   expanded: boolean;
@@ -103,7 +104,8 @@ interface ExpandableCategoryCardProps {
 function ExpandableCategoryCard({
   id,
   title,
-  description,
+  previewDescription,
+  fullDescription,
   image,
   badge,
   expanded,
@@ -117,12 +119,13 @@ function ExpandableCategoryCard({
   const [contentHeight, setContentHeight] = useState(0);
 
   const descriptionSegments = useMemo(() => {
-    const rawSegments = description
+    const sourceText = fullDescription || previewDescription;
+    const rawSegments = sourceText
       .split(/[,،.!؟؛]\s*/)
       .map((segment) => segment.trim())
       .filter(Boolean);
-    return rawSegments.length > 0 ? rawSegments : [description];
-  }, [description]);
+    return rawSegments.length > 0 ? rawSegments : [sourceText];
+  }, [fullDescription, previewDescription]);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter" || event.key === " ") {
@@ -222,7 +225,7 @@ function ExpandableCategoryCard({
 
         {!expanded && (
           <p className="text-sm text-slate-600 leading-relaxed line-clamp-2">
-            {description}
+            {previewDescription}
           </p>
         )}
 
@@ -497,7 +500,7 @@ function MarbleInfoContent() {
       match?.highlights?.[0] ||
       "تعرف على تفاصيل كل فئة واستخداماتها.";
 
-    const description =
+    const previewDescription =
       rawDescription.length > 120
         ? `${rawDescription.slice(0, 117)}...`
         : rawDescription;
@@ -568,7 +571,14 @@ function MarbleInfoContent() {
       categoryType = "نحت";
     }
 
-    return { title, description, image, slug, categoryType };
+    return {
+      title,
+      previewDescription,
+      fullDescription: rawDescription,
+      image,
+      slug,
+      categoryType,
+    };
   };
 
   return (
@@ -887,7 +897,8 @@ function MarbleInfoContent() {
                           key={cardKey}
                           id={cardKey}
                           title={meta.title}
-                          description={meta.description}
+                          previewDescription={meta.previewDescription}
+                          fullDescription={meta.fullDescription}
                           image={meta.image}
                           badge={meta.categoryType || meta.title}
                           expanded={isExpanded}
