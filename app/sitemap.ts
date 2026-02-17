@@ -97,9 +97,7 @@ const buildEntry = (path: string, overrides: Partial<SitemapItem> = {}): Sitemap
 const getStaticEntries = (): SitemapItem[] => [
   buildEntry("/", { changeFrequency: "daily", priority: 1.0 }),
   buildEntry("/products", { changeFrequency: "daily", priority: 0.95 }),
-  buildEntry("/categories", { changeFrequency: "weekly", priority: 0.9 }),
-  buildEntry("/marble-info", { changeFrequency: "weekly", priority: 0.85 }),
-  buildEntry("/marble-uses", { changeFrequency: "weekly", priority: 0.8 }),
+  buildEntry("/marble-info", { changeFrequency: "weekly", priority: 0.9 }),
   buildEntry("/about", { changeFrequency: "monthly", priority: 0.6 }),
   buildEntry("/about-marble", { changeFrequency: "monthly", priority: 0.6 }),
   buildEntry("/policies", { changeFrequency: "yearly", priority: 0.4 }),
@@ -138,23 +136,6 @@ const getProductEntries = async (): Promise<SitemapItem[]> => {
     );
 };
 
-const getCategoryEntries = async (): Promise<SitemapItem[]> => {
-  const result = await fetchJson<any>(`${Api}${API_ENDPOINTS.CATEGORIES.LIST}`);
-  const categories = extractArray<ApiEntity>(result);
-
-  const hasCategoryValue = (category: ApiEntity): category is ApiEntity & { name: string } =>
-    typeof (category._id || category.id || category.name) === "string";
-
-  return categories
-    .filter(hasCategoryValue)
-    .map((category) =>
-      buildEntry(`/categories/${slugify(category._id || category.id || category.name)}`, {
-        changeFrequency: "weekly",
-        priority: 0.9,
-        lastModified: toLastModified(category.updatedAt),
-      })
-    );
-};
 
 const getOrganizationEntries = async (): Promise<SitemapItem[]> => {
   const result = await fetchJson<any>(`${Api}/organizations`);
@@ -168,7 +149,7 @@ const getOrganizationEntries = async (): Promise<SitemapItem[]> => {
     .map((org) =>
       buildEntry(`/organization/${slugify(org.organizationId || org.id || org.name)}`, {
         changeFrequency: "weekly",
-        priority: 0.3,
+        priority: 0.6,
         lastModified: toLastModified(org.updatedAt),
       })
     );
@@ -192,7 +173,7 @@ const getProfileEntries = async (): Promise<SitemapItem[]> => {
     );
 };
 
-// Dedupe URLs to avoid duplicate entries in the sitemapوببوبوبو.
+// Dedupe URLs to avoid duplicate entries in the sitemap.
 const dedupeEntries = (entries: SitemapItem[]): SitemapItem[] => {
   const map = new Map<string, SitemapItem>();
   entries.forEach((entry) => {
@@ -204,9 +185,8 @@ const dedupeEntries = (entries: SitemapItem[]): SitemapItem[] => {
 };
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [products, categories, organizations, profiles] = await Promise.all([
+  const [products, organizations, profiles] = await Promise.all([
     getProductEntries(),
-    getCategoryEntries(),
     getOrganizationEntries(),
     getProfileEntries(),
   ]);
@@ -215,7 +195,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...getStaticEntries(),
     ...getMarbleUseEntries(),
     ...products,
-    ...categories,
     ...organizations,
     ...profiles,
   ];

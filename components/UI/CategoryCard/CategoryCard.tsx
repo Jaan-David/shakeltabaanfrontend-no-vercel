@@ -35,6 +35,7 @@ export default function CategoryCard({
           fill
           className="object-cover transition-transform duration-200 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          unoptimized
         />
       </div>
       <div className="flex flex-1 flex-col p-5">
@@ -43,7 +44,7 @@ export default function CategoryCard({
             {title}
           </h3>
           <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-            رخام
+            {marbleType}
           </span>
         </div>
         <p className="mb-6 text-sm text-slate-600 leading-relaxed line-clamp-2">

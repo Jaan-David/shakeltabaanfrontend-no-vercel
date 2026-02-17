@@ -88,6 +88,198 @@ const renderLimitedList = (items?: string[], limit = 3) => {
   return items.slice(0, limit);
 };
 
+interface ExpandableCategoryCardProps {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  badge: string;
+  expanded: boolean;
+  onToggle: () => void;
+  onDetailsClick: () => void;
+  onOrderClick: () => void;
+}
+
+function ExpandableCategoryCard({
+  id,
+  title,
+  description,
+  image,
+  badge,
+  expanded,
+  onToggle,
+  onDetailsClick,
+  onOrderClick,
+}: ExpandableCategoryCardProps) {
+  const contentId = `${id}-content`;
+  const cardRef = useRef<HTMLElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const [contentHeight, setContentHeight] = useState(0);
+
+  const descriptionSegments = useMemo(() => {
+    const rawSegments = description
+      .split(/[,،.!؟؛]\s*/)
+      .map((segment) => segment.trim())
+      .filter(Boolean);
+    return rawSegments.length > 0 ? rawSegments : [description];
+  }, [description]);
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onToggle();
+    }
+  };
+
+  const handleDetailsClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    onDetailsClick();
+  };
+
+  const handleOrderClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    onOrderClick();
+  };
+
+  const handleChevronClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    onToggle();
+  };
+
+  useEffect(() => {
+    if (!contentRef.current) return;
+    setContentHeight(contentRef.current.scrollHeight);
+  }, [descriptionSegments, expanded]);
+
+  const handleToggle = () => {
+    const nextExpanded = !expanded;
+    onToggle();
+
+    if (nextExpanded && typeof window !== "undefined") {
+      const isMobile = window.matchMedia("(max-width: 768px)").matches;
+      if (isMobile) {
+        requestAnimationFrame(() => {
+          cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      }
+    }
+  };
+
+  return (
+    <article
+      ref={cardRef}
+      className={`group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl ${
+        expanded ? "shadow-xl ring-1 ring-blue-100" : ""
+      }`}
+      role="button"
+      tabIndex={0}
+      aria-expanded={expanded}
+      aria-controls={contentId}
+      onClick={handleToggle}
+      onKeyDown={handleKeyDown}
+    >
+      <div className="relative aspect-[4/3] w-full overflow-hidden">
+        <Image
+          src={image}
+          alt={title}
+          fill
+          className={`object-cover transition-transform duration-300 ${
+            expanded ? "scale-[0.98]" : "group-hover:scale-[1.03]"
+          }`}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          unoptimized
+        />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/20 via-transparent to-transparent" />
+      </div>
+
+      <div className="flex flex-1 flex-col p-5">
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <h3 className="text-lg font-semibold text-slate-900 leading-snug">
+            {title}
+          </h3>
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+              {badge}
+            </span>
+            <button
+              type="button"
+              onClick={handleChevronClick}
+              className={`flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-transform duration-300 ${
+                expanded ? "rotate-180" : "rotate-0"
+              }`}
+              aria-label={expanded ? "إغلاق التفاصيل" : "عرض التفاصيل"}
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                <path
+                  fillRule="evenodd"
+                  d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.25 8.27a.75.75 0 0 1-.02-1.06z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {!expanded && (
+          <p className="text-sm text-slate-600 leading-relaxed line-clamp-2">
+            {description}
+          </p>
+        )}
+
+        <div
+          id={contentId}
+          className={`transition-all duration-300 ${
+            expanded
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 -translate-y-2 pointer-events-none"
+          }`}
+          style={{ maxHeight: expanded ? contentHeight : 0, overflow: "hidden" }}
+        >
+          <div ref={contentRef} className="pt-2">
+            <div className="space-y-2">
+              {descriptionSegments.map((segment, index) => (
+                <span
+                  key={`${segment}-${index}`}
+                  className={`block text-sm text-slate-600 leading-relaxed transition-all duration-300 ${
+                    expanded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+                  }`}
+                  style={{ transitionDelay: `${index * 70}ms` }}
+                >
+                  {segment}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div
+          className={`mt-4 grid gap-3 transition-all duration-300 ${
+            expanded
+              ? "max-h-32 opacity-100 translate-y-0"
+              : "max-h-0 opacity-0 -translate-y-2 pointer-events-none"
+          }`}
+        >
+          <button
+            type="button"
+            onClick={handleDetailsClick}
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors duration-200 hover:border-blue-300 hover:bg-blue-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+          >
+            تفاصيل أكثر
+            <span aria-hidden="true">→</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleOrderClick}
+            className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+          >
+            اطلب الآن
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 function MarbleInfoContent() {
   const router = useRouter();
   const curatedUseCategories = useMemo<MarbleCategory[]>(
@@ -116,6 +308,7 @@ function MarbleInfoContent() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalLoading, setIsModalLoading] = useState(false);
+  const [expandedCategoryKey, setExpandedCategoryKey] = useState<string | null>(null);
   const modalRef = useRef<HTMLDivElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
@@ -296,23 +489,7 @@ function MarbleInfoContent() {
         item.id === category._id
     );
 
-    const normalize = (value?: string) => (value || "").toLowerCase();
-    const hasEgyptianWords = (value?: string) => {
-      const n = normalize(value);
-      return n.includes("رخام") && n.includes("مصر");
-    };
-
-    const egyptianSignals = [
-      "رخام مص",
-      "رخام مصري",
-      "رخام مصرى",
-      "الرخام المصري",
-      "الرخام المص",
-      "masry",
-      "masri",
-      "egypt",
-      "egyptian",
-    ];
+    const normalize = (value?: string) => (value || "").trim().toLowerCase().replace(/ى/g, 'ي');
 
     const rawDescription =
       category.summary ||
@@ -320,32 +497,78 @@ function MarbleInfoContent() {
       match?.highlights?.[0] ||
       "تعرف على تفاصيل كل فئة واستخداماتها.";
 
-    const isEgyptianMarble = [
-      match?.title,
-      category.title,
-      category.key,
-      match?.slug,
-      category.summary,
-    ].some((value) =>
-      egyptianSignals.some((signal) => normalize(value).includes(signal)) ||
-      hasEgyptianWords(value)
-    );
-
     const description =
       rawDescription.length > 120
         ? `${rawDescription.slice(0, 117)}...`
         : rawDescription;
 
-    const image =
-      (isEgyptianMarble ? "/categories/rokham10.jpeg" : undefined) ||
-      category.imageList?.[0] ||
-      match?.heroImage ||
-      "/acessts/placeholder.svg";
-
     const slug = match?.slug || category.key || "";
     const title = category.title || match?.title || "";
+    const normalizedTitle = normalize(title);
 
-    return { title, description, image, slug };
+    // Category Images Mapping with multiple variations
+    const categoryImages: Record<string, string> = {
+      "جرانيت مستورد": "/categories/جرانيت مستورد.jpeg",
+      "جرانيت مصرى": "/categories/جرانيت مصري.jpeg",
+      "جرانيت مصري": "/categories/جرانيت مصري.jpeg",
+      "رخام مستورد": "/categories/رخام مستورد.jpeg",
+      "رخام مصرى": "/categories/رخام مصري.jpeg",
+      "رخام مصري": "/categories/رخام مصري.jpeg",
+      "كوارتز": "/categories/كوارتز.jpeg",
+      "رخام مصنع": "/categories/رخام صناعي.jpeg",
+      "رخام صناعي": "/categories/رخام صناعي.jpeg",
+      "اعمال النحت": "/categories/اعمال نحت.jpeg",
+      "اعمال نحت": "/categories/اعمال نحت.jpeg",
+    };
+
+    // Try exact match first
+    let image = categoryImages[title];
+    
+    // If no exact match, try normalized matching
+    if (!image) {
+      for (const [key, value] of Object.entries(categoryImages)) {
+        if (normalize(key) === normalizedTitle) {
+          image = value;
+          break;
+        }
+      }
+    }
+    
+    // If still no match, try partial matching based on keywords
+    if (!image) {
+      if (normalizedTitle.includes('جرانيت') && normalizedTitle.includes('مستورد')) {
+        image = "/categories/جرانيت مستورد.jpeg";
+      } else if (normalizedTitle.includes('جرانيت') && (normalizedTitle.includes('مصري') || normalizedTitle.includes('مصري'))) {
+        image = "/categories/جرانيت مصري.jpeg";
+      } else if (normalizedTitle.includes('رخام') && normalizedTitle.includes('مستورد')) {
+        image = "/categories/رخام مستورد.jpeg";
+      } else if (normalizedTitle.includes('رخام') && (normalizedTitle.includes('مصري') || normalizedTitle.includes('مصري'))) {
+        image = "/categories/رخام مصري.jpeg";
+      } else if (normalizedTitle.includes('كوارتز')) {
+        image = "/categories/كوارتز.jpeg";
+      } else if (normalizedTitle.includes('رخام') && (normalizedTitle.includes('صناعي') || normalizedTitle.includes('مصنع'))) {
+        image = "/categories/رخام صناعي.jpeg";
+      } else if (normalizedTitle.includes('نحت')) {
+        image = "/categories/اعمال نحت.jpeg";
+      }
+    }
+    
+    // Fallback to other sources
+    if (!image) {
+      image = category.imageList?.[0] || match?.heroImage || "/acessts/placeholder.svg";
+    }
+
+    // Get proper category type for badge
+    let categoryType = "رخام";
+    if (normalizedTitle.includes('جرانيت')) {
+      categoryType = "جرانيت";
+    } else if (normalizedTitle.includes('كوارتز')) {
+      categoryType = "كوارتز";
+    } else if (normalizedTitle.includes('نحت')) {
+      categoryType = "نحت";
+    }
+
+    return { title, description, image, slug, categoryType };
   };
 
   return (
@@ -657,16 +880,23 @@ function MarbleInfoContent() {
                   <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {categories.map((category) => {
                       const meta = getCategoryDisplay(category);
+                      const cardKey = category._id || category.key || category.title;
+                      const isExpanded = expandedCategoryKey === cardKey;
                       return (
-                        <CategoryCard
-                          key={category._id || category.key || category.title}
+                        <ExpandableCategoryCard
+                          key={cardKey}
+                          id={cardKey}
                           title={meta.title}
                           description={meta.description}
                           image={meta.image}
-                          marbleType={meta.title}
-                          detailsLabel="تفاصيل أكثر"
+                          badge={meta.categoryType || meta.title}
+                          expanded={isExpanded}
+                          onToggle={() =>
+                            setExpandedCategoryKey((prev) =>
+                              prev === cardKey ? null : cardKey
+                            )
+                          }
                           onDetailsClick={() => handleCategoryClick(category)}
-                          orderLabel="اطلب الآن"
                           onOrderClick={() =>
                             router.push(
                               `/products?category=${encodeURIComponent(meta.title)}`

@@ -17,12 +17,13 @@ interface CategoriesGridProps {
 }
 
 const categoryImages: Record<string, string> = {
-  "جرانيت مستورد": "/categories/1.jpg",
-  "جرانيت مصرى": "/categories/2.jpg",
-  "رخام مستورد": "/categories/3.jpg",
-  "رخام مصرى": "/categories/5.jpg",
-  "كوارتز": "/categories/4.jpg",
-  "رخام مصنع": "/categories/6.jpg",
+  "جرانيت مستورد": "/categories/جرانيت مستورد.jpeg",
+  "جرانيت مصرى": "/categories/جرانيت مصري.jpeg",
+  "رخام مستورد": "/categories/رخام مستورد.jpeg",
+  "رخام مصرى": "/categories/رخام مصري.jpeg",
+  "كوارتز": "/categories/كوارتز.jpeg",
+  "رخام مصنع": "/categories/رخام صناعي.jpeg",
+  "اعمال النحت": "/categories/اعمال نحت.jpeg",
 };
 
 const CATEGORY_FALLBACKS: Record<string, string> = {
@@ -32,11 +33,13 @@ const CATEGORY_FALLBACKS: Record<string, string> = {
   "رخام مصرى": "رخام مصري عالي الجودة",
   "كوارتز": "كوارتز عملي ولمسات عصرية",
   "رخام مصنع": "رخام مصنع بتكلفة اقتصادية",
+  "اعمال النحت": "أعمال نحت احترافية وفنية",
 };
 
-const getCategoryType = (name: string): "رخام" | "جرانيت" | "كوارتز" => {
+const getCategoryType = (name: string): "رخام" | "جرانيت" | "كوارتز" | "نحت" => {
   if (name.includes("جرانيت")) return "جرانيت";
   if (name.includes("كوارتز")) return "كوارتز";
+  if (name.includes("نحت")) return "نحت";
   return "رخام";
 };
 
