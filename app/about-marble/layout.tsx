@@ -1,22 +1,18 @@
-import { generateSEO } from "../../config/seo.config";
+import { generateSEO } from "@/config/seo.config";
 
 export const metadata = generateSEO({
-  title: "انواع الرخام المصري | مميزات الرخام الطبيعي",
+  title: "أنواع الرخام في مصر | شق التعبان",
   description:
-    "تعرف على انواع الرخام المصري ومميزات الرخام الطبيعي وعيوب الرخام الصناعي مع معلومات تساعدك تختار افضل رخام للمطبخ والارضيات.",
+    "تعرف على أنواع الرخام في مصر ومميزاته واستخداماته مع مقارنة الرخام والجرانيت ونصائح اختيار الرخام من شق التعبان بأسلوب مبسط.",
   keywords: [
-    "انواع الرخام المصري",
-    "مميزات الرخام الطبيعي",
-    "عيوب الرخام الصناعي",
+    "أنواع الرخام",
+    "رخام في مصر",
     "الفرق بين الرخام والجرانيت",
-    "افضل رخام للمطبخ",
-    "انهي رخام احسن للمطبخ",
-    "الرخام بيتخدش ولا لا",
-    "best marble for kitchen countertops",
-    "types of marble stone",
-    "granite vs marble durability",
+    "مميزات الرخام",
+    "رخام شق التعبان",
   ],
   url: "/about-marble",
+  type: "article",
 });
 
 export default function AboutMarbleLayout({

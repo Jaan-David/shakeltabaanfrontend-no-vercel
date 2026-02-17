@@ -1,9 +1,12 @@
+import Link from "next/link";
+import Script from "next/script";
 import { notFound } from "next/navigation";
 import ProductPage, { ProductData } from "@/_pages/ProductPage/ProductPage";
 import { fetchProductByIdISR } from "@/services/api/products";
 import { reviewService } from "@/services/api/reviews";
 
 import { canonicalBaseUrl, generateSEO, seoConfig } from "@/config/seo.config";
+import { marbleUseCategories } from "@/app/marble-uses/data";
 
 const buildProductKeywords = (product: any) => {
   const name = product?.name || product?.nameAr || "";
@@ -37,6 +40,62 @@ const buildProductDescription = (product: any) => {
   return `اشترِ ${name} ${category} من شق التعبان في مصر. رخام وجرانيت بجودة عالية وأسعار منافسة لمشاريعك.`.trim();
 };
 
+const detectMaterialType = (product: any) => {
+  const text = `${product?.name || ""} ${product?.nameAr || ""} ${
+    product?.category || ""
+  } ${product?.description || ""}`;
+
+  if (text.includes("جرانيت") || text.toLowerCase().includes("granite")) {
+    return "جرانيت";
+  }
+  if (text.includes("كوارتز") || text.toLowerCase().includes("quartz")) {
+    return "كوارتز";
+  }
+  return "رخام";
+};
+
+const buildProductMetaTitle = (product: any, fallbackId: string) => {
+  const name = product?.name || product?.nameAr || `منتج ${fallbackId}`;
+  const title = `سعر ${name} في مصر | شق التعبان`;
+  return title.length > 60 ? `${title.slice(0, 59)}…` : title;
+};
+
+const buildProductMetaDescription = (product: any, material: string) => {
+  const name = product?.name || product?.nameAr || "المنتج";
+  let description = `سعر ${name} من ${material} متاح في مصر عبر شق التعبان مع توريد موثوق وخيارات متعددة تناسب المشاريع السكنية والتجارية.`;
+
+  if (description.length < 140) {
+    description = `${description} اطلب عرض سعر الآن.`;
+  }
+
+  if (description.length > 160) {
+    description = `${description.slice(0, 157).trimEnd()}...`;
+  }
+
+  return description;
+};
+
+const buildProductFaqItems = (product: any, material: string) => {
+  const name = product?.name || product?.nameAr || "هذا المنتج";
+  return [
+    {
+      question: `ما سعر المتر من ${name} في مصر؟`,
+      answer:
+        `السعر يعتمد على المقاس والسُمك والمصدر. تواصل مع شق التعبان للحصول على سعر متر ${material} المناسب لمشروعك بدقة.`,
+    },
+    {
+      question: `ما أفضل استخدامات ${name}؟`,
+      answer:
+        `يُستخدم ${name} في الأرضيات والمطابخ والواجهات حسب درجة التحمل والصيانة المطلوبة، ويمكن لفريق شق التعبان ترشيح الاستخدام الأنسب.`,
+    },
+    {
+      question: `ما الفرق بين ${name} والبدائل الأخرى؟`,
+      answer:
+        `البدائل تختلف في المتانة ومقاومة البقع والتكلفة. مقارنة ${material} مع الجرانيت أو الكوارتز تساعدك على اختيار الأفضل حسب ميزانيتك.`,
+    },
+  ];
+};
+
 function getImageList(
   p?: { imageList?: string[]; images?: string[]; image?: string } | null
 ): string[] {
@@ -63,6 +122,48 @@ const toAbsoluteUrl = (value: string) => {
 };
 
 const stripUndefined = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
+
+const extractApiProduct = (res: any) => {
+  if (res?.data?.product) return res.data.product;
+  if (res?.data && (res.data._id || res.data.id)) return res.data;
+  if (res?.product) return res.product;
+  return null;
+};
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const decodedId = decodeURIComponent(id);
+
+  try {
+    const res = await fetchProductByIdISR(decodedId, 300);
+    const apiProduct = extractApiProduct(res);
+    const material = detectMaterialType(apiProduct);
+    const title = buildProductMetaTitle(apiProduct, decodedId);
+    const description = buildProductMetaDescription(apiProduct, material);
+
+    return generateSEO({
+      title,
+      description,
+      keywords: buildProductKeywords(apiProduct),
+      image: apiProduct?.image || apiProduct?.imageList?.[0],
+      url: `/product/${encodeURIComponent(decodedId)}`,
+      type: "product",
+    });
+  } catch {
+    const fallbackTitle = `سعر المنتج في مصر | شق التعبان`;
+    return generateSEO({
+      title: fallbackTitle.length > 60 ? `${fallbackTitle.slice(0, 59)}…` : fallbackTitle,
+      description:
+        "تعرف على سعر المنتج في مصر من شق التعبان مع خيارات توريد موثوقة ومقارنات تساعدك على اختيار الرخام أو الجرانيت المناسب.",
+      url: `/product/${encodeURIComponent(decodedId)}`,
+      type: "product",
+    });
+  }
+}
 
 export default async function ProductByIdPage({
   params,
@@ -103,21 +204,7 @@ export default async function ProductByIdPage({
       }
     }
 
-    // Extract product from different response formats
-    let apiProduct: any = null;
-    
-    // Format 1: { status: 'success', data: { product: {...} } }
-    if ((res as any)?.data?.product) {
-      apiProduct = (res as any).data.product;
-    }
-    // Format 2: { status: 'success', data: {...product fields} }
-    else if (res.data && (res.data._id || res.data.id)) {
-      apiProduct = res.data;
-    }
-    // Format 3: { product: {...} }
-    else if ((res as any)?.product) {
-      apiProduct = (res as any).product;
-    }
+    const apiProduct = extractApiProduct(res);
 
     if (!apiProduct) {
       return notFound();
@@ -193,6 +280,32 @@ export default async function ProductByIdPage({
     const absoluteImages = imageList.map((img) => toAbsoluteUrl(img));
     const priceValue = Number(apiProduct.price ?? 0);
     const hasPrice = Number.isFinite(priceValue) && priceValue > 0;
+    const materialType = detectMaterialType(apiProduct);
+    const faqItems = buildProductFaqItems(apiProduct, materialType);
+    const faqJsonLd = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: faqItems.map((item) => ({
+        "@type": "Question",
+        name: item.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: item.answer,
+        },
+      })),
+    };
+    const relatedUseCategories = marbleUseCategories
+      .filter((item) => {
+        const title = item.title;
+        if (materialType === "كوارتز") {
+          return title.includes("مطبخ") || title.includes("مطابخ");
+        }
+        if (materialType === "جرانيت") {
+          return title.includes("واجه") || title.includes("سلالم") || title.includes("أرضيات");
+        }
+        return title.includes("أرضيات") || title.includes("مداخل") || title.includes("حمامات");
+      })
+      .slice(0, 3);
 
     const brandName =
       typeof apiProduct.brand === "string" && apiProduct.brand.trim().length > 0
@@ -235,11 +348,74 @@ export default async function ProductByIdPage({
 
     return (
       <>
-        <script
+        <Script
+          id="product-jsonld"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
         />
+        <Script
+          id="product-faq-jsonld"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
         <ProductPage data={data} />
+        <section className="mx-auto w-full max-w-6xl px-4 py-12">
+          <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+              <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+                أسئلة شائعة عن سعر {data.title} في مصر
+              </h2>
+              <div className="mt-6 space-y-5">
+                {faqItems.map((item) => (
+                  <div
+                    key={item.question}
+                    className="border-b border-slate-100 pb-5 last:border-b-0 last:pb-0"
+                  >
+                    <h3 className="text-base font-semibold text-slate-900 sm:text-lg">
+                      {item.question}
+                    </h3>
+                    <p className="mt-2 text-sm text-slate-600 sm:text-base">
+                      {item.answer}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+              <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+                روابط مفيدة لاختيار {materialType}
+              </h2>
+              <ul className="mt-5 space-y-3 text-sm text-slate-600 sm:text-base">
+                <li>
+                  <Link
+                    href="/marble-info"
+                    className="font-semibold text-blue-700 hover:text-blue-600"
+                  >
+                    تعرف على أنواع الرخام والجرانيت والكوارتز في مصر
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href={`/products?category=${encodeURIComponent(materialType)}`}
+                    className="font-semibold text-blue-700 hover:text-blue-600"
+                  >
+                    تصفح منتجات {materialType} وأسعارها في مصر
+                  </Link>
+                </li>
+                {relatedUseCategories.map((item) => (
+                  <li key={item.id}>
+                    <Link
+                      href={`/marble-uses/${item.slug}`}
+                      className="font-semibold text-blue-700 hover:text-blue-600"
+                    >
+                      استخدامات {item.title} للمشاريع المختلفة
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
       </>
     );
   } catch (e: any) {
@@ -355,61 +531,3 @@ export default async function ProductByIdPage({
   }
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  const decodedId = decodeURIComponent(id);
-
-  try {
-    const res = await fetchProductByIdISR(decodedId, 300);
-    
-    // Check if the response indicates an error
-    if (res.status === "error") {
-      if (res.message?.includes("not found") || res.message?.includes("Product not found")) {
-        return generateSEO({
-          title: "منتج غير متوفر",
-          description: seoConfig.siteDescription,
-          keywords: seoConfig.defaultKeywords,
-          url: `/product/${decodedId}`,
-        });
-      }
-    }
-    
-    const apiProduct: any = (res as any)?.data?.product || (res as any)?.product || res.data;
-    if (!apiProduct || (!apiProduct._id && !apiProduct.id)) {
-      return generateSEO({
-        title: "منتج غير متوفر",
-        description: seoConfig.siteDescription,
-        keywords: seoConfig.defaultKeywords,
-        url: `/product/${decodedId}`,
-      });
-    }
-
-    const productName = apiProduct.name || apiProduct.nameAr || "منتج";
-    const title = `${productName} | رخام | جرانيت | شق التعبان | مصر`;
-    const description = apiProduct.description || apiProduct.descriptionAr || buildProductDescription(apiProduct);
-    const imageList = getImageList(apiProduct);
-    const image = imageList[0]
-      ? toAbsoluteUrl(imageList[0])
-      : `${getSiteUrl()}/acessts/NoImage.jpg`;
-
-    return generateSEO({
-      title,
-      description,
-      keywords: buildProductKeywords(apiProduct),
-      image,
-      url: `/product/${decodedId}`,
-      type: "product",
-    });
-  } catch {
-    return generateSEO({
-      title: "منتج غير متوفر",
-      description: seoConfig.siteDescription,
-      keywords: seoConfig.defaultKeywords,
-      url: `/product/${decodedId}`,
-    });
-  }
-}

@@ -1,3 +1,4 @@
+import Script from "next/script";
 import { Suspense } from "react";
 import ProductsPage from "@/_pages/ProductsPage/ProductsPage";
 import { canonicalBaseUrl, generateSEO } from "@/config/seo.config";
@@ -20,12 +21,18 @@ const stripUndefined = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
 
 export async function generateMetadata() {
   return generateSEO({
-    title: "رخام وجرانيت شق التعبان | مصر",
+    title: "رخام في مصر وأسعار الجرانيت | شق التعبان",
     description:
-      "تصفح رخام وجرانيت شق التعبان في مصر من موردين موثوقين للواجهات والمطابخ والمشاريع بأسعار تنافسية.",
+      "تصفح رخام مطابخ ورخام أرضيات وجرانيت واجهات من شق التعبان مع توريد رخام في مصر وأسعار تنافسية للمشاريع السكنية والتجارية.",
     keywords: [
       "رخام",
       "جرانيت",
+      "كوارتز",
+      "رخام مطابخ",
+      "رخام أرضيات",
+      "جرانيت واجهات",
+      "أسعار الجرانيت في مصر",
+      "توريد رخام في مصر",
       "شق التعبان",
       "رخام في مصر",
       "جرانيت في مصر",
@@ -87,12 +94,14 @@ export default async function ProductsRoutePage() {
 
   return (
     <>
-      <script
+      <Script
+        id="products-collection-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionPageJsonLd) }}
       />
       {itemListJsonLd ? (
-        <script
+        <Script
+          id="products-itemlist-jsonld"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
         />

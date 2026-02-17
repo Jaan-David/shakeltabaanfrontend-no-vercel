@@ -1,8 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useEffect, useMemo, useRef } from "react";
+import CategoryCard from "@/components/UI/CategoryCard/CategoryCard";
+import { marbleUseCategories } from "@/app/marble-uses/data";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
@@ -88,7 +90,20 @@ const renderLimitedList = (items?: string[], limit = 3) => {
 
 function MarbleInfoContent() {
   const router = useRouter();
-  const [categories, setCategories] = useState<MarbleCategory[]>([]);
+  const curatedUseCategories = useMemo<MarbleCategory[]>(
+    () =>
+      marbleUseCategories.map((item) => ({
+        _id: item.id,
+        key: item.slug,
+        title: item.title,
+        summary: item.description,
+        imageList: [item.heroImage],
+        isActive: true,
+      })),
+    []
+  );
+
+  const [categories, setCategories] = useState<MarbleCategory[]>(curatedUseCategories);
   const [selectedCategory, setSelectedCategory] =
     useState<MarbleCategory | null>(null);
   const [loadingCategories, setLoadingCategories] = useState(true);
@@ -97,9 +112,12 @@ function MarbleInfoContent() {
   const [typeQuery, setTypeQuery] = useState("");
   const [useQuery, setUseQuery] = useState("");
   const [showCategories, setShowCategories] = useState(true);
-  const [expandedTypeKeys, setExpandedTypeKeys] = useState<
-    Record<string, boolean>
-  >({});
+  const [activeType, setActiveType] = useState<MarbleTypeDetail | null>(null);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalLoading, setIsModalLoading] = useState(false);
+  const modalRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -109,11 +127,14 @@ function MarbleInfoContent() {
     if (!mounted) return;
 
     const fetchCategories = async () => {
+      let loadedFromApi = false;
+
       try {
         const data = await fetchFromBases("/categories");
         const listFromCategories = extractArray(data);
         if (listFromCategories.length > 0) {
           setCategories(listFromCategories);
+          loadedFromApi = true;
           return;
         }
 
@@ -121,16 +142,20 @@ function MarbleInfoContent() {
         const listFromFallback = extractArray(fallback);
         if (listFromFallback.length > 0) {
           setCategories(listFromFallback);
+          loadedFromApi = true;
         }
       } catch (error) {
         console.error("Error fetching marble categories:", error);
       } finally {
+        if (!loadedFromApi) {
+          setCategories(curatedUseCategories);
+        }
         setLoadingCategories(false);
       }
     };
 
     fetchCategories();
-  }, [mounted]);
+  }, [mounted, curatedUseCategories]);
 
   const fetchCategoryDetails = async (
     categoryKey: string,
@@ -192,11 +217,17 @@ function MarbleInfoContent() {
     setUseQuery("");
   };
 
-  const toggleTypeExpansion = (key: string) => {
-    setExpandedTypeKeys((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+  const openTypeDetails = (type: MarbleTypeDetail) => {
+    setActiveType(type);
+    setActiveImageIndex(0);
+    setIsModalLoading(true);
+    setIsModalOpen(true);
+  };
+
+  const closeTypeDetails = () => {
+    setIsModalOpen(false);
+    setActiveType(null);
+    setActiveImageIndex(0);
   };
 
   useEffect(() => {
@@ -215,46 +246,400 @@ function MarbleInfoContent() {
     return () => clearTimeout(handle);
   }, [selectedCategory, typeQuery, useQuery]);
 
+  useEffect(() => {
+    if (!isModalOpen) return;
+    const timeout = setTimeout(() => setIsModalLoading(false), 300);
+    return () => clearTimeout(timeout);
+  }, [isModalOpen]);
+
+  useEffect(() => {
+    if (!isModalOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeTypeDetails();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const modal = modalRef.current;
+      if (!modal) return;
+      const focusable = Array.from(
+        modal.querySelectorAll<HTMLElement>(
+          "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])"
+        )
+      ).filter((el) => !el.hasAttribute("disabled"));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    closeButtonRef.current?.focus();
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isModalOpen]);
+
+  const getCategoryDisplay = (category: MarbleCategory) => {
+    const match = marbleUseCategories.find(
+      (item) =>
+        item.slug === category.key ||
+        item.title === category.title ||
+        item.id === category._id
+    );
+
+    const normalize = (value?: string) => (value || "").toLowerCase();
+    const hasEgyptianWords = (value?: string) => {
+      const n = normalize(value);
+      return n.includes("رخام") && n.includes("مصر");
+    };
+
+    const egyptianSignals = [
+      "رخام مص",
+      "رخام مصري",
+      "رخام مصرى",
+      "الرخام المصري",
+      "الرخام المص",
+      "masry",
+      "masri",
+      "egypt",
+      "egyptian",
+    ];
+
+    const rawDescription =
+      category.summary ||
+      match?.description ||
+      match?.highlights?.[0] ||
+      "تعرف على تفاصيل كل فئة واستخداماتها.";
+
+    const isEgyptianMarble = [
+      match?.title,
+      category.title,
+      category.key,
+      match?.slug,
+      category.summary,
+    ].some((value) =>
+      egyptianSignals.some((signal) => normalize(value).includes(signal)) ||
+      hasEgyptianWords(value)
+    );
+
+    const description =
+      rawDescription.length > 120
+        ? `${rawDescription.slice(0, 117)}...`
+        : rawDescription;
+
+    const image =
+      (isEgyptianMarble ? "/categories/rokham10.jpeg" : undefined) ||
+      category.imageList?.[0] ||
+      match?.heroImage ||
+      "/acessts/placeholder.svg";
+
+    const slug = match?.slug || category.key || "";
+    const title = category.title || match?.title || "";
+
+    return { title, description, image, slug };
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] to-[#e2e8f0] py-16 px-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-slate-50 py-12 md:py-20">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-12">
-          <button
-            onClick={() => router.back()}
-            className="mb-6 inline-flex items-center gap-2 text-blue-600 hover:text-blue-500 transition-colors"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-            العودة
-          </button>
-          <h1 className="text-4xl md:text-5xl font-bold text-[#0f172a] mb-4">
-            معلومات عن الرخام والجرانيت
-          </h1>
-          <p className="text-xl text-[#475569]">
-            دليلك الشامل لاختيار أفضل أنواع الرخام والجرانيت
-          </p>
-        </div>
+        <section className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white/80 px-6 py-12 shadow-sm md:px-10 md:py-16">
+          <div
+            className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-slate-50"
+            aria-hidden="true"
+          />
+          <div
+            className="absolute -left-20 -top-20 h-56 w-56 rounded-full bg-blue-100/60 blur-3xl motion-safe:animate-pulse"
+            aria-hidden="true"
+          />
+          <div
+            className="absolute -bottom-24 -right-16 h-64 w-64 rounded-full bg-slate-200/60 blur-3xl"
+            aria-hidden="true"
+          />
+          <div className="relative text-center">
+            <p className="text-sm font-semibold text-blue-700">
+              دليل شق التعبان للرخام
+            </p>
+            <h1 className="mt-3 text-3xl font-bold text-slate-900 sm:text-4xl md:text-5xl">
+              دليلك الشامل لاختيار أنسب أنواع الرخام والجرانيت
+            </h1>
+            <p className="mt-4 text-base text-slate-600 sm:text-lg">
+              معلومات عن الرخام والجرانيت
+            </p>
+          </div>
+        </section>
 
         {/* Content Sections */}
         {!mounted ? (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-            <p className="text-[#475569] mt-4">جاري تحميل...</p>
+            <div className="inline-block h-12 w-12 animate-spin rounded-full border-b-2 border-blue-500"></div>
+            <p className="mt-4 text-slate-600">جاري تحميل...</p>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-12 md:space-y-20">
+            {/* How to Choose Guide Section */}
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 sm:p-8 md:p-10">
+              <div className="mb-10 text-center">
+                <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl md:text-4xl">
+                  كيفية اختيار الفئة المناسبة
+                </h2>
+                <p className="mt-3 text-base text-slate-600 sm:text-lg">
+                  اتبع هذه الخطوات البسيطة لاختيار نوع الرخام الذي يناسب احتياجاتك
+                </p>
+              </div>
+
+              <div className="relative grid gap-6 sm:grid-cols-2 lg:grid-cols-5 lg:gap-4 lg:before:absolute lg:before:inset-x-6 lg:before:top-8 lg:before:h-px lg:before:bg-slate-200">
+                {/* Step 1 */}
+                <div className="relative z-10 flex h-full flex-col items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-5 text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-xl font-bold text-white">
+                    1
+                  </div>
+                  <h3 className="text-base font-semibold text-slate-900 sm:text-lg">
+                    حدد المكان
+                  </h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    هل تريد رخاماً للأرضيات، المطبخ، الحمام، أم السلالم؟
+                  </p>
+                </div>
+
+                {/* Step 2 */}
+                <div className="relative z-10 flex h-full flex-col items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-5 text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-xl font-bold text-white">
+                    2
+                  </div>
+                  <h3 className="text-base font-semibold text-slate-900 sm:text-lg">
+                    اختر النوع
+                  </h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    طبيعي أم صناعي؟ كل نوع له مميزاته وأسعاره
+                  </p>
+                </div>
+
+                {/* Step 3 */}
+                <div className="relative z-10 flex h-full flex-col items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-5 text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-xl font-bold text-white">
+                    3
+                  </div>
+                  <h3 className="text-base font-semibold text-slate-900 sm:text-lg">
+                    حدد اللون
+                  </h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    فاتح يعطي اتساعاً، غامق يعكس فخامة وقوة
+                  </p>
+                </div>
+
+                {/* Step 4 */}
+                <div className="relative z-10 flex h-full flex-col items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-5 text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-xl font-bold text-white">
+                    4
+                  </div>
+                  <h3 className="text-base font-semibold text-slate-900 sm:text-lg">
+                    قارن الأسعار
+                  </h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    أسعار متنوعة لتناسب جميع الميزانيات
+                  </p>
+                </div>
+
+                {/* Step 5 */}
+                <div className="relative z-10 flex h-full flex-col items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-5 text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-xl font-bold text-white">
+                    5
+                  </div>
+                  <h3 className="text-base font-semibold text-slate-900 sm:text-lg">
+                    اطلب الآن
+                  </h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    تواصل معنا للحصول على أفضل الخدمات
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* Marble Uses Categories Grid */}
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 sm:p-8 md:p-10">
+              <h2 className="flex items-center gap-3 text-2xl font-semibold text-slate-900 sm:text-3xl">
+                <span className="text-3xl" aria-hidden="true">
+                  🏢
+                </span>
+                تصنيفات استخدام الرخام
+              </h2>
+              
+              <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+                {marbleUseCategories.map((category) => (
+                  <CategoryCard
+                    key={category.id}
+                    title={category.title}
+                    description={category.description}
+                    image={category.heroImage}
+                    href={`/marble-uses/${category.slug}`}
+                    marbleType={category.title}
+                    onOrderClick={() => router.push(`/inquiries?marbleType=${encodeURIComponent(category.title)}`)}
+                  />
+                ))}
+              </div>
+            </section>
+
+            {/* Comprehensive Comparison Table */}
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 sm:p-8 md:p-10">
+              <h2 className="flex items-center gap-3 text-2xl font-semibold text-slate-900 sm:text-3xl">
+                <span className="text-3xl" aria-hidden="true">
+                  📊
+                </span>
+                مقارنة شاملة بين أنواع الرخام والجرانيت
+              </h2>
+              <p className="mt-3 text-base text-slate-600 sm:text-lg">
+                مقارنة تفصيلية لمساعدتك على اختيار النوع المناسب حسب الاستخدام والميزانية
+              </p>
+
+              {/* Table */}
+              <div className="mt-8 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+                <table className="w-full min-w-[720px] border-collapse text-xs sm:text-sm">
+                  <thead>
+                    <tr className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+                      <th className="sticky top-0 z-10 border border-blue-500/30 bg-blue-600 p-3 text-right font-bold sm:p-4">
+                        النوع
+                      </th>
+                      <th className="sticky top-0 z-10 border border-blue-500/30 bg-blue-600 p-3 text-right font-bold sm:p-4">
+                        المتانة
+                      </th>
+                      <th className="sticky top-0 z-10 border border-blue-500/30 bg-blue-600 p-3 text-right font-bold sm:p-4">
+                        مقاومة البقع
+                      </th>
+                      <th className="sticky top-0 z-10 border border-blue-500/30 bg-blue-600 p-3 text-right font-bold sm:p-4">
+                        مقاومة الحرارة
+                      </th>
+                      <th className="sticky top-0 z-10 border border-blue-500/30 bg-blue-600 p-3 text-right font-bold sm:p-4">
+                        الصيانة
+                      </th>
+                      <th className="sticky top-0 z-10 border border-blue-500/30 bg-blue-600 p-3 text-right font-bold sm:p-4">
+                        الاستخدامات
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-sm">
+                    {/* Quartzite */}
+                    <tr className="bg-emerald-50/60 transition-colors hover:bg-emerald-100/70">
+                      <td className="border border-slate-200 p-3 font-bold text-slate-900 sm:p-4">كوارتز (صناعي)</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">⭐⭐⭐⭐⭐ ممتازة</td>
+                      <td className="border border-slate-200 p-3 font-bold text-emerald-700 sm:p-4">✓ ممتازة</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">⭐⭐⭐⭐⭐</td>
+                      <td className="border border-slate-200 p-3 text-emerald-700 sm:p-4">سهلة جداً</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">أرضيات✓ مطابخ✓ حمامات✓</td>
+                    </tr>
+
+                    {/* Granite Egyptian */}
+                    <tr className="odd:bg-slate-50 transition-colors hover:bg-blue-50/60">
+                      <td className="border border-slate-200 p-3 font-bold text-slate-900 sm:p-4">جرانيت مصري</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">⭐⭐⭐⭐⭐ ممتازة</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">⭐⭐⭐⭐ وسيط</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">⭐⭐⭐⭐⭐</td>
+                      <td className="border border-slate-200 p-3 text-orange-700 sm:p-4">معالجة دورية</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">أرضيات✓ مطابخ✓ سلالم✓</td>
+                    </tr>
+
+                    {/* Granite Imported */}
+                    <tr className="even:bg-white transition-colors hover:bg-blue-50/60">
+                      <td className="border border-slate-200 p-3 font-bold text-slate-900 sm:p-4">جرانيت مستورد</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">⭐⭐⭐⭐⭐ ممتازة</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">⭐⭐⭐⭐⭐ ممتازة</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">⭐⭐⭐⭐⭐</td>
+                      <td className="border border-slate-200 p-3 text-orange-700 sm:p-4">معالجة دورية</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">أرضيات✓ مطابخ✓ سلالم✓</td>
+                    </tr>
+
+                    {/* Marble Natural Egyptian */}
+                    <tr className="odd:bg-slate-50 transition-colors hover:bg-blue-50/60">
+                      <td className="border border-slate-200 p-3 font-bold text-slate-900 sm:p-4">رخام طبيعي مصري</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">⭐⭐⭐ جيدة</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">⭐⭐ ضعيفة</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">⭐⭐⭐⭐</td>
+                      <td className="border border-slate-200 p-3 text-red-700 sm:p-4">صيانة مكثفة</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">أرضيات✓ حمامات✓</td>
+                    </tr>
+
+                    {/* Marble Natural Imported */}
+                    <tr className="even:bg-white transition-colors hover:bg-blue-50/60">
+                      <td className="border border-slate-200 p-3 font-bold text-slate-900 sm:p-4">رخام طبيعي مستورد</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">⭐⭐⭐⭐ قوية</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">⭐⭐ ضعيفة</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">⭐⭐⭐⭐</td>
+                      <td className="border border-slate-200 p-3 text-red-700 sm:p-4">صيانة مكثفة</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">أرضيات✓ حمامات✓</td>
+                    </tr>
+
+                    {/* Artificial Marble */}
+                    <tr className="odd:bg-slate-50 transition-colors hover:bg-blue-50/60">
+                      <td className="border border-slate-200 p-3 font-bold text-slate-900 sm:p-4">رخام صناعي</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">⭐⭐⭐⭐ قوية</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">⭐⭐⭐⭐ جيدة</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">⭐⭐⭐⭐</td>
+                      <td className="border border-slate-200 p-3 text-emerald-700 sm:p-4">سهلة</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">أرضيات✓ مطابخ✓ حمامات✓</td>
+                    </tr>
+
+                    {/* Terrazzo */}
+                    <tr className="even:bg-white transition-colors hover:bg-blue-50/60">
+                      <td className="border border-slate-200 p-3 font-bold text-slate-900 sm:p-4">تيرازو (صناعي)</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">⭐⭐⭐⭐ قوية</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">⭐⭐⭐⭐ جيدة</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">⭐⭐⭐⭐</td>
+                      <td className="border border-slate-200 p-3 text-emerald-700 sm:p-4">سهلة</td>
+                      <td className="border border-slate-200 p-3 sm:p-4">أرضيات✓ مطابخ✓ حمامات✓</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Key Insights */}
+              <div className="mt-10 grid gap-6 md:grid-cols-2">
+                <div className="flex gap-4 rounded-xl border border-emerald-200 bg-emerald-50/60 p-6 text-emerald-900">
+                  <span
+                    className="mt-1 inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-lg"
+                    aria-hidden="true"
+                  >
+                    ✓
+                  </span>
+                  <div>
+                    <h3 className="text-lg font-bold">أفضل الخيارات</h3>
+                    <ul className="mt-3 space-y-2 text-sm leading-relaxed text-emerald-800">
+                      <li>• <strong>للمطابخ:</strong> الكوارتز (أفضل مقاومة وأقل صيانة)</li>
+                      <li>• <strong>للأرضيات:</strong> الجرانيت الطبيعي (متانة + سعر جيد)</li>
+                      <li>• <strong>للحمامات:</strong> الكوارتز أو الكوارتز (مقاومة للرطوبة)</li>
+                      <li>• <strong>للسلالم:</strong> الجرانيت (متانة عالية جداً)</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 rounded-xl border border-orange-200 bg-orange-50/70 p-6 text-orange-900">
+                  <span
+                    className="mt-1 inline-flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 text-lg"
+                    aria-hidden="true"
+                  >
+                    !
+                  </span>
+                  <div>
+                    <h3 className="text-lg font-bold">ملاحظات مهمة</h3>
+                    <ul className="mt-3 space-y-2 text-sm leading-relaxed text-orange-800">
+                      <li>• الرخام الطبيعي يحتاج صيانة دورية (معالجة بالسيلر)</li>
+                      <li>• الأنواع الفاتحة أكثر عرضة للتبقع من الداكنة</li>
+                      <li>• الكوارتز غير مسامي لا يمتص السوائل</li>
+                      <li>• الأسعار تختلف حسب الجودة والمصدر</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </section>
+
             {/* Categories & Types */}
             <div className="bg-white rounded-2xl p-8 border border-[#cbd5f5] transition-all hover:border-[#3b82f6] hover:shadow-[0_12px_30px_rgba(59,130,246,0.15)] hover:-translate-y-1">
               <h2 className="text-3xl font-semibold text-[#0f172a] mb-6 flex items-center gap-3">
@@ -269,62 +654,27 @@ function MarbleInfoContent() {
                     <p className="text-[#475569] mt-4">جاري تحميل التصنيفات...</p>
                   </div>
                 ) : (
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {categories.map((category) => (
-                      <button
-                        key={category._id}
-                        onClick={() => handleCategoryClick(category)}
-                        className={`text-right bg-white rounded-xl p-6 border border-[#cbd5f5] transition-all hover:border-[#3b82f6] hover:shadow-[0_10px_24px_rgba(59,130,246,0.15)] hover:-translate-y-1 ${
-                          selectedCategory?.key === category.key
-                            ? "ring-2 ring-blue-500/60"
-                            : ""
-                        }`}
-                      >
-                        {category.imageList && category.imageList.length > 0 ? (
-                          <div className="mb-4 overflow-hidden rounded-lg border border-[#cbd5f5]">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={category.imageList[0]}
-                              alt={category.title}
-                              className="w-full h-40 object-cover"
-                              loading="lazy"
-                            />
-                          </div>
-                        ) : null}
-                        <h3 className="text-xl font-bold text-[#1e293b] mb-2">
-                          {category.title}
-                        </h3>
-                        <p className="text-[#475569] mb-4 text-sm line-clamp-2">
-                          {category.summary || ""}
-                        </p>
-                        <div className="flex flex-wrap gap-2 text-xs mb-4">
-                          {formatPriceRange(category.moneyRange) && (
-                            <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                              {formatPriceRange(category.moneyRange)}
-                            </span>
-                          )}
-                          {typeof category.types?.length === "number" && (
-                            <span className="px-2.5 py-1 rounded-full bg-slate-50 text-slate-600 border border-slate-200">
-                              الأنواع: {category.types.length}
-                            </span>
-                          )}
-                        </div>
-                        {renderLimitedList(category.advantages, 2) && (
-                          <div className="text-sm text-[#475569]">
-                            <p className="font-semibold text-[#1e293b] mb-1">
-                              مميزات
-                            </p>
-                            <ul className="list-disc list-inside space-y-1">
-                              {renderLimitedList(category.advantages, 2)?.map(
-                                (adv) => (
-                                  <li key={adv}>{adv}</li>
-                                )
-                              )}
-                            </ul>
-                          </div>
-                        )}
-                      </button>
-                    ))}
+                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {categories.map((category) => {
+                      const meta = getCategoryDisplay(category);
+                      return (
+                        <CategoryCard
+                          key={category._id || category.key || category.title}
+                          title={meta.title}
+                          description={meta.description}
+                          image={meta.image}
+                          marbleType={meta.title}
+                          detailsLabel="تفاصيل أكثر"
+                          onDetailsClick={() => handleCategoryClick(category)}
+                          orderLabel="اطلب الآن"
+                          onOrderClick={() =>
+                            router.push(
+                              `/products?category=${encodeURIComponent(meta.title)}`
+                            )
+                          }
+                        />
+                      );
+                    })}
                   </div>
                 )
               ) : (
@@ -394,259 +744,261 @@ function MarbleInfoContent() {
                       <p className="text-[#475569] mt-4">جاري تحميل الأنواع...</p>
                     </div>
                   ) : (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {(selectedCategory?.types || []).map((type, index) => {
-                        const typeKey = `${selectedCategory?.key || "category"}-${type.name}-${index}`;
-                        const isExpanded = !!expandedTypeKeys[typeKey];
-                        return (
-                          <div
-                            key={typeKey}
-                            className="bg-white rounded-xl p-6 border border-[#cbd5f5] transition-all hover:border-[#3b82f6] hover:shadow-[0_12px_30px_rgba(59,130,246,0.15)] hover:-translate-y-1"
-                          >
-                            {type.imageList && type.imageList.length > 0 ? (
-                              <div className="mb-4 overflow-hidden rounded-lg border border-[#cbd5f5]">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
-                                  src={type.imageList[0]}
-                                  alt={type.name}
-                                  className="w-full h-40 object-cover"
-                                  loading="lazy"
-                                />
-                              </div>
-                            ) : null}
-                            <h4 className="text-lg font-bold text-[#1e293b] mb-2">
-                              {type.name}
-                            </h4>
-                            <p
-                              className={`text-[#475569] text-sm mb-3 ${
-                                isExpanded ? "" : "line-clamp-3"
-                              }`}
+                    <>
+                      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        {(selectedCategory?.types || []).map((type, index) => {
+                          const typeKey = `${selectedCategory?.key || "category"}-${type.name}-${index}`;
+                          return (
+                            <article
+                              key={typeKey}
+                              className="group flex h-full min-h-[380px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-md"
                             >
-                              {type.description || ""}
-                            </p>
-                            <div className="space-y-3 mb-3">
-                              {type.colors && type.colors.length > 0 && (
-                                <div>
-                                  <p className="text-xs font-semibold text-[#1e293b] mb-1">
-                                    الألوان
-                                  </p>
-                                  <div className="flex flex-wrap gap-2">
-                                    {(isExpanded
-                                      ? type.colors
-                                      : type.colors.slice(0, 4)
-                                    ).map((color, colorIndex) => (
-                                      <span
-                                        key={`${color}-${colorIndex}`}
-                                        className="px-2.5 py-1 text-xs rounded-full bg-slate-50 text-slate-600 border border-slate-200"
-                                      >
-                                        {color}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                              {type.idealUses && type.idealUses.length > 0 ? (
-                                <div>
-                                  <p className="text-xs font-semibold text-[#1e293b] mb-1">
-                                    الاستخدامات
-                                  </p>
-                                  <div className="flex flex-wrap gap-2">
-                                    {(isExpanded
-                                      ? type.idealUses
-                                      : type.idealUses.slice(0, 4)
-                                    ).map((use) => (
-                                      <span
-                                        key={use}
-                                        className="px-2.5 py-1 text-xs rounded-full bg-blue-50 text-blue-700 border border-blue-200"
-                                      >
-                                        {use}
-                                      </span>
-                                    ))}
-                                  </div>
+                              {type.imageList && type.imageList.length > 0 ? (
+                                <div className="relative h-44 w-full overflow-hidden border-b border-slate-200">
+                                  <Image
+                                    src={type.imageList[0]}
+                                    alt={`صورة ${type.name} من شق التعبان`}
+                                    width={800}
+                                    height={520}
+                                    sizes="(max-width: 768px) 100vw, 800px"
+                                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                    unoptimized
+                                  />
                                 </div>
                               ) : null}
+
+                              <div className="flex flex-1 flex-col p-6">
+                                <div>
+                                  <h4 className="text-lg font-semibold text-slate-900">
+                                    {type.name}
+                                  </h4>
+                                  <p className="mt-2 line-clamp-1 text-sm text-slate-600">
+                                    {type.description || ""}
+                                  </p>
+                                </div>
+
+                                <div className="mt-4 flex flex-wrap gap-2">
+                                  {(type.colors || []).slice(0, 1).map((color, colorIndex) => (
+                                    <span
+                                      key={`${color}-${colorIndex}`}
+                                      className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-600"
+                                    >
+                                      {color}
+                                    </span>
+                                  ))}
+                                  {(type.idealUses || []).slice(0, 2).map((use) => (
+                                    <span
+                                      key={use}
+                                      className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs text-blue-700"
+                                    >
+                                      {use}
+                                    </span>
+                                  ))}
+                                </div>
+
+                                <div className="mt-auto pt-5">
+                                  <button
+                                    onClick={() => openTypeDetails(type)}
+                                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                  >
+                                    عرض التفاصيل
+                                  </button>
+                                </div>
+                              </div>
+                            </article>
+                          );
+                        })}
+                        {(selectedCategory?.types || []).length === 0 && (
+                          <div className="col-span-full text-center py-10">
+                            <p className="text-[#475569]">
+                              لا توجد أنواع مطابقة للفلاتر الحالية
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div
+                        className={`fixed inset-0 z-50 ${
+                          isModalOpen ? "pointer-events-auto" : "pointer-events-none"
+                        }`}
+                        aria-hidden={!isModalOpen}
+                      >
+                        <button
+                          className={`absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 ${
+                            isModalOpen ? "opacity-100" : "opacity-0"
+                          }`}
+                          onClick={closeTypeDetails}
+                          aria-label="إغلاق التفاصيل"
+                        />
+                        <div
+                          className={`relative flex h-full items-end justify-center px-4 pb-4 pt-16 transition-all duration-300 sm:items-start sm:pb-10 sm:pt-10 ${
+                            isModalOpen ? "opacity-100" : "opacity-0"
+                          }`}
+                        >
+                          <div
+                            ref={modalRef}
+                            role="dialog"
+                            aria-modal="true"
+                            className={`w-full transform rounded-3xl border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.25)] transition-all duration-300 sm:mx-auto sm:max-h-[90vh] sm:w-[min(80vw,1100px)] ${
+                              isModalOpen
+                                ? "translate-y-0 scale-100 sm:translate-y-0 sm:scale-100"
+                                : "translate-y-full scale-100 sm:-translate-y-10 sm:scale-95"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+                              <div>
+                                <p className="text-xs font-semibold text-blue-600">تفاصيل النوع</p>
+                                <h4 className="mt-1 text-xl font-semibold text-slate-900">
+                                  {activeType?.name || ""}
+                                </h4>
+                              </div>
+                              <button
+                                ref={closeButtonRef}
+                                onClick={closeTypeDetails}
+                                className="rounded-full border border-slate-200 p-2 text-slate-500 transition hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                aria-label="إغلاق"
+                              >
+                                <svg
+                                  viewBox="0 0 20 20"
+                                  fill="currentColor"
+                                  className="h-4 w-4"
+                                  aria-hidden="true"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M4.22 4.22a.75.75 0 0 1 1.06 0L10 8.94l4.72-4.72a.75.75 0 1 1 1.06 1.06L11.06 10l4.72 4.72a.75.75 0 1 1-1.06 1.06L10 11.06l-4.72 4.72a.75.75 0 0 1-1.06-1.06L8.94 10 4.22 5.28a.75.75 0 0 1 0-1.06z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              </button>
                             </div>
-                            {isExpanded && (
-                              <>
-                                <div className="grid grid-cols-1 gap-3 text-sm text-[#475569]">
-                                  {renderLimitedList(
-                                    type.advantages,
-                                    type.advantages?.length || 0
-                                  ) && (
+
+                            <div className="max-h-[80vh] overflow-y-auto px-6 pb-6 pt-5 sm:max-h-[75vh]">
+                              {isModalLoading ? (
+                                <div className="space-y-6">
+                                  <div className="h-60 w-full animate-pulse rounded-2xl bg-slate-100" />
+                                  <div className="grid gap-3 sm:grid-cols-2">
+                                    <div className="h-24 rounded-xl bg-slate-100 animate-pulse" />
+                                    <div className="h-24 rounded-xl bg-slate-100 animate-pulse" />
+                                  </div>
+                                  <div className="h-20 rounded-xl bg-slate-100 animate-pulse" />
+                                </div>
+                              ) : (
+                                <div className="space-y-6">
+                                  {activeType?.imageList && activeType.imageList.length > 0 && (
                                     <div>
-                                      <p className="font-semibold text-[#1e293b] mb-1">
-                                        مميزات
-                                      </p>
-                                      <ul className="list-disc list-inside space-y-1">
-                                        {renderLimitedList(
-                                          type.advantages,
-                                          type.advantages?.length || 0
-                                        )?.map((adv) => (
-                                          <li key={adv}>{adv}</li>
+                                      <Image
+                                        src={activeType.imageList[activeImageIndex]}
+                                        alt={`صورة ${activeType.name} من شق التعبان`}
+                                        width={1200}
+                                        height={720}
+                                        sizes="(max-width: 768px) 100vw, 1200px"
+                                        className="h-60 w-full rounded-2xl object-cover transition-all duration-300"
+                                        unoptimized
+                                      />
+                                      {activeType.imageList.length > 1 && (
+                                        <div className="mt-4 grid grid-cols-4 gap-3 sm:grid-cols-6">
+                                          {activeType.imageList.slice(0, 6).map((img, imgIndex) => (
+                                            <button
+                                              key={`${img}-${imgIndex}`}
+                                              onClick={() => setActiveImageIndex(imgIndex)}
+                                              className={`overflow-hidden rounded-xl border transition ${
+                                                imgIndex === activeImageIndex
+                                                  ? "border-blue-500 ring-2 ring-blue-200"
+                                                  : "border-slate-200 hover:border-blue-200"
+                                              }`}
+                                              aria-label={`عرض الصورة ${imgIndex + 1}`}
+                                            >
+                                              <Image
+                                                src={img}
+                                                alt={`${activeType.name} صورة ${imgIndex + 1}`}
+                                                width={160}
+                                                height={160}
+                                                sizes="160px"
+                                                className="h-16 w-full object-cover"
+                                                unoptimized
+                                              />
+                                            </button>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  <div className="grid gap-6 lg:grid-cols-2">
+                                    {activeType?.description && (
+                                      <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5">
+                                        <p className="text-sm font-semibold text-slate-900">الوصف</p>
+                                        <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                                          {activeType.description}
+                                        </p>
+                                      </div>
+                                    )}
+                                    {activeType?.care && (
+                                      <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5">
+                                        <p className="text-sm font-semibold text-slate-900">العناية</p>
+                                        <p className="mt-2 text-sm text-slate-600">
+                                          {activeType.care}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="grid gap-6 lg:grid-cols-2">
+                                    {activeType?.advantages && activeType.advantages.length > 0 && (
+                                      <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-5">
+                                        <p className="text-sm font-semibold text-emerald-900">المميزات</p>
+                                        <ul className="mt-3 list-disc list-inside space-y-1 text-sm text-emerald-800">
+                                          {activeType.advantages.map((adv) => (
+                                            <li key={adv}>{adv}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                    {activeType?.disadvantages && activeType.disadvantages.length > 0 && (
+                                      <div className="rounded-2xl border border-orange-200 bg-orange-50/70 p-5">
+                                        <p className="text-sm font-semibold text-orange-900">العيوب</p>
+                                        <ul className="mt-3 list-disc list-inside space-y-1 text-sm text-orange-800">
+                                          {activeType.disadvantages.map((dis) => (
+                                            <li key={dis}>{dis}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {activeType?.howToCheck && activeType.howToCheck.length > 0 && (
+                                    <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                                      <p className="text-sm font-semibold text-slate-900">كيف تتحقق؟</p>
+                                      <ul className="mt-3 list-disc list-inside space-y-1 text-sm text-slate-600">
+                                        {activeType.howToCheck.map((check) => (
+                                          <li key={check}>{check}</li>
                                         ))}
                                       </ul>
                                     </div>
                                   )}
-                                  {renderLimitedList(
-                                    type.disadvantages,
-                                    type.disadvantages?.length || 0
-                                  ) && (
-                                    <div>
-                                      <p className="font-semibold text-[#1e293b] mb-1">
-                                        عيوب
+
+                                  {activeType?.moneyRange && (
+                                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4">
+                                      <p className="text-sm font-semibold text-emerald-700">
+                                        {formatPriceRange(activeType.moneyRange)}
                                       </p>
-                                      <ul className="list-disc list-inside space-y-1">
-                                        {renderLimitedList(
-                                          type.disadvantages,
-                                          type.disadvantages?.length || 0
-                                        )?.map((dis) => (
-                                          <li key={dis}>{dis}</li>
-                                        ))}
-                                      </ul>
                                     </div>
                                   )}
                                 </div>
-                                {renderLimitedList(
-                                  type.howToCheck,
-                                  type.howToCheck?.length || 0
-                                ) && (
-                                  <div className="mt-3 text-sm text-[#475569]">
-                                    <p className="font-semibold text-[#1e293b] mb-1">
-                                      كيف تتحقق؟
-                                    </p>
-                                    <ul className="list-disc list-inside space-y-1">
-                                      {renderLimitedList(
-                                        type.howToCheck,
-                                        type.howToCheck?.length || 0
-                                      )?.map((check) => (
-                                        <li key={check}>{check}</li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                )}
-                                {type.care && (
-                                  <p className="mt-3 text-sm text-[#475569]">
-                                    <span className="font-semibold text-[#1e293b]">
-                                      العناية:
-                                    </span>{" "}
-                                    {type.care}
-                                  </p>
-                                )}
-                              </>
-                            )}
-                            {type.moneyRange ? (
-                              <p className="text-emerald-600 text-sm font-semibold mt-3">
-                                {formatPriceRange(type.moneyRange)}
-                              </p>
-                            ) : null}
-                            {(type.description ||
-                              type.colors?.length ||
-                              type.idealUses?.length ||
-                              type.advantages?.length ||
-                              type.disadvantages?.length ||
-                              type.howToCheck?.length ||
-                              type.care) && (
-                              <button
-                                onClick={() => toggleTypeExpansion(typeKey)}
-                                className="mt-4 text-sm font-semibold text-blue-600 hover:text-blue-500 transition-colors"
-                              >
-                                {isExpanded ? "عرض أقل" : "عرض المزيد"}
-                              </button>
-                            )}
+                              )}
+                            </div>
                           </div>
-                        );
-                      })}
-                      {(selectedCategory?.types || []).length === 0 && (
-                        <div className="col-span-full text-center py-10">
-                          <p className="text-[#475569]">
-                            لا توجد أنواع مطابقة للفلاتر الحالية
-                          </p>
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    </>
                   )}
                 </div>
               )}
             </div>
 
-            {/* Section 1 */}
-            <div className="bg-[#eff6ff] rounded-2xl p-8 border border-[#3b82f6] transition-all">
-              <h2 className="text-3xl font-semibold text-[#1e40af] mb-4 flex items-center gap-3">
-                <span className="text-4xl">💎</span>
-                ما هو الرخام؟
-              </h2>
-              <p className="text-[#475569] text-lg leading-relaxed">
-                الرخام هو صخر كلسي متحول، يتكون من الحجر الجيري الذي تعرض لدرجات
-                حرارة وضغط عاليين. يتميز الرخام بجماله الطبيعي وألوانه المتنوعة،
-                مما يجعله خياراً مثالياً للديكور الداخلي والخارجي.
-              </p>
-            </div>
-
-            {/* Section 2 */}
-            <div className="bg-white rounded-2xl p-8 border border-[#cbd5f5] transition-all hover:border-[#3b82f6] hover:shadow-[0_12px_30px_rgba(59,130,246,0.15)] hover:-translate-y-1">
-              <h2 className="text-3xl font-semibold text-[#0f172a] mb-4 flex items-center gap-3">
-                <span className="text-4xl">🏔️</span>
-                الفرق بين الرخام والجرانيت
-              </h2>
-              <div className="grid md:grid-cols-2 gap-6 text-[#475569] text-lg">
-                <div className="bg-white rounded-xl p-6 border border-[#cbd5f5]">
-                  <h3 className="text-2xl font-bold text-[#1e293b] mb-3">
-                    الرخام
-                  </h3>
-                  <ul className="space-y-2">
-                    <li>• صخر كلسي متحول</li>
-                    <li>• ألوان فاتحة وعروق واضحة</li>
-                    <li>• أقل صلابة من الجرانيت</li>
-                    <li>• مثالي للديكور الداخلي</li>
-                    <li>• يحتاج عناية منتظمة</li>
-                  </ul>
-                </div>
-                <div className="bg-white rounded-xl p-6 border border-[#cbd5f5]">
-                  <h3 className="text-2xl font-bold text-[#1e293b] mb-3">
-                    الجرانيت
-                  </h3>
-                  <ul className="space-y-2">
-                    <li>• صخر ناري بلوري</li>
-                    <li>• ألوان متنوعة ونقاط بلورية</li>
-                    <li>• أكثر صلابة ومتانة</li>
-                    <li>• مقاوم للخدش والحرارة</li>
-                    <li>• مناسب للمطابخ والأرضيات</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* Section 3 */}
-            <div className="bg-white rounded-2xl p-8 border border-[#cbd5f5] transition-all hover:border-[#3b82f6] hover:shadow-[0_12px_30px_rgba(59,130,246,0.15)] hover:-translate-y-1">
-              <h2 className="text-3xl font-semibold text-[#0f172a] mb-4 flex items-center gap-3">
-                <span className="text-4xl">🛠️</span>
-                نصائح للعناية بالرخام
-              </h2>
-              <ul className="space-y-3 text-[#475569] text-lg">
-                <li className="flex items-start gap-3">
-                  <span className="text-blue-600 text-xl">✓</span>
-                  <span>نظف السطح بقطعة قماش ناعمة ومنظف خاص بالرخام</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-blue-600 text-xl">✓</span>
-                  <span>تجنب استخدام المنظفات الحمضية (الخل، الليمون)</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-blue-600 text-xl">✓</span>
-                  <span>استخدم حماية (سيلر) كل 6-12 شهر</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-blue-600 text-xl">✓</span>
-                  <span>امسح السوائل المنسكبة فوراً لتجنب البقع</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-blue-600 text-xl">✓</span>
-                  <span>استخدم قواعد تحت الأكواب والأطباق الساخنة</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* CTA Section */}
+            {/* CTA Section */
+            /* Sections "What is Marble", "Difference between Marble and Granite", "Care Tips", "Detailed Guide" removed */ }
             <div className="bg-white rounded-2xl p-8 border border-[#cbd5f5] text-center transition-all hover:border-[#3b82f6] hover:shadow-[0_12px_30px_rgba(59,130,246,0.15)] hover:-translate-y-1">
               <h2 className="text-3xl font-semibold text-[#0f172a] mb-4">
                 جاهز لاختيار الرخام المثالي؟

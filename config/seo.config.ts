@@ -31,7 +31,7 @@ export const seoConfig = {
   images: {
     ogImage: '/og-image.jpg',
     twitterImage: '/twitter-image.jpg',
-    logo: '/logo1.png',
+    logo: '/logo/logo1.png',
     favicon: '/favicon.ico',
   },
   

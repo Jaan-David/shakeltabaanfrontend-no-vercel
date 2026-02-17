@@ -224,11 +224,11 @@ function HeroSection({
                 const baseButtonClass =
                   "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 w-full sm:w-auto min-h-[48px] px-6 sm:px-8 py-3 sm:py-4 whitespace-nowrap sm:min-w-[190px]";
                 const secondaryClass =
-                  `${baseButtonClass} bg-white/95 hover:bg-white text-blue-600 border border-blue-200 shadow-md hover:shadow-lg`;
+                  `${baseButtonClass} bg-white/95 hover:bg-white text-blue-600 hover:text-blue-700 border border-blue-200 shadow-md hover:shadow-lg`;
                 const primaryClass =
-                  `${baseButtonClass} bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl scale-[1.03] sm:scale-[1.06]`;
+                  `${baseButtonClass} bg-blue-600 hover:bg-blue-700 text-white hover:text-white shadow-lg hover:shadow-xl scale-[1.03] sm:scale-[1.06]`;
                 const tertiaryClass =
-                  `${baseButtonClass} bg-slate-100/80 hover:bg-white/90 text-slate-700 border border-slate-200 shadow-sm hover:shadow-md backdrop-blur-sm`;
+                  `${baseButtonClass} bg-slate-100/80 hover:bg-white/90 text-slate-700 hover:text-slate-800 border border-slate-200 shadow-sm hover:shadow-md backdrop-blur-sm`;
 
                 return (
                   <>

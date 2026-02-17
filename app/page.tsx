@@ -1,3 +1,4 @@
+import Script from "next/script";
 import HomePage from "@/_pages/HomePage/HomePage";
 
 import style from "./page.module.css";
@@ -13,15 +14,19 @@ const getSiteUrl = () =>
 const stripUndefined = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
 
 export const metadata = generateSEO({
-  title: "أفضل أنواع الرخام والجرانيت في مصر | منصة شق التعبان",
+  title: "رخام في مصر وجرانيت في مصر | شق التعبان",
   description:
-    "منصة شق التعبان تقدم أفضل أنواع الرخام والجرانيت الطبيعي في مصر. تصفح الرخام الأبيض والأسود وجرانيت المطابخ وأسعار الرخام في مصر.",
+    "اكتشف أفضل رخام في مصر وجرانيت في مصر وكوارتز للمطابخ من منصة شق التعبان مع أسعار محدثة وتوريد موثوق ومقارنات واضحة.",
   keywords: [
     "شق التعبان",
     "شقت التعبان",
     "شقه التعبان",
     "رخام",
     "جرانيت",
+    "كوارتز",
+    "توريد رخام في مصر",
+    "رخام في مصر",
+    "جرانيت في مصر",
     "رخام شق التعبان",
     "جرانيت شق التعبان",
     "رخام مصر",
@@ -40,7 +45,6 @@ export const metadata = generateSEO({
     "رخامه مطبخ",
     "الفرق بين الرخام والجرانيت",
     "أنواع الرخام",
-    "كوارتز",
   ],
   image: seoConfig.images.logo,
   url: "/",
@@ -52,16 +56,17 @@ export default function Home() {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "منصة شق التعبان",
-    headline: "رخام وجرانيت شق التعبان",
+    headline: "رخام في مصر وجرانيت في مصر | شق التعبان",
     description:
-      "منصة شق التعبان للرخام والجرانيت الطبيعي في مصر مع أفضل الأسعار والتشكيلات.",
+      "منصة شق التعبان للرخام والجرانيت الطبيعي في مصر مع أسعار محدثة وتوريد موثوق واختيارات واسعة للمطابخ والأرضيات.",
     url: homeUrl,
     inLanguage: "ar",
   });
 
   return (
     <div className={style.container}>
-      <script
+      <Script
+        id="home-webpage-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }}
       />
