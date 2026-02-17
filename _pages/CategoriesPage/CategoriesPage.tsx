@@ -8,8 +8,8 @@ export default function CategoriesPage() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>فئات المنتجات</h1>
-        <p className={styles.subtitle}>اكتشف مجموعتنا الواسعة من المنتجات الكيميائية</p>
+        <h1 className={styles.title}>رخام في مصر وجرانيت في مصر</h1>
+        <p className={styles.subtitle}>تصنيفات كوارتز للمطابخ وخامات تناسب الأرضيات والواجهات</p>
       </div>
       <CategoriesGrid categories={categories} />
     </div>

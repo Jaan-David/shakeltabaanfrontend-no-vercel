@@ -1,11 +1,11 @@
-/* card.module.css - Blue & White Theme */
+/* card.module.css - Modern Blue & White Theme */
 .card {
-  background: #FFFFFF;
-  border-radius: 18px;
-  border: 1px solid #E5E7EB;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+  background: linear-gradient(to bottom right, #FFFFFF, #F8FAFC);
+  border-radius: 24px;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
   overflow: hidden;
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   width: 100%;
   position: relative;
   font-family: var(--font-primary);
@@ -19,9 +19,9 @@
 
 @media (hover: hover) and (min-width: 1024px) {
   .card:hover {
-    box-shadow: 0 16px 30px rgba(15, 23, 42, 0.14);
-    border-color: #60A5FA;
-    transform: translateY(-4px);
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+    border-color: #93C5FD;
+    transform: translateY(-8px);
   }
 }
 
@@ -53,53 +53,53 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 6px 12px;
+  padding: 8px 16px;
   border-radius: 999px;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: #FFFFFF;
   background: linear-gradient(135deg, #DC2626 0%, #F97316 100%);
-  box-shadow: 0 8px 16px rgba(220, 38, 38, 0.35);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 10px 20px rgba(220, 38, 38, 0.4);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .specialOfferBadge svg {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   fill: #FFFFFF;
 }
 
 .card:hover .specialOfferBadge {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(220, 38, 38, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(220, 38, 38, 0.5);
 }
 
 .offerBadge {
   position: absolute;
-  top: 8px;
-  inset-inline-start: 8px;
-  background: #B91C1C;
+  top: 12px;
+  inset-inline-start: 12px;
+  background: linear-gradient(135deg, #B91C1C 0%, #DC2626 100%);
   color: #FFFFFF;
-  padding: 4px 10px;
+  padding: 6px 14px;
   border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 700;
   z-index: 3;
-  box-shadow: 0 2px 6px rgba(185, 28, 28, 0.25);
+  box-shadow: 0 6px 16px rgba(185, 28, 28, 0.35);
 }
 
 .discountBadge {
   position: absolute;
-  top: 8px;
-  inset-inline-end: 8px;
-  background: #9F1239;
+  top: 12px;
+  inset-inline-end: 12px;
+  background: linear-gradient(135deg, #9F1239 0%, #BE123C 100%);
   color: #FFFFFF;
-  padding: 4px 10px;
+  padding: 6px 14px;
   border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.8rem;
+  font-weight: 700;
   z-index: 3;
-  box-shadow: 0 2px 6px rgba(159, 18, 57, 0.25);
+  box-shadow: 0 6px 16px rgba(159, 18, 57, 0.35);
 }
 
 @keyframes pulse {
@@ -124,42 +124,50 @@
 /* Heart Icon */
 .favoriteButton {
   position: absolute;
-  top: 10px;
-  inset-inline-end: 10px;
-  width: 32px;
-  height: 32px;
+  top: 12px;
+  inset-inline-end: 12px;
+  width: 36px;
+  height: 36px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 4;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
 }
 
 .favoriteButton:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 12px rgba(15, 23, 42, 0.15);
+  transform: scale(1.1);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2);
+  background: #FFFFFF;
 }
 
 .heartIcon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   display: block;
+  transition: transform 0.2s ease;
+}
+
+.favoriteButton:active .heartIcon {
+  transform: scale(0.9);
 }
 
 /* Product Image Container */
 .cardImage{
   position: relative;
-  background: #F8FAFC;
+  background: linear-gradient(to bottom right, #F8FAFC, #F1F5F9);
   width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid #E2E8F0;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
 }
 
 /* ✅ FIXED: Proper image centering and covering */
@@ -169,7 +177,7 @@
   object-fit: cover;
   object-position: center;
   display: block;
-  transition: transform 0.4s ease;
+  transition: transform 0.5s ease;
 }
 
 .placeholderImage {
@@ -179,25 +187,27 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   color: #94A3B8;
-  background: linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%);
-  border-bottom: 1px solid #E2E8F0;
+  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
 }
 
 .placeholderIcon {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
+  opacity: 0.6;
 }
 
 .placeholderText {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 700;
+  opacity: 0.7;
 }
 
 @media (hover: hover) and (min-width: 1024px) {
   .card:hover .img {
-    transform: scale(1.04);
+    transform: scale(1.08);
   }
 }
 
@@ -358,19 +368,26 @@
 .cardActionButton {
   width: 100%;
   height: 100%;
-  background: #2563EB;
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
   color: #FFFFFF;
-  border-radius: 10px;
+  border-radius: 12px;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .cardActionButton:hover {
-  background: #1D4ED8;
+  background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+}
+
+.cardActionButton:active {
+  transform: translateY(0);
 }
 
 /* Category */
@@ -379,20 +396,19 @@
   justify-content: center;
   align-items: center;
   width: fit-content;
-  height: 1.25rem;
-  border-radius: 1.5rem;
-  padding: 0.25rem 1rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  padding: 0.3rem 1.2rem;
   gap: 1rem;
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border: 1px solid #93C5FD;
 }
 
 .categoryText {
-  padding: 0.3rem 1rem;
-  border-radius: 1.125rem;
-  font-size: 0.625rem;
-  font-weight: 600;
-  color: #2563EB;
+  padding: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #1E40AF;
   letter-spacing: 0.02em;
 }
 

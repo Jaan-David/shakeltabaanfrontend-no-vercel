@@ -1,11 +1,11 @@
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import Image from "next/image";
 
 //styles
 import styles from "@/components/UI/notification/notification.module.css";
 
-//icon
-import Trash from "@/public/icons/Trash Bin Trash.svg";
+import TrashIcon from "@/public/icons/Trash Bin Trash.svg";
 
 import {
   getNotifications,
@@ -426,7 +426,12 @@ const NotificationsComponent: React.FC<NotificationsComponentProps> = ({
                   onClick={(e) => handleDeleteNotification(notification._id, e)}
                   title="حذف الإشعار"
                 >
-                  <Trash />
+                  <Image
+                    src={TrashIcon}
+                    alt="حذف الإشعار"
+                    width={20}
+                    height={20}
+                  />
                 </button>
               </div>
             ))}

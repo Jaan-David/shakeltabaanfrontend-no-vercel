@@ -4,7 +4,6 @@ import AppShell from "@/components/Layout/AppShell";
 // import GoogleTranslate from "@/components/Layout/Translator/GoogleTranslator";
 import ClientProviders from "@/components/providers/ClientProvider";
 import { Metadata } from "next";
-import Head from "next/head";
 import Script from "next/script";
 import { canonicalBaseUrl, seoConfig, organizationSchema, websiteSchema } from "@/config/seo.config";
 
@@ -30,8 +29,8 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/',
     languages: {
-      'ar': '/',
-      'en': '/en',
+      ar: '/',
+      en: '/en',
     },
   },
   openGraph: {
@@ -58,13 +57,11 @@ export const metadata: Metadata = {
     site: seoConfig.twitter.site,
     creator: seoConfig.twitter.creator,
   },
-  // robots: seoConfig.robots,
   icons: {
     icon: seoConfig.images.favicon,
     shortcut: seoConfig.images.favicon,
     apple: '/apple-touch-icon.png',
   },
-  // manifest: '/site.webmanifest',
   verification: seoConfig.verification,
 };
 
@@ -92,13 +89,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang={seoConfig.defaultLanguage} dir="rtl" suppressHydrationWarning>
-      <Head>
-        <link rel="canonical" href={`${canonicalBaseUrl}/`} />
-        <link rel="alternate" hrefLang="ar" href={`${canonicalBaseUrl}/`} />
-        <link rel="alternate" hrefLang="en" href={`${canonicalBaseUrl}/en`} />
-        <link rel="alternate" hrefLang="x-default" href={`${canonicalBaseUrl}/`} />
-      </Head>
       <head>
+        <link
+          rel="preload"
+          href="/fonts/beiruti/static/Beiruti-Regular.ttf"
+          as="font"
+          type="font/ttf"
+          crossOrigin="anonymous"
+        />
+
+        {/* Contact Information (for search engines) */}
+        <meta name="contact" content={seoConfig.contact.email} />
+        <meta name="geo.region" content="EG-C" />
+        <meta name="geo.placename" content="Cairo" />
+      </head>
+      
+      <body className="antialiased" suppressHydrationWarning={true}>
         <Script
           async
           src="https://www.googletagmanager.com/gtag/js?id=G-8V17H7W98Z"
@@ -111,22 +117,7 @@ gtag('js', new Date());
 
 gtag('config', 'G-8V17H7W98Z');`}
         </Script>
-        {/* Preconnect to improve performance */}
-        <link
-          rel="preload"
-          href="/fonts/beiruti/static/Beiruti-Regular.ttf"
-          as="font"
-          type="font/truetype"
-          crossOrigin="anonymous"
-        />
 
-        {/* Contact Information (for search engines) */}
-        <meta name="contact" content={seoConfig.contact.email} />
-        <meta name="geo.region" content="EG-C" />
-        <meta name="geo.placename" content="Cairo" />
-      </head>
-      
-      <body className="antialiased" suppressHydrationWarning={true}>
         {/* Google Translate - Temporarily disabled due to chunk loading issues */}
         {/* <GoogleTranslate pageLanguage={seoConfig.defaultLanguage} /> */}
 

@@ -2,6 +2,7 @@
 import React from 'react';
 import { ArrowLeft, Mountain, Shield, Palette, Wrench } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Script from "next/script";
 
 export default function AboutMarblePage() {
   const router = useRouter();
@@ -58,6 +59,21 @@ export default function AboutMarblePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900/20 to-purple-900/20 text-white">
+      <Script
+        id="about-marble-article-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: "أنواع الرخام في مصر | شق التعبان",
+            description:
+              "تعرف على أنواع الرخام في مصر ومميزاته واستخداماته مع مقارنة الرخام والجرانيت ونصائح اختيار الرخام من شق التعبان.",
+            url: "https://www.shkelteaban.com/about-marble",
+            inLanguage: "ar",
+          }),
+        }}
+      />
       {/* Header */}
       <div className="bg-gradient-to-br from-slate-800 via-blue-900 to-purple-900 py-16 px-4">
         <div className="max-w-6xl mx-auto text-center">

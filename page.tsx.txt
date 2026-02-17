@@ -1,0 +1,90 @@
+import { canonicalBaseUrl, generateSEO, seoConfig } from "@/config/seo.config";
+import MarbleInfoClient from "./MarbleInfoClient";
+
+const marbleInfoTitle = "أنواع الرخام والفرق بين الرخام والجرانيت | شق التعبان";
+const marbleInfoDescription =
+  "دليل شق التعبان لفهم أنواع الرخام والجرانيت في مصر، ونصائح الاختيار والعناية للمطابخ والأرضيات.";
+const getSiteUrl = () =>
+  process.env.NEXT_PUBLIC_SITE_URL
+    ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/+$/, "")
+    : canonicalBaseUrl;
+
+export async function generateMetadata() {
+  return generateSEO({
+    title: marbleInfoTitle,
+    description: marbleInfoDescription,
+    keywords: [
+      "أنواع الرخام",
+      "الفرق بين الرخام والجرانيت",
+      "رخام",
+      "جرانيت",
+      "شق التعبان",
+      "رخام في مصر",
+      "جرانيت في مصر",
+      "رخام المطبخ",
+      "كوارتز",
+      "رخام وجرانيت في مصر",
+      "شق الثعبان",
+      "شقه تعبان",
+      "رخام شق التعبان",
+      "جرانيت شق التعبان",
+      "marble in Egypt",
+      "granite suppliers Egypt",
+    ],
+    url: "/marble-info",
+    type: "article",
+  });
+}
+
+const stripUndefined = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
+
+export default function MarbleInfoPage() {
+  const articleUrl = `${getSiteUrl()}/marble-info`;
+  const publisherLogo = `${getSiteUrl()}${seoConfig.images.logo.startsWith("/") ? seoConfig.images.logo : `/${seoConfig.images.logo}`}`;
+  const articleJsonLd = stripUndefined({
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: marbleInfoTitle,
+    description: marbleInfoDescription,
+    url: articleUrl,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": articleUrl,
+    },
+    inLanguage: "ar",
+    publisher: {
+      "@type": "Organization",
+      name: seoConfig.siteName,
+      url: getSiteUrl(),
+      logo: {
+        "@type": "ImageObject",
+        url: publisherLogo,
+      },
+    },
+    about: [
+      "أنواع الرخام",
+      "الفرق بين الرخام والجرانيت",
+      "رخام",
+      "جرانيت",
+      "شق التعبان",
+      "شق الثعبان",
+      "رخام في مصر",
+      "جرانيت في مصر",
+      "رخام المطبخ",
+      "كوارتز",
+      "رخام وجرانيت في مصر",
+      "marble in Egypt",
+      "granite suppliers Egypt",
+    ],
+  });
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <MarbleInfoClient />
+    </>
+  );
+}

@@ -1,8 +1,12 @@
 'use client';
 
+// Disable prerendering for inquiries page to avoid build-time auth/client issues
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
+
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   inquiryService,
   type Inquiry,
@@ -19,14 +23,17 @@ import InquiryStatusBadge from './components/InquiryStatusBadge';
 
 export default function InquiriesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const marbleType = searchParams?.get('marbleType') ?? '';
+  
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'list' | 'create'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'create'>(marbleType ? 'create' : 'list');
   const [activeStatus, setActiveStatus] = useState<'all' | 'active' | 'accepted' | 'ended'>('all');
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
   
   // Create Inquiry Form
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState(marbleType ? `طلب لـ: ${marbleType}\n\nالتفاصيل:\n` : '');
   const [images, setImages] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -120,7 +127,7 @@ export default function InquiriesPage() {
       });
       
       setSuccessMessage('تم إنشاء الطلب بنجاح! سنرسل لك العروض قريباً');
-      setDescription('');
+      setDescription(marbleType ? `طلب لـ: ${marbleType}\n\nالتفاصيل:\n` : '');
       setImages([]);
       
       // Refresh inquiries list

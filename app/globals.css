@@ -1,4 +1,6 @@
 @import "keen-slider/keen-slider.min.css";
+@import url('../public/acessts/marble/marble-ui.css');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Harmattan:wght@400;600;700&family=Amiri:wght@400;700&display=swap');
 
 /* Self-hosted Beiruti font - FIXED format declarations */
 @font-face {
@@ -53,7 +55,7 @@ html {
   -webkit-text-size-adjust: 100%;
   -moz-tab-size: 4;
   tab-size: 4;
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-family: 'Cairo', 'Harmattan', 'Amiri', 'Beiruti', 'Noto Naskh Arabic', 'Droid Arabic Kufi', 'Beiruti', system-ui, -apple-system, sans-serif;
   overflow-x: hidden; /* Remove horizontal scroll */
 }
 
@@ -63,6 +65,21 @@ body {
   background-color: #FFFFFF;  /* White background */
   color: #0F172A;             /* Dark text */
   overflow-x: hidden;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.6s ease-out both;
 }
 
 .inquiries-cta-bg {
@@ -278,8 +295,6 @@ video {
 @tailwind components;
 @tailwind utilities;
 
-@import url('/acessts/marble/marble-ui.css');
-
 :root {
   /* ========================================
      BLUE & WHITE THEME - ShakElTaaban Frontend
@@ -328,7 +343,7 @@ video {
   --secondary1: var(--brand-2);
   --secondary2: var(--brand-3);
 
-  --font-primary: 'Beiruti', 'Cairo', system-ui, -apple-system, sans-serif;
+  --font-primary: var(--font-cairo, 'Cairo'), 'Beiruti', system-ui, -apple-system, sans-serif;
 }
 
 .dark {

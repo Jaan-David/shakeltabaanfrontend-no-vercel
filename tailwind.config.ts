@@ -188,6 +188,8 @@ const config: Config = {
       },
       fontFamily: {
         beiruti: ['Beiruti', 'sans-serif'],
+        arabicBody: ['Cairo', 'Harmattan', 'Amiri', 'Beiruti', 'sans-serif'],
+        arabicHeading: ['Beiruti', 'Cairo', 'Harmattan', 'Amiri', 'sans-serif'],
       },
       fontSize: {
         'display-1': ['3.5rem', { lineHeight: '1.1', fontWeight: '700' }],
