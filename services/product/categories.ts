@@ -1,4 +1,4 @@
-// services/product/categories.ts - Category service with smart caching
+// services/product/categories.ts rr- Category service with smart caching
 
 import { Api, API_ENDPOINTS } from './../api/endpoints';
 
