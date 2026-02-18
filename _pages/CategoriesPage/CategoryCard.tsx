@@ -4,7 +4,7 @@ import styles from "./CategoriesGrid.module.css";
 interface CategoryCardProps {
   title: string;
   description: string;
-  badge: "رخام" | "جرانيت" | "كوارتز";
+  badge: "رخام" | "جرانيت" | "كوارتز" | "نحت";
   image: string;
   onClick: () => void;
 }

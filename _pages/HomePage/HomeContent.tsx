@@ -50,6 +50,7 @@ export default function HomeContent() {
     { id: "رخام مصرى", name: "رخام مصرى" },
     { id: "كوارتز", name: "كوارتز" },
     { id: "رخام مصنع", name: "رخام مصنع" },
+    { id: "اعمال النحت", name: "اعمال النحت" },
   ];
 
   const normalizeProductImage = (src?: string) => {
