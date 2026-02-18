@@ -8,11 +8,11 @@ interface CategoryCardProps {
   description: string;
   image: string;
   href?: string;
-  marbleType?: string;
+  marbleType: string;
   detailsLabel?: string;
   onDetailsClick?: () => void;
   orderLabel?: string;
-  onOrderClick?: () => void;
+  onOrderClick: () => void;
 }
 
 export default function CategoryCard({
@@ -43,11 +43,9 @@ export default function CategoryCard({
           <h3 className="text-lg font-semibold text-slate-900 leading-snug">
             {title}
           </h3>
-          {marbleType && (
-            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-              {marbleType}
-            </span>
-          )}
+          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+            {marbleType}
+          </span>
         </div>
         <p className="mb-6 text-sm text-slate-600 leading-relaxed line-clamp-2">
           {description}
@@ -73,16 +71,14 @@ export default function CategoryCard({
           ) : (
             <span className="text-sm font-semibold text-slate-500">تفاصيل أكثر</span>
           )}
-          {onOrderClick && (
-            <button
-              type="button"
-              onClick={onOrderClick}
-              className="rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-              aria-label={`${orderLabel || "اطلب الآن"} ${marbleType || ""}`}
-            >
-              {orderLabel || "اطلب الآن"}
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={onOrderClick}
+            className="rounded-full bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            aria-label={`${orderLabel || "اطلب الآن"} ${marbleType}`}
+          >
+            {orderLabel || "اطلب الآن"}
+          </button>
         </div>
       </div>
     </article>
