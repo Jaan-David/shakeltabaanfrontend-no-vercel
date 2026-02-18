@@ -4,7 +4,7 @@
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 
-import { useState, useEffect, useCallback } from 'react';
+import { Suspense, useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -22,6 +22,14 @@ import InquiryFilters from './components/InquiryFilters';
 import InquiryStatusBadge from './components/InquiryStatusBadge';
 
 export default function InquiriesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white pb-16 px-4 rtl">جاري التحميل...</div>}>
+      <InquiriesPageContent />
+    </Suspense>
+  );
+}
+
+function InquiriesPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const marbleType = searchParams?.get('marbleType') ?? '';

@@ -1,32 +1,3 @@
-<<<<<<< HEAD
-import { notFound } from "next/navigation";
-import { marbleUseCategories } from "../data";
-import MarbleUseWrapper from "./MarbleUseWrapper";
-
-interface MarbleUsePageProps {
-  params: Promise<{ slug: string }>;
-}
-
-export function generateStaticParams() {
-  return marbleUseCategories.map((category) => ({
-    slug: category.slug,
-  }));
-}
-
-export async function generateMetadata({ params }: MarbleUsePageProps) {
-  const { slug } = await params;
-  const category = marbleUseCategories.find(
-    (item) => item.slug === slug
-  );
-
-  if (!category) {
-    return {};
-  }
-
-  return {
-    title: `${category.title} | شق التعبان`,
-    description: category.description,
-=======
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -136,27 +107,17 @@ export async function generateMetadata({ params }: MarbleUsePageProps) {
       description,
       images: [ogImage],
     },
->>>>>>> 591654581c9211810a9184a2bee06a356166f53f
   };
 }
 
 export default async function MarbleUsePage({ params }: MarbleUsePageProps) {
   const { slug } = await params;
-<<<<<<< HEAD
-  const category = marbleUseCategories.find(
-    (item) => item.slug === slug
-  );
-=======
   const category = marbleUseCategories.find((item) => item.slug === slug);
->>>>>>> 591654581c9211810a9184a2bee06a356166f53f
 
   if (!category) {
     notFound();
   }
 
-<<<<<<< HEAD
-  return <MarbleUseWrapper slug={slug} />;
-=======
   const contactLink = `/inquiries?marbleType=${encodeURIComponent(category.title)}`;
   const pageUrl = `${canonicalBaseUrl}/marble-uses/${category.slug}`;
   const breadcrumbJsonLd = generateBreadcrumb([
@@ -470,5 +431,4 @@ export default async function MarbleUsePage({ params }: MarbleUsePageProps) {
       </section>
     </div>
   );
->>>>>>> 591654581c9211810a9184a2bee06a356166f53f
 }
