@@ -58,9 +58,17 @@ export const metadata: Metadata = {
     creator: seoConfig.twitter.creator,
   },
   icons: {
-    icon: seoConfig.images.favicon,
+    icon: [
+      { url: seoConfig.images.favicon, sizes: '32x32', type: 'image/png' },
+      { url: seoConfig.images.favicon, sizes: '48x48', type: 'image/png' },
+      { url: seoConfig.images.favicon, sizes: '192x192', type: 'image/png' },
+    ],
     shortcut: seoConfig.images.favicon,
-    apple: '/apple-touch-icon.png',
+    apple: {
+      url: seoConfig.images.favicon,
+      sizes: '180x180',
+      type: 'image/png',
+    },
   },
   verification: seoConfig.verification,
 };

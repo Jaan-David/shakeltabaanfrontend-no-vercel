@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Background from '@/components/UI/Background/Background';
 import { Button } from '@/components/UI/Buttons/Button';
 import PolicyConsent from '@/components/Auth/PolicyConsent';
 import styles from '../auth.module.css';
@@ -85,7 +84,6 @@ export default function AcceptPoliciesPage() {
 
   return (
     <>
-      <Background />
       <div className={styles.container}>
         <div className={styles.formWrapper}>
           <div className={styles.header}>

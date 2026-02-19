@@ -8,7 +8,6 @@ import { Eye, EyeOff } from 'lucide-react';
 import { Button } from './../../../components/UI/Buttons/Button'; 
 import Input from './../../../components/UI/Inputs/Input'; 
 import Logo from '@/public/logo/logo2.png';
-import Background from './../../../components/UI/Background/Background';
 import Alert from '@/components/UI/Alert/alert';
 import styles from './../auth.module.css';
 import { AuthService, AuthError, LoginCredentials, UserStorage, type User } from './../../../services/auth/login';
@@ -470,7 +469,6 @@ useEffect(() => {
   if (status === 'loading') {
     return (
       <>
-        <Background />
         <div className={styles.container}>
           <div className={styles.formWrapper}>
             <div className={styles.header}>
@@ -494,8 +492,6 @@ useEffect(() => {
 
   return (
     <>
-      <Background />
-      
       <div className={styles.container}>
         <div className={styles.formWrapper}>
           <div className={styles.header}>
@@ -654,7 +650,6 @@ export default function LoginForm() {
   return (
     <Suspense fallback={
       <>
-        <Background />
         <div style={{
           display: 'flex',
           flexDirection: 'column',

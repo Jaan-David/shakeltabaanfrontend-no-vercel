@@ -184,11 +184,11 @@ function HeroSection({
 }) {
   return (
     <section
-      className="relative w-full mb-12 sm:mb-16 md:mb-20 overflow-hidden bg-gradient-to-b from-blue-600 to-blue-500"
+      className="relative w-full mb-8 sm:mb-12 md:mb-16 overflow-hidden bg-gradient-to-b from-blue-600 to-blue-500"
       aria-labelledby="hero-title"
     >
       {/* Background Image with Overlay */}
-      <div className="relative w-full h-[280px] sm:h-[360px] md:h-[420px] lg:h-[480px]">
+      <div className="relative w-full min-h-[56svh] max-h-[85svh] sm:min-h-[360px] md:min-h-[420px] lg:min-h-[480px]">
         <Image
           src={heroImage.src}
           alt={heroImage.alt}
@@ -200,54 +200,56 @@ function HeroSection({
         />
 
         {/* Dark Gradient Overlay for Text Contrast */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-bl from-black/80 via-black/55 to-black/35" />
 
         {/* Content Card */}
         <div
-          className="absolute inset-0 flex items-center justify-center px-4"
+          className="absolute inset-0 flex items-center justify-center px-4 py-6"
           dir="rtl"
         >
-          <div className="w-full max-w-2xl space-y-4 sm:space-y-6 text-center">
+          <div className="w-full max-w-sm sm:max-w-2xl space-y-3 sm:space-y-5 text-center">
+            <div className="rounded-2xl bg-white/8 backdrop-blur-md px-4 py-5 sm:px-7 sm:py-7 shadow-lg border border-white/15 motion-safe:animate-fade-in">
             <h1
               id="hero-title"
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white drop-shadow-lg leading-tight"
+              className="text-4xl sm:text-4xl md:text-5xl font-extrabold text-white drop-shadow-lg leading-snug"
             >
               {userName || "منصة شق الثعبان"}
             </h1>
 
-            <p className="text-base sm:text-lg text-white/95 drop-shadow-md max-w-xl mx-auto">
+            <p className="mt-2 text-sm sm:text-lg text-white/85 drop-shadow-md max-w-sm sm:max-w-xl mx-auto">
               أفضل أنواع الرخام والجرانيت والكوارتز بأسعار منافسة وجودة عالية
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-3 sm:pt-5">
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:gap-3 justify-center">
               {(() => {
                 const baseButtonClass =
-                  "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 w-full sm:w-auto min-h-[48px] px-6 sm:px-8 py-3 sm:py-4 whitespace-nowrap sm:min-w-[190px]";
-                const secondaryClass =
-                  `${baseButtonClass} bg-white/95 hover:bg-white text-blue-600 hover:text-blue-700 border border-blue-200 shadow-md hover:shadow-lg`;
+                  "inline-flex items-center justify-center gap-2 rounded-2xl font-semibold transition-all duration-200 w-full sm:w-auto min-h-[50px] px-5 sm:px-8 py-3 sm:py-4 whitespace-nowrap sm:min-w-[190px] active:scale-[0.98]";
                 const primaryClass =
-                  `${baseButtonClass} bg-blue-600 hover:bg-blue-700 text-white hover:text-white shadow-lg hover:shadow-xl scale-[1.03] sm:scale-[1.06]`;
-                const tertiaryClass =
-                  `${baseButtonClass} bg-slate-100/80 hover:bg-white/90 text-slate-700 hover:text-slate-800 border border-slate-200 shadow-sm hover:shadow-md backdrop-blur-sm`;
+                  `${baseButtonClass} bg-blue-600 hover:bg-blue-700 !text-white hover:!text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5`;
+                const secondaryClass =
+                  `${baseButtonClass} bg-white/10 hover:bg-white/15 !text-white hover:!text-white border border-white/50 shadow-sm hover:shadow-md text-sm sm:text-base`;
+                const guidanceClass =
+                  "inline-flex items-center justify-center gap-2 !text-white/95 hover:!text-white underline-offset-4 hover:underline transition-all duration-200 text-xs sm:text-sm px-2 py-1 active:scale-[0.98] mt-1 sm:mt-0";
 
                 return (
                   <>
-                    <Link href="/inquiries" className={secondaryClass}>
-                      <Star size={18} />
-                      طلب مخصص
-                    </Link>
                     <Link href="/products" className={primaryClass}>
                       <Zap size={18} />
                       تصفح المنتجات
                     </Link>
-                    <Link href="/marble-info" className={tertiaryClass}>
-                      <HelpCircle size={18} />
-                      ازاي تختار نوع رخامك؟
+                    <Link href="/inquiries" className={secondaryClass}>
+                      <Star size={18} />
+                      طلب خاص
+                    </Link>
+                    <Link href="/marble-info" className={guidanceClass}>
+                      ازاي تختار نوع رخامتك؟
+                      <HelpCircle size={16} />
                     </Link>
                   </>
                 );
               })()}
+            </div>
             </div>
           </div>
         </div>
@@ -296,7 +298,7 @@ function CTARequestSection() {
           <div className="flex flex-col gap-4">
             <Link
               href="/inquiries"
-              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 active:scale-95 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl w-full min-h-[52px] text-lg"
+              className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-95 !text-white hover:!text-white px-8 py-4 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl w-full min-h-[52px] text-lg"
             >
               أرسل طلبك الآن
               <ArrowLeft size={20} />

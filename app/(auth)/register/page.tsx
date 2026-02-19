@@ -7,7 +7,6 @@ import { Eye, EyeOff } from "lucide-react";
 import { Button } from "./../../../components/UI/Buttons/Button";
 import Input from "./../../../components/UI/Inputs/Input";
 import Logo from "@/public/logo/logo2.png";
-import Background from "./../../../components/UI/Background/Background";
 import Alert from "@/components/UI/Alert/alert";
 import styles from "./../auth.module.css";
 import { registerUser, RegisterRequest } from "../../../services/auth/register";
@@ -286,9 +285,6 @@ export default function RegistrationForm() {
 
   return (
     <>
-      {/* Background component - will be behind everything */}
-      <Background />
-
       <div className={styles.container}>
         <div className={styles.formWrapper}>
           {/* Logo and Title */}
