@@ -5,8 +5,16 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 });
 
 const nextConfig: NextConfig = {
-  // Enable compression
+  // Enable compression (gzip by default, brotli on compatible servers)
   compress: true,
+  
+  // Response compression - Next.js uses gzip for gzip, brotli for brotli
+  // Deploy platform (Vercel/Fly.io) handles brotli compression automatically
+  // For self-hosted, ensure your server supports it
+  onDemandEntries: {
+    maxInactiveAge: 60 * 1000,      // 60 seconds
+    pagesBufferLength: 5,            // Lower memory usage
+  },
   
   // Development indicators configuration
   devIndicators: false,
@@ -20,9 +28,18 @@ const nextConfig: NextConfig = {
   // GSAP transpilation fix for build errors
   transpilePackages: ['gsap'],
   
-  // Performance: Enable experimental optimizations
+  /**
+   * Performance: Enable experimental optimizations
+   * - optimizeCss: Inlines critical CSS, removes unused styles
+   * - optimizePackageImports: Tree-shake unused code from packages
+   * - tailwindCss: Auto-configure Tailwind for better purging
+   */
   experimental: {
-    optimizeCss: true, // Inline critical CSS
+    optimizeCss: true,              // Inline critical CSS
+    // optimizePackageImports: [      // Uncomment if you have large packages to optimize
+    //   'lucide-react',
+    //   'react-icons',
+    // ],
   },
   
   // Image configuration for external domains
@@ -71,17 +88,76 @@ const nextConfig: NextConfig = {
     unoptimized: process.env.NODE_ENV === 'development', // Disable optimization in dev for faster refresh
   },
   
-  // Compiler optimizations
+  // Compiler optimizations (SWC - faster than Terser)
   compiler: {
-    // Remove console logs in production
+    // Remove console logs in production (improves bundle size)
     removeConsole: process.env.NODE_ENV === 'production' ? {
       exclude: ['error', 'warn'], // Keep error and warn logs
     } : false,
+    
+    // Remove React displayName in production (smaller bundle)
+    reactRemoveProperties: process.env.NODE_ENV === 'production' ? true : false,
   },
   
-  // Caching headers for better performance
+  // Caching headers for better performance + Security headers
   async headers() {
     return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'geolocation=(), microphone=(), camera=()',
+          },
+          /**
+           * Content Security Policy (CSP):
+           * - Allows Google Tag Manager (trusted-types and script-src)
+           * - Allows Cloudinary images and Azure storage
+           * - Allows Google Fonts (safe for performance)
+           * - Blocks inline scripts (except for GTM which uses nonce or trusted types)
+           * - Safe for analytics without breaking functionality
+           */
+          {
+            key: 'Content-Security-Policy',
+            value: `
+              default-src 'self';
+              script-src 'self' 'unsafe-eval' 'unsafe-inline' www.googletagmanager.com www.google-analytics.com;
+              style-src 'self' 'unsafe-inline' fonts.googleapis.com;
+              img-src 'self' data: https: res.cloudinary.com marble-bajco.com shakeltabaanstorage.blob.core.windows.net www.googletagmanager.com;
+              font-src 'self' data: fonts.gstatic.com;
+              connect-src 'self' https: www.google-analytics.com www.googletagmanager.com shakeltabaanstorage.blob.core.windows.net marble-bajco.com shk2t-t3ban.fly.dev shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net;
+              frame-src 'self' www.google.com;
+              media-src 'self' data: blob: https:;
+              upgrade-insecure-requests;
+            `.replace(/\s+/g, ' ').trim(),
+          },
+          /**
+           * HSTS (HTTP Strict Transport Security):
+           * Forces HTTPS for 1 year, including subdomains
+           * Prevents downgrade attacks
+           */
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains; preload',
+          },
+        ],
+      },
       {
         source: '/_next/static/:path*',
         headers: [

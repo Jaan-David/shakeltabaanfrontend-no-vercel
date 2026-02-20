@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { generateSEO, seoConfig } from "@/config/seo.config";
 import RevealOnScroll from "@/components/UI/RevealOnScroll";
+import PreviousWorkCard from "./PreviousWorkCard";
 import {
   buildAltText,
   buildBreadcrumbJsonLd,
@@ -429,32 +430,20 @@ export default async function OrganizationProfilePage({
             <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {previousWorks.map((work) => {
                 const id = work._id || work.id || work.title || "work";
-                const rawImage = work.photoList?.[0] || "";
+                const photoList = work.photoList || [];
+                const rawImage = photoList[0] || "";
                 const image = rawImage ? normalizeApiImage(rawImage) : "/acessts/NoImage.jpg";
                 const imageIsRemote = image.startsWith("http://") || image.startsWith("https://");
+                
                 return (
-                  <div
+                  <PreviousWorkCard
                     key={id}
-                    className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-                  >
-                    <div className="relative aspect-[16/10] w-full">
-                      <Image
-                        src={image}
-                        alt={work.title || "عمل سابق"}
-                        width={520}
-                        height={340}
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                        unoptimized={imageIsRemote}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent opacity-70 transition-opacity duration-300 group-hover:opacity-100" />
-                      <div className="absolute bottom-4 right-4 left-4">
-                        <h4 className="text-base md:text-lg font-semibold text-white line-clamp-2">
-                          {work.title || "مشروع"}
-                        </h4>
-                      </div>
-                    </div>
-                  </div>
+                    title={work.title || "مشروع"}
+                    description={work.description}
+                    images={photoList.map((photo) => normalizeApiImage(photo))}
+                    primaryImage={image}
+                    isRemote={imageIsRemote}
+                  />
                 );
               })}
             </div>

@@ -18,6 +18,7 @@ interface ImageProps {
   fill?: boolean;
   onClick?: () => void;
   style?: CSSProperties;
+  sizes?: string;
 }
 
 interface MediaProps extends ImageProps {
@@ -110,6 +111,7 @@ export function CustomImage({
   fill,
   onClick,
   style,
+  sizes,
   ...props
 }: ImageProps) {
   const resolvedSrc = useMemo(() => resolveMediaSrc(src, fallbackSrc), [src, fallbackSrc]);
@@ -228,6 +230,7 @@ export function CustomImage({
           fill={fill}
           width={!fill ? width : undefined}
           height={!fill ? height : undefined}
+          sizes={sizes}
           onError={handleError}
           priority={priority}
           unoptimized={isRemoteSrc}

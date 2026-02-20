@@ -1,11 +1,22 @@
 @import "keen-slider/keen-slider.min.css";
 @import url('../public/acessts/marble/marble-ui.css');
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Harmattan:wght@400;600;700&family=Amiri:wght@400;700&display=swap');
 
-/* Self-hosted Beiruti font - FIXED format declarations */
+/**
+ * FONT LOADING - Optimized with next/font
+ * 
+ * Google Fonts (Cairo, Harmattan, Amiri) are now loaded via next/font/google
+ * with display: swap to prevent render-blocking. CSS variables are injected
+ * at runtime by next/font in the html className.
+ *
+ * Self-hosted Beiruti font uses WOFF2 format for better compression.
+ */
+
+/* Self-hosted Beiruti font - WOFF2 format (optimized) */
+/* WOFF2 is ~70% smaller than TTF, loads faster */
 @font-face {
   font-family: 'Beiruti';
-  src: url('/fonts/beiruti/static/Beiruti-Regular.ttf') format('truetype');
+  src: url('/fonts/beiruti/static/Beiruti-Regular.woff2') format('woff2'),
+       url('/fonts/beiruti/static/Beiruti-Regular.ttf') format('truetype');
   font-weight: 200;
   font-style: normal;
   font-display: swap;
@@ -13,7 +24,8 @@
 
 @font-face {
   font-family: 'Beiruti';
-  src: url('/fonts/beiruti/static/Beiruti-Medium.ttf') format('truetype');
+  src: url('/fonts/beiruti/static/Beiruti-Medium.woff2') format('woff2'),
+       url('/fonts/beiruti/static/Beiruti-Medium.ttf') format('truetype');
   font-weight: 300;
   font-style: normal;
   font-display: swap;
@@ -21,7 +33,8 @@
 
 @font-face {
   font-family: 'Beiruti';
-  src: url('/fonts/beiruti/static/Beiruti-SemiBold.ttf') format('truetype');
+  src: url('/fonts/beiruti/static/Beiruti-SemiBold.woff2') format('woff2'),
+       url('/fonts/beiruti/static/Beiruti-SemiBold.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -29,7 +42,8 @@
 
 @font-face {
   font-family: 'Beiruti';
-  src: url('/fonts/beiruti/static/Beiruti-Bold.ttf') format('truetype');
+  src: url('/fonts/beiruti/static/Beiruti-Bold.woff2') format('woff2'),
+       url('/fonts/beiruti/static/Beiruti-Bold.ttf') format('truetype');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -55,7 +69,17 @@ html {
   -webkit-text-size-adjust: 100%;
   -moz-tab-size: 4;
   tab-size: 4;
-  font-family: 'Cairo', 'Harmattan', 'Amiri', 'Beiruti', 'Noto Naskh Arabic', 'Droid Arabic Kufi', 'Beiruti', system-ui, -apple-system, sans-serif;
+  /**
+   * Font family stack using next/font CSS variables:
+   * --font-cairo, --font-harmattan, --font-amiri (from Google Fonts)
+   * --font-beiruti (self-hosted)
+   * 
+   * Order matters: Try custom fonts first, then fallbacks
+   */
+  font-family: var(--font-cairo, 'Cairo'), var(--font-harmattan, 'Harmattan'), 
+              var(--font-amiri, 'Amiri'), var(--font-beiruti, 'Beiruti'), 
+              'Noto Naskh Arabic', 'Droid Arabic Kufi', 
+              system-ui, -apple-system, sans-serif;
   overflow-x: hidden; /* Remove horizontal scroll */
 }
 

@@ -194,6 +194,7 @@ function HeroSection({
           alt={heroImage.alt}
           fill
           priority
+          fetchPriority="high"
           sizes="100vw"
           className="object-cover"
           quality={85}

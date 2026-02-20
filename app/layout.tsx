@@ -6,6 +6,7 @@ import ClientProviders from "@/components/providers/ClientProvider";
 import { Metadata } from "next";
 import Script from "next/script";
 import { canonicalBaseUrl, seoConfig, organizationSchema, websiteSchema } from "@/config/seo.config";
+import { fontVariables } from "@/lib/fonts";
 
 // ============================================
 // ROOT METADATA (SEO) - Using Config
@@ -96,15 +97,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang={seoConfig.defaultLanguage} dir="rtl" suppressHydrationWarning>
+    <html lang={seoConfig.defaultLanguage} dir="rtl" suppressHydrationWarning className={fontVariables}>
       <head>
+        {/* LCP Image Preload - /slider/1.jpg is the hero image on home page */}
         <link
           rel="preload"
-          href="/fonts/beiruti/static/Beiruti-Regular.ttf"
-          as="font"
-          type="font/ttf"
-          crossOrigin="anonymous"
+          href="/slider/1.jpg"
+          as="image"
+          type="image/jpeg"
         />
+
+        {/* Preconnect to Cloudinary for faster image loading */}
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+
+        {/* Preconnect to API servers for faster data fetching */}
+        <link rel="preconnect" href="https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net" />
+        <link rel="preconnect" href="https://shakeltabaanstorage.blob.core.windows.net" />
 
         {/* Contact Information (for search engines) */}
         <meta name="contact" content={seoConfig.contact.email} />
