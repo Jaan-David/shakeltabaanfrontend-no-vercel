@@ -107,12 +107,8 @@ export default function RootLayout({
           type="image/jpeg"
         />
 
-        {/* Preconnect to Cloudinary for faster image loading */}
+        {/* Preconnect to Cloudinary for faster image loading (above-the-fold images) */}
         <link rel="preconnect" href="https://res.cloudinary.com" />
-
-        {/* Preconnect to API servers for faster data fetching */}
-        <link rel="preconnect" href="https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net" />
-        <link rel="preconnect" href="https://shakeltabaanstorage.blob.core.windows.net" />
 
         {/* Contact Information (for search engines) */}
         <meta name="contact" content={seoConfig.contact.email} />
