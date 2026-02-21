@@ -58,7 +58,8 @@ type NavItem = {
 const MAIN_NAV_ITEMS: NavItem[] = [
   { label: "الرئيسية", href: "/" },
   { label: "المنتجات", href: "/products" },
-  { label: "طلباتك الخاصة", href: "/inquiries" },
+  { label: "طلبيتك الخاصه", href: "/inquiries" },
+  { label: "اطلب صنايعي", href: "/service-requests" },
   { label: "ازاي تختار", href: "/marble-info" },
   { label: "من نحن", href: "/about" },
 ];

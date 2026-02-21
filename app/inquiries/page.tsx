@@ -246,7 +246,7 @@ function InquiriesPageContent() {
 
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
         <InquiriesHeader
-          title="طلباتك الخاصة"
+          title="طلبيتك الخاصه"
           subtitle="اكتب طلبك وسيقوم الموردون بإرسال عروض أسعار — اختر العرض المناسب وابدأ التنفيذ بسهولة."
         />
 

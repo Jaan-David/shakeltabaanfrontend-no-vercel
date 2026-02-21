@@ -76,7 +76,13 @@ const Footer = () => {
                 className="text-slate-300 transition hover:text-blue-300 font-medium"
                 href="/inquiries"
               >
-                طلباتك الخاصة
+                طلبيتك الخاصه
+              </Link>
+              <Link
+                className="text-slate-300 transition hover:text-blue-300 font-medium"
+                href="/service-requests"
+              >
+                اطلب صنايعي
               </Link>
               <Link
                 className="text-slate-300 transition hover:text-blue-300 font-medium"
@@ -209,7 +215,8 @@ const Footer = () => {
               {[
                 { label: 'الرئيسية', href: '/' },
                 { label: 'المنتجات', href: '/products' },
-                { label: 'طلباتك الخاصة', href: '/inquiries' },
+                { label: 'طلبيتك الخاصه', href: '/inquiries' },
+                { label: 'اطلب صنايعي', href: '/service-requests' },
                 { label: 'ازاي تختار', href: '/marble-info' },
                 { label: 'من نحن', href: '/about' },
               ].map((item) => (

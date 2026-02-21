@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { ClipboardList, Heart, MapPin, Pencil, Ruler } from 'lucide-react';
+import { ClipboardList, Heart, MapPin, Pencil, Ruler, Receipt } from 'lucide-react';
 
 import styles from '../../profile.module.css';
 import TopMetrics from '@/_pages/ProfilePage/sections/TopScetion/Top';
@@ -418,9 +418,17 @@ const DashboardHome: React.FC<DashboardHomeProps> = ({
                   <div
                     className={`${styles.order_info} w-full flex flex-col items-start gap-2 lg:w-auto lg:flex-row lg:items-center lg:gap-3`}
                   >
-                    <span className={`${styles.status_badge} ${getStatusClass(order.status)}`}>
-                      {normalizeOrderStatus(order.status)}
-                    </span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`${styles.status_badge} ${getStatusClass(order.status)}`}>
+                        {normalizeOrderStatus(order.status)}
+                      </span>
+                      {order.paymentRequests && order.paymentRequests.length > 0 && (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-xs font-semibold text-blue-700">
+                          <Receipt className="w-3.5 h-3.5" />
+                          {order.paymentRequests.length} طلب دفع
+                        </span>
+                      )}
+                    </div>
                     <span className={styles.order_total}>
                       {getOrderTotal(order).toFixed(2)} ج
                     </span>

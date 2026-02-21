@@ -12,6 +12,7 @@ type Props = {
 const defaultItems: Item[] = [
   { label: 'الرئيسية', href: '/' },
   { label: 'الخدمات', href: '/services' },
+  { label: 'اطلب صنايعي', href: '/service-requests' },
   { label: 'المنتجات', href: '/product' },
   { label: 'من نحن', href: '/about' },
 ];

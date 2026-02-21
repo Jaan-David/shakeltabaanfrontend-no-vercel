@@ -231,7 +231,7 @@ function HeroSection({
                 const secondaryClass =
                   `${baseButtonClass} bg-white/10 hover:bg-white/15 !text-white hover:!text-white border border-white/50 shadow-sm hover:shadow-md text-sm sm:text-base`;
                 const guidanceClass =
-                  "inline-flex items-center justify-center gap-2 !text-white/95 hover:!text-white underline-offset-4 hover:underline transition-all duration-200 text-xs sm:text-sm px-2 py-1 active:scale-[0.98] mt-1 sm:mt-0";
+                  "inline-flex items-center justify-center gap-2 !text-white/95 hover:!text-white underline-offset-4 hover:underline transition-all duration-200 text-base sm:text-base px-2 py-1 active:scale-[0.98] mt-1 sm:mt-0";
 
                 return (
                   <>

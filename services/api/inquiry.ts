@@ -10,6 +10,7 @@ export interface Inquiry {
     firstName: string;
     lastName: string;
   };
+  type?: string;
   name: string;
   description: string;
   phoneNumber: string;
@@ -32,6 +33,7 @@ export interface InquiryReply {
 }
 
 export interface CreateInquiryData {
+  type?: string;
   name?: string;
   description: string;
   phoneNumber?: string;
@@ -47,6 +49,7 @@ export interface UpdateInquiryData {
 export interface InquiryFilters {
   page?: number;
   limit?: number;
+  type?: string;
   status?: 'active' | 'accepted' | 'ended';
 }
 
@@ -101,6 +104,7 @@ export const inquiryService = {
     try {
       const formData = new FormData();
       
+      if (data.type) formData.append('type', data.type);
       if (data.name) formData.append('name', data.name);
       formData.append('description', data.description);
       if (data.phoneNumber) formData.append('phoneNumber', data.phoneNumber);
@@ -143,6 +147,7 @@ export const inquiryService = {
     
     if (filters?.page) params.append('page', filters.page.toString());
     if (filters?.limit) params.append('limit', filters.limit.toString());
+    if (filters?.type) params.append('type', filters.type);
     if (filters?.status) params.append('status', filters.status);
 
     const response = await apiClient.get(`${BASE_URL}/inquiries?${params.toString()}`);

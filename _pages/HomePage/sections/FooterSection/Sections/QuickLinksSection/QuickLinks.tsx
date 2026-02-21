@@ -14,6 +14,7 @@ const QuickLinks = ({ onContactClick }: QuickLinksProps) => {
     { href: "/about", label: "من نحن" },
     { href: "/policies", label: "السياسات الخاصة بالمنصة" },
     { href: "/inquiries", label: "اعمل طلبك علي مزاجك" },
+    { href: "/service-requests", label: "اطلب صنايعي" },
   ]);
 
   return (

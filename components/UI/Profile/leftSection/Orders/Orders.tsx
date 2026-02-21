@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 import OrderFilter, { FilterOption } from '@/components/UI/Profile/leftSection/Orders/OrderFilter';
 
 //icons 
-import { Package } from 'lucide-react';
+import { Package, Receipt } from 'lucide-react';
 import Box from '@/public/icons/order.svg'
 
 // Import the correct interfaces from the service
@@ -173,9 +173,17 @@ const Orders: React.FC<OrdersProps> = ({orders}) => {
                   <div className={styles.orderPrice_new}>
                     السعر: {getOrderTotal(order).toFixed(2)} ج
                   </div>
-                  <span className={`${styles.statusBadge_new} ${getStatusClass(order.status)}`}>
-                    {getStatusText(order.status)}
-                  </span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`${styles.statusBadge_new} ${getStatusClass(order.status)}`}>
+                      {getStatusText(order.status)}
+                    </span>
+                    {order.paymentRequests && order.paymentRequests.length > 0 && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-xs font-semibold text-blue-700">
+                        <Receipt className="w-3.5 h-3.5" />
+                        {order.paymentRequests.length} طلب دفع
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className={`${styles.orderRight_new} w-full items-start gap-2 lg:w-auto lg:items-end`}>

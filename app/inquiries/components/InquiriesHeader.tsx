@@ -12,7 +12,7 @@ const trustItems = [
   },
   {
     icon: Users,
-    label: "تواصل مباشر مع الموردين",
+    label: "تواصل مباشر مع مقدمي الخدمة",
   },
   {
     icon: Sparkles,

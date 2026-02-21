@@ -108,6 +108,7 @@ export interface OrderItem {
   updatedAt: string;
   __v: number;
   paymentDetails?: PaymentDetails;
+  paymentRequests?: any[];
   id: string;
 }
 

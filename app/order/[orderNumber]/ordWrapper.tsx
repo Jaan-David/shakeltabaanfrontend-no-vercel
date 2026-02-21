@@ -2,11 +2,18 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter, useParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 
 //components
 import OrderStepper from '@/components/UI/Profile/leftSection/Orders/OrderStepper';
 import type { OrderStatus } from '@/components/UI/Profile/leftSection/Orders/OrderStepper';
 import InfoCard from '@/components/UI/Profile/leftSection/Orders/InfoCard';
+
+// Dynamic import to avoid circular dependencies
+const PaymentRequestsSection = dynamic(
+  () => import('@/components/UI/PaymentRequests/PaymentRequestsSection').then(mod => ({ default: mod.PaymentRequestsSection })),
+  { loading: () => <div className="bg-white rounded-lg border border-gray-200 p-6 h-40 animate-pulse" /> }
+);
 
 // Import order service
 import orderService, { CartItem, OrderItem, OrderStatusArabic } from '@/services/profile/orders';
@@ -171,6 +178,14 @@ export default function OrdWrapper() {
               <p className="text-slate-500 text-center col-span-full text-sm">لا توجد منتجات في هذا الطلب</p>
             )}
           </div>
+        </div>
+
+        {/* Payment Requests */}
+        <div className="bg-white shadow-lg rounded-xl p-4 border border-slate-200">
+          <PaymentRequestsSection
+            orderId={orderId}
+            orderTotal={order.deliveryPrice + cartTotal}
+          />
         </div>
       </div>
     </div>

@@ -1,11 +1,9 @@
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import Image from "next/image";
+import { Trash2 } from "lucide-react";
 
 //styles
 import styles from "@/components/UI/notification/notification.module.css";
-
-import TrashIcon from "@/public/icons/Trash Bin Trash.svg";
 
 import {
   getNotifications,
@@ -426,12 +424,7 @@ const NotificationsComponent: React.FC<NotificationsComponentProps> = ({
                   onClick={(e) => handleDeleteNotification(notification._id, e)}
                   title="حذف الإشعار"
                 >
-                  <Image
-                    src={TrashIcon}
-                    alt="حذف الإشعار"
-                    width={20}
-                    height={20}
-                  />
+                  <Trash2 className="w-5 h-5 text-red-500" />
                 </button>
               </div>
             ))}
