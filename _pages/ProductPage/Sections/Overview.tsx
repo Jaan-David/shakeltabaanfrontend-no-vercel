@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Heart, ChevronLeft, ChevronRight } from "lucide-react";
-import { Minus, Plus } from "lucide-react";
 import { CustomMedia } from "@/components/UI/Image/Images";
 import PriceRow from "@/components/UI/Price/PriceRow";
 import { cartService, checkProductUnitConflict } from "@/services/api/cart";
@@ -46,6 +45,8 @@ type Props = {
   averageRate?: number;
   createdAt?: string;
   updatedAt?: string;
+  withInstallation?: boolean;
+  minAmount?: number;
 };
 
 // Helper function to calculate price based on unit conversion
@@ -120,8 +121,17 @@ const Overview: React.FC<Props> = ({
   averageRate,
   createdAt,
   updatedAt,
+  withInstallation,
+  minAmount,
 }) => {
-  const [quantity, setQuantity] = useState(1);
+  const safeMinAmount = useMemo(() => {
+    const parsed = Number(minAmount);
+    if (!Number.isFinite(parsed) || parsed <= 0) return 1;
+    return parsed;
+  }, [minAmount]);
+
+  const [quantityInput, setQuantityInput] = useState<string>(String(safeMinAmount));
+  const [quantityError, setQuantityError] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const hasLinearPrice = [pricePerLinearMeter, offerLinearPrice]
     .some((value) => Number(value) > 0);
@@ -135,6 +145,10 @@ const Overview: React.FC<Props> = ({
   const [selectedUnitType, setSelectedUnitType] = useState<'linear' | 'cubic'>(
     hasLinearPrice ? 'linear' : 'cubic'
   );
+
+  const parsedQuantity = Number(quantityInput);
+  const quantityValue = Number.isFinite(parsedQuantity) ? parsedQuantity : NaN;
+  const isQuantityValid = Number.isFinite(quantityValue) && quantityValue >= safeMinAmount;
   
   // Define available units based on props - show related units together
   const unitOptions = React.useMemo(() => {
@@ -169,6 +183,54 @@ const Overview: React.FC<Props> = ({
     
     return options.length > 0 ? options : [{ key: 'unit', label: 'قطعة' }];
   }, [isUNIT, isKG, isTON, isLITER, isCUBIC_METER]);
+
+  useEffect(() => {
+    setQuantityInput((prev) => {
+      if (!prev) return String(safeMinAmount);
+      const current = Number(prev);
+      if (!Number.isFinite(current) || current < safeMinAmount) {
+        return String(safeMinAmount);
+      }
+      return prev;
+    });
+    setQuantityError(null);
+  }, [safeMinAmount]);
+
+  const handleQuantityChange = (value: string) => {
+    setQuantityInput(value);
+
+    if (!value) {
+      setQuantityError(null);
+      return;
+    }
+
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) {
+      setQuantityError(`الحد الأدنى للطلب: ${safeMinAmount} م²`);
+      return;
+    }
+
+    if (numeric < safeMinAmount) {
+      setQuantityError(`الحد الأدنى للطلب: ${safeMinAmount} م²`);
+      return;
+    }
+
+    setQuantityError(null);
+  };
+
+  const handleQuantityBlur = () => {
+    if (!quantityInput) {
+      setQuantityInput(String(safeMinAmount));
+      setQuantityError(null);
+      return;
+    }
+
+    const numeric = Number(quantityInput);
+    if (!Number.isFinite(numeric) || numeric < safeMinAmount) {
+      setQuantityInput(String(safeMinAmount));
+      setQuantityError(null);
+    }
+  };
 
   // Get the base unit for price calculation
   const baseUnit = useMemo(() => getBaseUnit({ isUNIT, isKG, isTON, isLITER, isCUBIC_METER }), 
@@ -322,6 +384,13 @@ const Overview: React.FC<Props> = ({
       return;
     }
 
+    if (!isQuantityValid) {
+      setQuantityError(`الحد الأدنى للطلب: ${safeMinAmount} م²`);
+      return;
+    }
+
+    const quantityToSend = quantityValue;
+
     try {
       setIsAdding(true);
       if (!isAuthenticated()) {
@@ -333,12 +402,12 @@ const Overview: React.FC<Props> = ({
       localStorage.setItem(cartItemKey, JSON.stringify({
         unitType: unitTypeToSend,
         unit: selectedUnit,
-        quantity: quantity
+        quantity: quantityToSend
       }));
 
       await cartService.addToCart({
         productId: String(id),
-        itemQty: quantity,
+        itemQty: quantityToSend,
         unitType: unitTypeToSend
       });
       
@@ -539,6 +608,15 @@ const Overview: React.FC<Props> = ({
               )}
             </div>
 
+            {withInstallation && (
+              <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50/60 p-3">
+                <p className="text-sm font-semibold text-blue-700">خدمة التركيب متاحة</p>
+                <p className="mt-1 text-xs text-slate-600">
+                  سعر التركيب يحدد حسب الموقع والتفاصيل. سيتم التواصل لتحديد السعر النهائي.
+                </p>
+              </div>
+            )}
+
             <div className="mt-4 flex flex-col gap-2">
               <button
                 className="w-full rounded-xl bg-blue-600 py-3 text-white font-bold hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
@@ -547,27 +625,33 @@ const Overview: React.FC<Props> = ({
               >
                 أضف إلى السلة
               </button>
-              <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2">
-                <span className="text-sm text-slate-500">الكمية</span>
-                <div className="flex items-center gap-3">
-                  <button
-                    aria-label="decrease"
-                    onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                    className="p-1 rounded-full hover:bg-slate-100"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <span className="min-w-[1.5rem] text-center text-sm font-semibold">{quantity}</span>
-                  <button
-                    aria-label="increase"
-                    onClick={() =>
-                      setQuantity((prev) => Math.min(stockQty, prev + 1))
-                    }
-                    className="p-1 rounded-full hover:bg-slate-100"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
+              <div className="rounded-xl border border-slate-200 bg-white px-3 py-3">
+                <div className="flex items-center justify-between gap-3">
+                  <label htmlFor="quantity-input" className="text-sm text-slate-500">
+                    الكمية
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      id="quantity-input"
+                      type="number"
+                      inputMode="decimal"
+                      step="0.01"
+                      min={safeMinAmount}
+                      value={quantityInput}
+                      onChange={(event) => handleQuantityChange(event.target.value)}
+                      onBlur={handleQuantityBlur}
+                      className="w-28 sm:w-32 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-center text-base font-semibold text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                      aria-describedby="quantity-hint"
+                    />
+                    <span className="text-sm font-semibold text-slate-600">م²</span>
+                  </div>
                 </div>
+                <div id="quantity-hint" className="mt-2 text-xs text-slate-500">
+                  الحد الأدنى للطلب: {safeMinAmount} م²
+                </div>
+                {quantityError && (
+                  <div className="mt-1 text-xs text-rose-600">{quantityError}</div>
+                )}
               </div>
 
               {!hasMarbleUnits && (

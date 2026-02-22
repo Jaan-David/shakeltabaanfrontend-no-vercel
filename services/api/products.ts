@@ -50,6 +50,12 @@ export interface Product {
   organizationName?: string;
   createdBy?: string;
   productReview?: any[];
+  withInstallation?: boolean;
+  minAmount?: number;
+  reviewSummary?: {
+    totalReviews?: number;
+    ratingDistribution?: Record<string, number>;
+  };
   [key: string]: any;
 }
 

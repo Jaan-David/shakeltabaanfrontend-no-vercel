@@ -178,6 +178,8 @@ const ProductPage: React.FC<{ data: ProductData }> = ({ data }) => {
             averageRate={product.averageRate}
             createdAt={product.createdAt}
             updatedAt={product.updatedAt}
+            withInstallation={product.withInstallation}
+            minAmount={product.minAmount}
           />
         </Suspense>
 
