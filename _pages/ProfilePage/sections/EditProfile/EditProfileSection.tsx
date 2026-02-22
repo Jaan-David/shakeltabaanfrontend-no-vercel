@@ -122,7 +122,7 @@ const EditProfileSection: React.FC<EditProfileSectionProps> = ({
 
         try {
           orderService.debugAuth();
-          const apiOrders = await orderService.getUserOrders();
+          const apiOrders = await orderService.getUserOrders(true); // Force refresh to always get latest orders
           setOrders(apiOrders);
         } catch (error) {
           console.error('Failed to fetch orders:', error);

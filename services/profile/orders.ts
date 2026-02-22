@@ -144,9 +144,9 @@ class OrderService {
   
   // Cache configuration (in milliseconds)
   private readonly CACHE_DURATION = {
-    ORDERS_LIST: 5 * 60 * 1000,      // 5 minutes for orders list
-    ORDER_DETAILS: 10 * 60 * 1000,   // 10 minutes for order details
-    ORDER_TRACKING: 2 * 60 * 1000,   // 2 minutes for tracking (more frequent updates)
+    ORDERS_LIST: 60 * 1000,           // 60 seconds for orders list (reduced for real-time updates)
+    ORDER_DETAILS: 60 * 1000,         // 60 seconds for order details (reduced for real-time updates)
+    ORDER_TRACKING: 40 * 1000,        // 40 seconds for tracking (more frequent updates)
   };
 
   /**
@@ -312,6 +312,8 @@ class OrderService {
       const response = await fetch(`${this.baseUrl}${API_ENDPOINTS.USERS.ORDERS}`, {
         method: 'GET',
         headers,
+        cache: 'no-store',
+        credentials: 'include',
       });
 
       //console.log('📥 Response status:', response.status);
@@ -400,6 +402,7 @@ class OrderService {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        cache: 'no-store',
         credentials: 'include',
       });
 
@@ -446,6 +449,7 @@ class OrderService {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        cache: 'no-store',
         credentials: 'include',
       });
 
@@ -496,6 +500,7 @@ class OrderService {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        cache: 'no-store',
         credentials: 'include',
       });
 

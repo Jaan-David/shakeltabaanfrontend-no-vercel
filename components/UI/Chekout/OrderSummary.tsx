@@ -13,6 +13,7 @@ import Alert, { AlertButton } from '@/components/UI/Alert/alert';
 import { useRouter } from 'next/navigation';
 import { orderService, CreateOrderData} from '@/services/checkout/order';
 import { getAuthToken } from '@/services/auth/login';
+import profileOrderService from '@/services/profile/orders';
 
 interface Address {
     id: number;
@@ -129,6 +130,9 @@ const Summary: React.FC<SummaryInter> = ({
             const response = await orderService.createOrder(orderData);
             
             //console.log('✅ Order created successfully:', response);
+
+            // Invalidate orders cache to ensure fresh data on profile
+            profileOrderService.invalidateOrdersCache();
 
             // Show success message with redirect
             showAlert(

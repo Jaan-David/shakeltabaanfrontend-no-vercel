@@ -69,6 +69,13 @@ type PreviousWork = {
   createdAt?: string;
 };
 
+type RatingSummary = {
+  averageRate: number;
+  totalReviews: number;
+  totalProducts: number;
+  ratedProducts: number;
+};
+
 type OrganizationProfile = {
   _id?: string;
   id?: string;
@@ -77,6 +84,7 @@ type OrganizationProfile = {
   description?: string;
   location?: string;
   photo?: string;
+  ratingSummary?: RatingSummary;
 };
 
 async function fetchOrganizationProducts(organizationId: string): Promise<Product[]> {
@@ -179,14 +187,16 @@ export default async function OrganizationProfilePage({
   const logo = rawPhoto ? normalizeApiImage(rawPhoto) : "/logo/logo1.png";
   const logoIsRemote = logo.startsWith("http://") || logo.startsWith("https://");
 
+  const ratingSummary = orgData?.ratingSummary || { averageRate: 0, totalReviews: 0, totalProducts: 0, ratedProducts: 0 };
+  
   const orgProfile = {
     name: orgData?.name || organizationId || "اسم الشركة",
     description:
       orgData?.description ||
       "شركة متخصصة في جميع أنواع الرخام والجرانيت، بخبرة طويلة وجودة عالية في التنفيذ والتوريد.",
     location: orgData?.location || "",
-    rating: 4.6,
-    reviewsCount: 128,
+    rating: ratingSummary.averageRate || 0,
+    reviewsCount: ratingSummary.totalReviews || 0,
     logo,
   };
 
@@ -227,8 +237,8 @@ export default async function OrganizationProfilePage({
     image: orgProfile.logo,
     url: organizationUrl,
     address: orgProfile.location,
-    rating: orgProfile.rating,
-    ratingCount: orgProfile.reviewsCount,
+    rating: ratingSummary.averageRate || 0,
+    ratingCount: ratingSummary.totalReviews || 0,
     areaServed,
     sameAs,
   });

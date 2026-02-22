@@ -59,13 +59,13 @@ export default function OrdWrapper() {
         setLoading(true);
         setError(null);
 
-        const allOrders = await orderService.getUserOrders();
+        const allOrders = await orderService.getUserOrders(true); // Force refresh
         const foundOrder = allOrders.find(o => o._id === orderId || o.orderId === orderId);
 
         if (foundOrder) {
           setOrder(foundOrder);
         } else {
-          const orderDetails = await orderService.getOrderDetails(orderId);
+          const orderDetails = await orderService.getOrderDetails(orderId, true); // Force refresh
           setOrder(orderDetails);
         }
       } catch (err) {
