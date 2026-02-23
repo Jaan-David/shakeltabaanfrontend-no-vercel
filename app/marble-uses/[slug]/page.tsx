@@ -222,7 +222,7 @@ export default async function MarbleUsePage({ params }: MarbleUsePageProps) {
             الرجوع للاستخدامات
           </Link>
           <div className="max-w-3xl">
-            <h1 className="text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">
+            <h1 className="text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl">
               {category.title}
             </h1>
             <p className="mt-4 text-base text-white/90 sm:text-lg">
@@ -251,13 +251,13 @@ export default async function MarbleUsePage({ params }: MarbleUsePageProps) {
               <span aria-hidden="true">→</span>
             </Link>
             <Link
-              href={`/products?category=${encodeURIComponent(category.title)}`}
+              href={`/products?search=${encodeURIComponent(category.title)}`}
               className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/40 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10 sm:w-auto"
             >
               تصفح منتجات {category.title}
             </Link>
             <Link
-              href="/marble-info"
+              href="/products"
               className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/40 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10 sm:w-auto"
             >
               تصفح أنواع أخرى

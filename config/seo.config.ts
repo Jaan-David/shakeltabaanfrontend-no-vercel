@@ -7,8 +7,8 @@ export const canonicalBaseUrl = normalizeBaseUrl(
 );
 
 export const seoConfig = {
-  siteName: 'شق التعبان',
-  siteDescription: "اول واكبر منصة للرخام",
+  siteName: 'منصة شق التعبان',
+  siteDescription: "منصة شق التعبان - أول وأكبر منصة للرخام والجرانيت في مصر. نوفر أفضل أسعار الرخام والجرانيت والكوارتز مع خدمة توريد وتركيب موثوقة.",
   defaultLanguage: 'ar',
   
   // Social Media Links
@@ -41,18 +41,26 @@ export const seoConfig = {
     'شق الثعبان',
     'شق التعبان',
     'شقه تعبان',
+    'منصة شق التعبان',
     'رخام',
     'جرانيت',
+    'كوارتز',
+    'رخام في مصر',
+    'جرانيت في مصر',
+    'كوارتز مطابخ',
+    'اسعار الرخام',
+    'اسعار الجرانيت',
+    'سعر الرخام في مصر',
+    'توريد رخام',
+    'تركيب رخام',
+    'توريد وتركيب رخام',
     'رخام شق التعبان',
     'جرانيت شق التعبان',
-    'كيماويات',
-    'كيماويات البناء',
-    'دهانات',
-    'كيماويات الصباغة',
-    'مستحضرات التجميل',
-    'منظفات',
-    'تجارة كيماويات',
-    'مواد بناء',
+    'موردين رخام في مصر',
+    'موردين جرانيت في مصر',
+    'marble Egypt',
+    'granite Egypt',
+    'marble suppliers egypt',
     'القاهرة',
   ],
   
@@ -154,7 +162,6 @@ export const generateSEO = ({
       canonical: normalizedUrl,
       languages: {
         'ar': normalizedUrl,
-        'en': `${baseUrl}/en${url || ''}`,
         'x-default': baseUrl,
       },
     },

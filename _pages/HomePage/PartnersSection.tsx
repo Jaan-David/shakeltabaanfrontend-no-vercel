@@ -58,18 +58,23 @@ export default function PartnersSection() {
         setLoading(true);
         const data = await organizationService.getOrganizations();
 
-        const mappedPartners: Partner[] = data.map((org: Organization, index: number) => {
-          const rawPhoto = org.photo || '';
-          const logo = rawPhoto ? normalizeApiImage(rawPhoto) : '/acessts/placeholder.svg';
-          return {
-            id: org.organizationId || org.id || org._id || String(index),
-            organizationId: org.organizationId,
-            name: org.name,
-            logo,
-            location: org.location,
-            typeLabel: getTypeLabel(org),
-          };
-        });
+        const mappedPartners: Partner[] = data
+          .filter((org: Organization) => {
+            // Exclude ala5las organization
+            return org.name?.toLowerCase() !== 'ala5las';
+          })
+          .map((org: Organization, index: number) => {
+            const rawPhoto = org.photo || '';
+            const logo = rawPhoto ? normalizeApiImage(rawPhoto) : '/acessts/placeholder.svg';
+            return {
+              id: org.organizationId || org.id || org._id || String(index),
+              organizationId: org.organizationId,
+              name: org.name,
+              logo,
+              location: org.location,
+              typeLabel: getTypeLabel(org),
+            };
+          });
         setPartners(mappedPartners);
       } catch (error) {
         console.error('Error loading organizations:', error);

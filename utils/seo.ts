@@ -139,3 +139,82 @@ export const buildAltText = ({
   }
   return parts.length > 0 ? parts.join(" - ") : "product image";
 };
+
+type ProductSchemaParams = {
+  name: string;
+  description: string;
+  images: string[];
+  sku: string;
+  brand?: string;
+  price?: number;
+  currency?: string;
+  availability?: 'InStock' | 'OutOfStock' | 'PreOrder';
+  rating?: number;
+  reviewCount?: number;
+  url: string;
+};
+
+export const buildProductSchema = ({
+  name,
+  description,
+  images,
+  sku,
+  brand,
+  price,
+  currency = 'EGP',
+  availability = 'InStock',
+  rating,
+  reviewCount,
+  url,
+}: ProductSchemaParams) => {
+  const baseUrl = getBaseUrl();
+  const absoluteUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
+  const absoluteImages = images.map(img => 
+    img.startsWith('http') ? img : `${baseUrl}${img.startsWith('/') ? img : `/${img}`}`
+  );
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name,
+    description,
+    image: absoluteImages,
+    sku,
+    brand: brand ? {
+      '@type': 'Brand',
+      name: brand,
+    } : undefined,
+    offers: price ? {
+      '@type': 'Offer',
+      url: absoluteUrl,
+      priceCurrency: currency,
+      price: price,
+      availability: `https://schema.org/${availability}`,
+    } : undefined,
+    aggregateRating: (rating && reviewCount) ? {
+      '@type': 'AggregateRating',
+      ratingValue: rating,
+      reviewCount: reviewCount,
+    } : undefined,
+  };
+};
+
+type FAQSchemaParams = {
+  questions: Array<{
+    question: string;
+    answer: string;
+  }>;
+};
+
+export const buildFAQSchema = ({ questions }: FAQSchemaParams) => ({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: questions.map(item => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.answer,
+    },
+  })),
+});

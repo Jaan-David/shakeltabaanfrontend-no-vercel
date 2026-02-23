@@ -12,16 +12,40 @@ const buildProductKeywords = (product: any) => {
   const name = product?.name || product?.nameAr || "";
   const category = product?.category || "";
   const organization = product?.organizationName || "";
+  const material = detectMaterialType(product);
 
   const baseKeywords = [
     name,
     category,
     organization,
-    "رخام",
-    "جرانيت",
+    // Core brand keywords
     "شق التعبان",
     "شقه تعبان",
     "شق الثعبان",
+    "منصة شق التعبان",
+    // Material-specific keywords
+    material,
+    `${material} في مصر`,
+    `سعر ${material}`,
+    `سعر المتر ${material}`,
+    `اسعار ${material} في مصر`,
+    // Product types
+    "رخام",
+    "جرانيت",
+    "كوارتز",
+    "رخام في مصر",
+    "جرانيت في مصر",
+    "كوارتز مطابخ",
+    "اسعار الرخام",
+    "اسعار الجرانيت",
+    // Commercial intent keywords
+    "توريد رخام",
+    "تركيب رخام",
+    "توريد وتركيب رخام",
+    "موردين رخام في مصر",
+    "موردين جرانيت في مصر",
+    "رخام بالجملة",
+    // Brand specific
     "رخام شق التعبان",
     "جرانيت شق التعبان",
     "marble egypt",
@@ -37,7 +61,9 @@ const buildProductKeywords = (product: any) => {
 const buildProductDescription = (product: any) => {
   const name = product?.name || product?.nameAr || "المنتج";
   const category = product?.category ? `من فئة ${product.category}` : "";
-  return `اشترِ ${name} ${category} من شق التعبان في مصر. رخام وجرانيت بجودة عالية وأسعار منافسة لمشاريعك.`.trim();
+  const material = detectMaterialType(product);
+  
+  return `اشترِ ${name} ${category} بأفضل سعر في مصر من منصة شق التعبان. ${material} عالي الجودة مع خدمة توريد وتركيب موثوقة لجميع المشاريع السكنية والتجارية. احصل على عرض سعر الآن.`.trim();
 };
 
 const detectMaterialType = (product: any) => {
@@ -56,20 +82,17 @@ const detectMaterialType = (product: any) => {
 
 const buildProductMetaTitle = (product: any, fallbackId: string) => {
   const name = product?.name || product?.nameAr || `منتج ${fallbackId}`;
-  const title = `سعر ${name} في مصر | شق التعبان`;
-  return title.length > 60 ? `${title.slice(0, 59)}…` : title;
+  const material = detectMaterialType(product);
+  const title = `سعر ${name} | ${material} في مصر | توريد وتركيب | شق التعبان`;
+  return title.length > 60 ? `سعر ${name} في مصر | شق التعبان` : title;
 };
 
 const buildProductMetaDescription = (product: any, material: string) => {
   const name = product?.name || product?.nameAr || "المنتج";
-  let description = `سعر ${name} من ${material} متاح في مصر عبر شق التعبان مع توريد موثوق وخيارات متعددة تناسب المشاريع السكنية والتجارية.`;
-
-  if (description.length < 140) {
-    description = `${description} اطلب عرض سعر الآن.`;
-  }
+  let description = `احصل على أفضل سعر ${name} من ${material} في مصر عبر منصة شق التعبان. توريد وتركيب موثوق لجميع المشاريع. اطلب عرض سعر مجاني الآن.`;
 
   if (description.length > 160) {
-    description = `${description.slice(0, 157).trimEnd()}...`;
+    description = `افضل سعر ${name} من ${material} في مصر | شق التعبان | توريد وتركيب موثوق | اطلب عرض سعر مجاني`.slice(0, 160);
   }
 
   return description;
@@ -346,12 +369,43 @@ export default async function ProductByIdPage({
           : undefined,
     });
 
+    // Breadcrumb Schema for SEO
+    const breadcrumbJsonLd = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "الرئيسية",
+          "item": getSiteUrl(),
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "المنتجات",
+          "item": `${getSiteUrl()}/products`,
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": data.title,
+          "item": canonicalUrl,
+        },
+      ],
+    };
+
     return (
       <>
         <Script
           id="product-jsonld"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+        />
+        <Script
+          id="breadcrumb-jsonld"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
         />
         <Script
           id="product-faq-jsonld"

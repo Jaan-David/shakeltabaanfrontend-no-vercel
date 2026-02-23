@@ -115,8 +115,6 @@ function ExpandableCategoryCard({
 }: ExpandableCategoryCardProps) {
   const contentId = `${id}-content`;
   const cardRef = useRef<HTMLElement | null>(null);
-  const contentRef = useRef<HTMLDivElement | null>(null);
-  const [contentHeight, setContentHeight] = useState(0);
 
   const descriptionSegments = useMemo(() => {
     const sourceText = fullDescription || previewDescription;
@@ -149,11 +147,6 @@ function ExpandableCategoryCard({
     onToggle();
   };
 
-  useEffect(() => {
-    if (!contentRef.current) return;
-    setContentHeight(contentRef.current.scrollHeight);
-  }, [descriptionSegments, expanded]);
-
   const handleToggle = () => {
     const nextExpanded = !expanded;
     onToggle();
@@ -171,23 +164,31 @@ function ExpandableCategoryCard({
   return (
     <article
       ref={cardRef}
-      className={`group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl ${
-        expanded ? "shadow-xl ring-1 ring-blue-100" : ""
+      className={`flex h-full flex-col overflow-hidden rounded-2xl border bg-white shadow-sm ${
+        expanded 
+          ? "border-blue-100 shadow-xl ring-1 ring-blue-100" 
+          : "group border-slate-200 cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
       }`}
       role="button"
-      tabIndex={0}
+      tabIndex={expanded ? -1 : 0}
       aria-expanded={expanded}
       aria-controls={contentId}
-      onClick={handleToggle}
-      onKeyDown={handleKeyDown}
+      onClick={expanded ? undefined : handleToggle}
+      onKeyDown={expanded ? undefined : handleKeyDown}
     >
-      <div className="relative aspect-[4/3] w-full overflow-hidden">
+      <div 
+        className="relative aspect-[4/3] w-full overflow-hidden"
+        onClick={expanded ? handleToggle : undefined}
+        style={{ cursor: expanded ? "pointer" : "default" }}
+      >
         <Image
           src={image}
           alt={title}
           fill
-          className={`object-cover transition-transform duration-300 ${
-            expanded ? "scale-[0.98]" : "group-hover:scale-[1.03]"
+          className={`object-cover ${
+            expanded 
+              ? "" 
+              : "transition-transform duration-200 group-hover:scale-105"
           }`}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           unoptimized
@@ -197,17 +198,21 @@ function ExpandableCategoryCard({
 
       <div className="flex flex-1 flex-col p-5">
         <div className="mb-3 flex items-start justify-between gap-3">
-          <h3 className="text-lg font-semibold text-slate-900 leading-snug">
+          <h3 
+            className="text-lg font-semibold text-slate-900 leading-snug"
+            onClick={expanded ? handleToggle : undefined}
+            style={{ cursor: expanded ? "pointer" : "default" }}
+          >
             {title}
           </h3>
           <div className="flex items-center gap-2">
-            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 whitespace-nowrap">
               {badge}
             </span>
             <button
               type="button"
               onClick={handleChevronClick}
-              className={`flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-transform duration-300 ${
+              className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-all duration-150 hover:bg-slate-50 hover:border-slate-300 ${
                 expanded ? "rotate-180" : "rotate-0"
               }`}
               aria-label={expanded ? "إغلاق التفاصيل" : "عرض التفاصيل"}
@@ -229,55 +234,42 @@ function ExpandableCategoryCard({
           </p>
         )}
 
-        <div
-          id={contentId}
-          className={`transition-all duration-300 ${
-            expanded
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 -translate-y-2 pointer-events-none"
-          }`}
-          style={{ maxHeight: expanded ? contentHeight : 0, overflow: "hidden" }}
-        >
-          <div ref={contentRef} className="pt-2">
-            <div className="space-y-2">
-              {descriptionSegments.map((segment, index) => (
-                <span
-                  key={`${segment}-${index}`}
-                  className={`block text-sm text-slate-600 leading-relaxed transition-all duration-300 ${
-                    expanded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-                  }`}
-                  style={{ transitionDelay: `${index * 70}ms` }}
-                >
-                  {segment}
-                </span>
-              ))}
+        {expanded && (
+          <div id={contentId} className="animate-in fade-in duration-150">
+            <div className="pt-2">
+              <div className="space-y-2">
+                {descriptionSegments.map((segment, index) => (
+                  <span
+                    key={`${segment}-${index}`}
+                    className="block text-sm text-slate-600 leading-relaxed"
+                  >
+                    {segment}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
-        <div
-          className={`mt-4 grid gap-3 transition-all duration-300 ${
-            expanded
-              ? "max-h-32 opacity-100 translate-y-0"
-              : "max-h-0 opacity-0 -translate-y-2 pointer-events-none"
-          }`}
-        >
-          <button
-            type="button"
-            onClick={handleDetailsClick}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors duration-200 hover:border-blue-300 hover:bg-blue-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-          >
-            تفاصيل أكثر
-            <span aria-hidden="true">→</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleOrderClick}
-            className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-          >
-            اطلب الآن
-          </button>
-        </div>
+        {expanded && (
+          <div className="mt-4 grid gap-3 animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <button
+              type="button"
+              onClick={handleDetailsClick}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors duration-150 hover:border-blue-300 hover:bg-blue-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            >
+              تفاصيل أكثر
+              <span aria-hidden="true">→</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleOrderClick}
+              className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            >
+              اطلب الآن
+            </button>
+          </div>
+        )}
       </div>
     </article>
   );
