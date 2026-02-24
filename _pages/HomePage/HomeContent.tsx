@@ -260,53 +260,186 @@ function HeroSection({
 }
 
 // ============ CTA REQUEST SECTION ============
-function CTARequestSection() {
-  return (
-    <section className="px-4 py-12 sm:py-16 md:py-20 bg-slate-50">
-      <div className="mx-auto max-w-6xl">
-        <div className="grid gap-8 md:grid-cols-2 items-center rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 md:p-12 shadow-lg overflow-hidden">
-          {/* Content */}
-          <div className="flex flex-col gap-6" dir="rtl">
-            <div className="space-y-3">
-              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900">
-                هل لديك احتياجات خاصة؟
-              </h2>
-              <p className="text-lg text-slate-600">
-                أرسل احتياجاتك بدقة، واحصل على عروض وأسعار تنافسية من شبكة موردينا المتخصصة.
-              </p>
-            </div>
+interface CTAMode {
+  type: 'supply' | 'installation';
+  title: string;
+  description: string;
+  buttonText: string;
+  buttonRoute: string;
+  supportText: string;
+  items: string[];
+  buttonIcon?: string;
+}
 
-            {/* Trust Indicators */}
-            <div className="grid grid-cols-2 gap-4 md:gap-6">
-              <div className="flex items-start gap-3">
-                <Users size={20} className="text-blue-600 mt-1 flex-shrink-0" />
-                <div>
-                  <p className="font-semibold text-slate-900 text-sm">موردين موثوقين</p>
-                  <p className="text-xs text-slate-500">مختارين بعناية</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Zap size={20} className="text-blue-600 mt-1 flex-shrink-0" />
-                <div>
-                  <p className="font-semibold text-slate-900 text-sm">استجابة سريعة</p>
-                  <p className="text-xs text-slate-500">خلال 24 ساعة</p>
-                </div>
-              </div>
+const CTA_MODES: Record<'supply' | 'installation', CTAMode> = {
+  supply: {
+    type: 'supply',
+    title: 'اطلب خاماتك بالمواصفات',
+    description: 'حدد احتياجاتك بدقة (المقاسات – الكمية – النوع – التشطيب) ونوصل طلبك مباشرةً لأفضل شركات التوريد.',
+    buttonText: 'اطلب خامات أو توريد خاص',
+    buttonRoute: '/inquiries',
+    supportText: 'مناسب للمشاريع والكميات الكبيرة أو المقاسات الخاصة',
+    items: [
+      'تحديد مقاسات خاصة',
+      'كميات كبيرة للمشاريع',
+      'أفضل أسعار السوق',
+      'استلام عروض خلال 24 ساعة',
+    ],
+  },
+  installation: {
+    type: 'installation',
+    title: 'اطلب صنايعي لتنفيذ شغلك',
+    description: 'حدد احتياجاتك بدقة (الموقع – نوع العمل – المساحة) ونوصل طلبك مباشرةً لأفضل الصنايعية المتخصصة.',
+    buttonText: 'اطلب صنايعي لتنفيذ شغلك',
+    buttonRoute: '/service-requests',
+    supportText: 'لو محتاج تنفيذ أو تركيب في موقعك',
+    items: [
+      'تنفيذ احترافي وفني',
+      'عمال متخصصين موثوقين',
+      'ضمان على العمل',
+      'استلام عروض خلال 24 ساعة',
+    ],
+  },
+};
+
+function CTARequestSection() {
+  const [activeMode, setActiveMode] = useState<'supply' | 'installation'>('supply');
+  const mode = CTA_MODES[activeMode];
+
+  return (
+    <section className="px-4 py-12 sm:py-16 md:py-20 bg-gradient-to-b from-white to-slate-50">
+      <div className="mx-auto max-w-6xl">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 md:p-12 shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+          
+          {/* Segmented Toggle */}
+          <div className="mb-8 flex items-center justify-center" dir="rtl">
+            <div className="inline-flex rounded-full bg-slate-100 p-1 shadow-sm">
+              <button
+                onClick={() => setActiveMode('supply')}
+                className={`px-5 sm:px-7 py-2.5 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-200 ${
+                  activeMode === 'supply'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-slate-700 hover:text-slate-900'
+                }`}
+                aria-pressed={activeMode === 'supply'}
+              >
+                توريد خامات
+              </button>
+              <button
+                onClick={() => setActiveMode('installation')}
+                className={`px-5 sm:px-7 py-2.5 sm:py-3 rounded-full font-semibold text-sm sm:text-base transition-all duration-200 ${
+                  activeMode === 'installation'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-slate-700 hover:text-slate-900'
+                }`}
+                aria-pressed={activeMode === 'installation'}
+              >
+                تنفيذ وتركيب
+              </button>
             </div>
           </div>
 
-          {/* CTA Button */}
-          <div className="flex flex-col gap-4">
-            <Link
-              href="/inquiries"
-              className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-95 !text-white hover:!text-white px-8 py-4 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl w-full min-h-[52px] text-lg"
-            >
-              أرسل طلبك الآن
-              <ArrowLeft size={20} />
-            </Link>
-            <p className="text-xs text-slate-500 text-center">
-              بدون أي التزامات • رد خلال 24 ساعة
-            </p>
+          <div className="grid gap-8 md:gap-12 md:grid-cols-2 items-center">
+            
+            {/* Content */}
+            <div className="flex flex-col gap-6" dir="rtl">
+              {/* Main Title */}
+              <div className="space-y-4 animate-fade-in">
+                <h2 className="text-3xl sm:text-4xl md:text-[2.5rem] font-bold text-slate-900 leading-tight">
+                  {mode.title}
+                </h2>
+                
+                {/* Description - Improved Copy */}
+                <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
+                  {mode.description}
+                </p>
+              </div>
+
+              {/* Benefits Checklist */}
+              <div className="space-y-3.5">
+                {mode.items.map((item, index) => (
+                  <div key={index} className="flex items-start gap-3 group">
+                    {/* Check Icon */}
+                    <div className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center mt-1 group-hover:bg-blue-200 transition-colors">
+                      <svg
+                        className="w-3 h-3 text-blue-600"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        aria-hidden="true"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    {/* Text */}
+                    <span className="text-sm sm:text-base text-slate-700 font-medium leading-snug">
+                      {item}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Trust Badges */}
+              <div className="pt-3 flex items-center gap-3 text-xs sm:text-sm text-slate-600">
+                <div className="flex items-center gap-1.5">
+                  <Zap size={16} className="text-blue-600 flex-shrink-0" />
+                  <span>استجابة سريعة</span>
+                </div>
+                <span className="text-slate-300">•</span>
+                <div className="flex items-center gap-1.5">
+                  <Users size={16} className="text-blue-600 flex-shrink-0" />
+                  <span>موثوق</span>
+                </div>
+              </div>
+            </div>
+
+            {/* CTA Area */}
+            <div className="flex flex-col gap-4 animate-fade-in">
+              {/* Primary CTA Button */}
+              <Link
+                href={mode.buttonRoute}
+                className="group relative inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 min-h-[48px] sm:min-h-[56px]"
+                aria-label={mode.buttonText}
+              >
+                <span className="text-base sm:text-lg font-semibold">{mode.buttonText}</span>
+                <ArrowLeft
+                  size={20}
+                  className="transition-transform duration-200 group-hover:translate-x-1"
+                />
+              </Link>
+
+              {/* Micro-copy Under Button */}
+              <p className="text-xs sm:text-sm text-slate-500 text-right leading-relaxed">
+                {mode.supportText}
+              </p>
+
+              {/* Secondary CTA For Other Mode */}
+              {activeMode === 'supply' ? (
+                <Link
+                  href="/service-requests"
+                  className="group relative inline-flex items-center justify-center gap-2 bg-white hover:bg-blue-50 border-2 border-slate-300 hover:border-blue-400 text-slate-900 hover:text-blue-600 px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl font-semibold transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 min-h-[48px] sm:min-h-[56px] mt-2"
+                  aria-label="أو اطلب صنايعي"
+                >
+                  <span className="text-base sm:text-lg">أو اطلب صنايعي</span>
+                </Link>
+              ) : (
+                <Link
+                  href="/inquiries"
+                  className="group relative inline-flex items-center justify-center gap-2 bg-white hover:bg-blue-50 border-2 border-slate-300 hover:border-blue-400 text-slate-900 hover:text-blue-600 px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl font-semibold transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 min-h-[48px] sm:min-h-[56px] mt-2"
+                  aria-label="أو اطلب خامات"
+                >
+                  <span className="text-base sm:text-lg">أو اطلب خامات</span>
+                </Link>
+              )}
+
+              {/* Support Footer */}
+              <p className="text-xs text-slate-500 text-center pt-3 border-t border-slate-200 mt-3">
+                بدون أي التزامات • رد خلال 24 ساعة
+              </p>
+            </div>
           </div>
         </div>
       </div>

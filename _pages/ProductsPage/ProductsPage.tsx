@@ -86,6 +86,7 @@ export default function ProductsPage() {
   const [organization, setOrganization] = useState("all");
   const [ratingMin, setRatingMin] = useState<RatingOption>(0);
   const [hasOffer, setHasOffer] = useState(false);
+  const [withInstallation, setWithInstallation] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("relevance");
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
@@ -98,6 +99,7 @@ export default function ProductsPage() {
     setOrganization(params.get("organization") || "all");
     setRatingMin(getSafeRating(params.get("rating")));
     setHasOffer(params.get("offer") === "1");
+    setWithInstallation(params.get("installation") === "1");
     setSortBy(getSafeSort(params.get("sort")));
 
     isInitializedRef.current = true;
@@ -147,6 +149,7 @@ export default function ProductsPage() {
       if (organization !== "all") params.set("organization", organization);
       if (ratingMin !== 0) params.set("rating", String(ratingMin));
       if (hasOffer) params.set("offer", "1");
+      if (withInstallation) params.set("installation", "1");
       if (sortBy !== "relevance") params.set("sort", sortBy);
 
       const queryString = params.toString();
@@ -157,6 +160,7 @@ export default function ProductsPage() {
     [
       category,
       hasOffer,
+      withInstallation,
       organization,
       ratingMin,
       router,
@@ -170,6 +174,7 @@ export default function ProductsPage() {
   }, [
     category,
     hasOffer,
+    withInstallation,
     organization,
     ratingMin,
     search,
@@ -196,13 +201,15 @@ export default function ProductsPage() {
       const matchesRating = ratingMin === 0 || ratingValue >= ratingMin;
 
       const matchesOffer = !hasOffer || getOfferStatus(product);
+      const matchesInstallation = !withInstallation || product.withInstallation === true;
 
       return (
         matchesSearch &&
         matchesCategory &&
         matchesOrganization &&
         matchesRating &&
-        matchesOffer
+        matchesOffer &&
+        matchesInstallation
       );
     });
   }, [
@@ -212,6 +219,7 @@ export default function ProductsPage() {
     organization,
     ratingMin,
     hasOffer,
+    withInstallation,
   ]);
 
   const sortedProducts = useMemo(() => {
@@ -243,6 +251,7 @@ export default function ProductsPage() {
     setOrganization("all");
     setRatingMin(0);
     setHasOffer(false);
+    setWithInstallation(false);
     setSortBy("relevance");
   };
 
@@ -270,6 +279,7 @@ export default function ProductsPage() {
               organization={organization}
               ratingMin={ratingMin}
               hasOffer={hasOffer}
+              withInstallation={withInstallation}
               categories={categories}
               organizations={organizations}
               resultCount={sortedProducts.length}
@@ -278,6 +288,7 @@ export default function ProductsPage() {
               onOrganizationChange={setOrganization}
               onRatingChange={setRatingMin}
               onHasOfferChange={setHasOffer}
+              onWithInstallationChange={setWithInstallation}
               onReset={resetFilters}
             />
           </aside>
@@ -378,6 +389,7 @@ export default function ProductsPage() {
           organization={organization}
           ratingMin={ratingMin}
           hasOffer={hasOffer}
+          withInstallation={withInstallation}
           categories={categories}
           organizations={organizations}
           resultCount={sortedProducts.length}
@@ -386,6 +398,7 @@ export default function ProductsPage() {
           onOrganizationChange={setOrganization}
           onRatingChange={setRatingMin}
           onHasOfferChange={setHasOffer}
+          onWithInstallationChange={setWithInstallation}
           onReset={resetFilters}
         />
       </MobileFilterDrawer>

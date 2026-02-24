@@ -8,6 +8,7 @@ interface FilterSidebarProps {
   organization: string;
   ratingMin: RatingOption;
   hasOffer: boolean;
+  withInstallation: boolean;
   categories: string[];
   organizations: string[];
   resultCount: number;
@@ -16,6 +17,7 @@ interface FilterSidebarProps {
   onOrganizationChange: (value: string) => void;
   onRatingChange: (value: RatingOption) => void;
   onHasOfferChange: (value: boolean) => void;
+  onWithInstallationChange: (value: boolean) => void;
   onReset: () => void;
 }
 
@@ -25,6 +27,7 @@ export default function FilterSidebar({
   organization,
   ratingMin,
   hasOffer,
+  withInstallation,
   categories,
   organizations,
   resultCount,
@@ -33,6 +36,7 @@ export default function FilterSidebar({
   onOrganizationChange,
   onRatingChange,
   onHasOfferChange,
+  onWithInstallationChange,
   onReset,
 }: FilterSidebarProps) {
   return (
@@ -118,6 +122,21 @@ export default function FilterSidebar({
                 onChange={(event) => onHasOfferChange(event.target.checked)}
                 className="peer sr-only"
                 aria-label="عروض فقط"
+              />
+              <span className="absolute inset-0 rounded-full bg-slate-200 transition peer-checked:bg-blue-600" />
+              <span className="absolute left-1 top-1 h-3 w-3 rounded-full bg-white transition peer-checked:translate-x-4" />
+            </span>
+          </label>
+
+          <label className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700">
+            <span>متاح التركيب</span>
+            <span className="relative inline-flex h-5 w-9 items-center">
+              <input
+                type="checkbox"
+                checked={withInstallation}
+                onChange={(event) => onWithInstallationChange(event.target.checked)}
+                className="peer sr-only"
+                aria-label="متاح التركيب"
               />
               <span className="absolute inset-0 rounded-full bg-slate-200 transition peer-checked:bg-blue-600" />
               <span className="absolute left-1 top-1 h-3 w-3 rounded-full bg-white transition peer-checked:translate-x-4" />

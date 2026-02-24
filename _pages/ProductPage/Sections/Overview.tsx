@@ -557,6 +557,26 @@ const Overview: React.FC<Props> = ({
             )}
           </div>
 
+          {withInstallation === true && (
+            <div className="rounded-2xl border border-green-200 bg-green-50/80 p-4 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 flex-shrink-0">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-200">
+                    <span className="text-sm font-semibold text-green-700">✓</span>
+                  </div>
+                </div>
+                <div className="flex-1 text-right">
+                  <p className="font-semibold text-green-900">
+                    متاح تركيب بسعر منفصل
+                  </p>
+                  <p className="mt-1 text-sm text-green-700">
+                    يتم تحديد سعر التركيب حسب الموقع ونوع الشغل.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {(organizationName || organizationId) && (
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
               <p className="text-xs text-slate-500">المورد</p>
