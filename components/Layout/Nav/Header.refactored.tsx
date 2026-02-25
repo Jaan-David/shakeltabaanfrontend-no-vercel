@@ -6,7 +6,6 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { Menu, Search, X, Heart, ShoppingCart, Bell } from "lucide-react";
 import styles from "./Header.module.css";
-import "../../../app/globals.css";
 
 import {
   getCurrentUser,

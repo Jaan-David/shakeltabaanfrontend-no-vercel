@@ -40,7 +40,6 @@ export default function HomeContent() {
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [userName, setUserName] = useState<string>('منصة شق الثعبان');
   const [productSearch, setProductSearch] = useState('');
-  const [hasHydrated, setHasHydrated] = useState(false);
   const isMounted = useRef(false);
 
   const fixedCategories: CategoryType[] = [
@@ -69,8 +68,6 @@ export default function HomeContent() {
 
   useEffect(() => {
     isMounted.current = true;
-    setHasHydrated(true);
-
     const fetchUserProfile = async () => {
       // Only fetch profile if user is authenticated
       if (!isUserAuthenticated()) {
@@ -136,10 +133,6 @@ export default function HomeContent() {
       })
     : products;
 
-  if (!hasHydrated) {
-    return <div className="min-h-screen bg-white" />;
-  }
-
   return (
     <div className="min-h-screen bg-white">
       {/* ============ HERO SECTION ============ */}
@@ -197,7 +190,7 @@ function HeroSection({
           fetchPriority="high"
           sizes="100vw"
           className="object-cover"
-          quality={85}
+          quality={70}
         />
 
         {/* Dark Gradient Overlay for Text Contrast */}

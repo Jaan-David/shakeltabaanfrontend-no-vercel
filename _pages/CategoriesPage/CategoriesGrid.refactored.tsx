@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import CategoryCard from "./CategoryCard";
-import styles from './CategoriesGrid.module.css';
 
 export interface Category {
   id: string;

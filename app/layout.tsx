@@ -107,9 +107,6 @@ export default function RootLayout({
           type="image/jpeg"
         />
 
-        {/* Preconnect to Cloudinary for faster image loading (above-the-fold images) */}
-        <link rel="preconnect" href="https://res.cloudinary.com" />
-
         {/* Contact Information (for search engines) */}
         <meta name="contact" content={seoConfig.contact.email} />
         <meta name="geo.region" content="EG-C" />
