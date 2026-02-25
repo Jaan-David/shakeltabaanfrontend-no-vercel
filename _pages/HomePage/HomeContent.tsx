@@ -190,7 +190,7 @@ function HeroSection({
           fetchPriority="high"
           sizes="100vw"
           className="object-cover"
-          quality={70}
+          quality={60}
         />
 
         {/* Dark Gradient Overlay for Text Contrast */}

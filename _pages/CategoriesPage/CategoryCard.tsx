@@ -18,12 +18,13 @@ export default function CategoryCard({ title, description, badge, image, onClick
   };
 
   return (
-    <article
+    <div
       className={styles.categoryCard}
-      role="button"
-      tabIndex={0}
       onClick={onClick}
       onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label={`${title} - ${badge}`}
     >
       <div className={styles.imageContainer}>
         <Image
@@ -33,7 +34,7 @@ export default function CategoryCard({ title, description, badge, image, onClick
           height={300}
           sizes="(max-width: 480px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
           loading="lazy"
-          quality={70}
+          quality={60}
           className={styles.categoryImage}
         />
         {/* Hover overlay improves focus on the card title without heavy visuals. */}
@@ -58,6 +59,6 @@ export default function CategoryCard({ title, description, badge, image, onClick
           <span className={styles.cardButtonIcon} aria-hidden="true">→</span>
         </button>
       </div>
-    </article>
+    </div>
   );
 }

@@ -99,12 +99,21 @@ export default function RootLayout({
   return (
     <html lang={seoConfig.defaultLanguage} dir="rtl" suppressHydrationWarning className={fontVariables}>
       <head>
-        {/* LCP Image Preload - /slider/1.jpg is the hero image on home page */}
+        {/* Critical CSS - Inline above-the-fold styles for faster FCP/LCP */}
+        <style dangerouslySetInnerHTML={{__html: `
+          body{margin:0;background:#fff;color:#0f172a;overflow-x:hidden}
+          .antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+          img{display:block;max-width:100%;height:auto}
+        `}} />
+        
+        {/* LCP Image Preload - Hero image with responsive formats (WebP/AVIF priority) */}
         <link
           rel="preload"
-          href="/slider/1.jpg"
           as="image"
-          type="image/jpeg"
+          href="/_next/image?url=%2Fslider%2F1.jpg&w=640&q=60"
+          imageSrcSet="/_next/image?url=%2Fslider%2F1.jpg&w=640&q=60 640w, /_next/image?url=%2Fslider%2F1.jpg&w=750&q=60 750w, /_next/image?url=%2Fslider%2F1.jpg&w=828&q=60 828w, /_next/image?url=%2Fslider%2F1.jpg&w=1080&q=60 1080w, /_next/image?url=%2Fslider%2F1.jpg&w=1200&q=60 1200w, /_next/image?url=%2Fslider%2F1.jpg&w=1920&q=60 1920w"
+          imageSizes="100vw"
+          fetchPriority="high"
         />
 
         {/* Contact Information (for search engines) */}
@@ -117,9 +126,9 @@ export default function RootLayout({
         <Script
           async
           src="https://www.googletagmanager.com/gtag/js?id=G-8V17H7W98Z"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="ga-gtag" strategy="afterInteractive">
+        <Script id="ga-gtag" strategy="lazyOnload">
           {`window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());

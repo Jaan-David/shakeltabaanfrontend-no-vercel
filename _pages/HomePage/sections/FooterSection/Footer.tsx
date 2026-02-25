@@ -42,7 +42,7 @@ const Footer = () => {
               />
               <span className="text-lg font-semibold text-white">منصة شق الثعبان</span>
             </div>
-            <p className="text-sm leading-6 text-slate-300">
+            <p className="text-sm leading-6 text-slate-200">
               سوق احترافي للرخام والجرانيت والكوارتز يربطك بالموردين الموثوقين وأفضل الأسعار.
             </p>
             <div className="flex flex-wrap gap-2">
@@ -61,37 +61,37 @@ const Footer = () => {
           <FooterColumn title="روابط سريعة">
             <nav className="flex flex-col gap-3 text-sm">
               <Link
-                className="text-slate-300 transition hover:text-blue-300 font-medium"
+                className="text-slate-200 transition hover:text-blue-300 font-medium"
                 href="/"
               >
                 الرئيسية
               </Link>
               <Link
-                className="text-slate-300 transition hover:text-blue-300 font-medium"
+                className="text-slate-200 transition hover:text-blue-300 font-medium"
                 href="/products"
               >
                 المنتجات
               </Link>
               <Link
-                className="text-slate-300 transition hover:text-blue-300 font-medium"
+                className="text-slate-200 transition hover:text-blue-300 font-medium"
                 href="/inquiries"
               >
                 طلبيتك الخاصه
               </Link>
               <Link
-                className="text-slate-300 transition hover:text-blue-300 font-medium"
+                className="text-slate-200 transition hover:text-blue-300 font-medium"
                 href="/service-requests"
               >
                 اطلب صنايعي
               </Link>
               <Link
-                className="text-slate-300 transition hover:text-blue-300 font-medium"
+                className="text-slate-200 transition hover:text-blue-300 font-medium"
                 href="/marble-info"
               >
                 ازاي تختار
               </Link>
               <Link
-                className="text-slate-300 transition hover:text-blue-300 font-medium"
+                className="text-slate-200 transition hover:text-blue-300 font-medium"
                 href="/about"
               >
                 من نحن
@@ -101,7 +101,7 @@ const Footer = () => {
 
           {/* Categories Column */}
           <FooterColumn title="الفئات">
-            <ul className="flex flex-col gap-3 text-sm text-slate-300">
+            <ul className="flex flex-col gap-3 text-sm text-slate-200">
               <li>
                 <Link
                   className="transition hover:text-blue-300 font-medium"
@@ -147,7 +147,7 @@ const Footer = () => {
 
           {/* Contact Column */}
           <FooterColumn title="تواصل معنا">
-            <div className="flex flex-col gap-3 text-sm text-slate-300">
+            <div className="flex flex-col gap-3 text-sm text-slate-200">
               <a
                 className="transition hover:text-blue-300 font-medium"
                 href="tel:+201204246538"
@@ -190,7 +190,7 @@ const Footer = () => {
               />
               <span className="text-base font-semibold text-white">منصة شق الثعبان</span>
             </div>
-            <p className="text-sm leading-6 text-slate-300 mb-4">
+            <p className="text-sm leading-6 text-slate-200 mb-4">
               سوق احترافي للرخام والجرانيت والكوارتز يربطك بالموردين الموثوقين.
             </p>
             <div className="flex flex-wrap gap-2">
@@ -222,7 +222,7 @@ const Footer = () => {
               ].map((item) => (
                 <Link
                   key={item.href}
-                  className="text-slate-300 transition hover:text-blue-300 font-medium text-sm"
+                  className="text-slate-200 transition hover:text-blue-300 font-medium text-sm"
                   href={item.href}
                 >
                   {item.label}
@@ -247,7 +247,7 @@ const Footer = () => {
               ].map((cat) => (
                 <li key={cat.query}>
                   <Link
-                    className="text-slate-300 transition hover:text-blue-300 font-medium text-sm"
+                    className="text-slate-200 transition hover:text-blue-300 font-medium text-sm"
                     href={`/products?category=${cat.query}`}
                   >
                     {cat.name}
@@ -265,19 +265,19 @@ const Footer = () => {
           >
             <div className="flex flex-col gap-3 mb-4">
               <a
-                className="text-slate-300 transition hover:text-blue-300 font-medium text-sm flex items-center gap-2"
+                className="text-slate-200 transition hover:text-blue-300 font-medium text-sm flex items-center gap-2"
                 href="tel:+201204246538"
               >
                 📞 +201204246538
               </a>
               <a
-                className="text-slate-300 transition hover:text-blue-300 font-medium text-sm flex items-center gap-2"
+                className="text-slate-200 transition hover:text-blue-300 font-medium text-sm flex items-center gap-2"
                 href="mailto:info@shak-elt3ban.com"
               >
                 📧 info@shak-elt3ban.com
               </a>
               <a
-                className="text-slate-300 transition hover:text-blue-300 font-medium text-sm flex items-center gap-2"
+                className="text-slate-200 transition hover:text-blue-300 font-medium text-sm flex items-center gap-2"
                 href="https://wa.me/201204246538"
               >
                 💬 واتساب مباشر
@@ -334,7 +334,7 @@ function AccordionSection({
       {isOpen && (
         <div
           id={`accordion-${title}`}
-          className="px-4 py-4 bg-slate-850 text-slate-300 text-center"
+          className="px-4 py-4 bg-slate-850 text-slate-200 text-center"
         >
           {children}
         </div>
