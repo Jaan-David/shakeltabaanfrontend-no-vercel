@@ -30,11 +30,11 @@ export default function CategoryCard({ title, description, badge, image, onClick
         <Image
           src={image}
           alt={title}
-          width={400}
-          height={300}
-          sizes="(max-width: 480px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          width={320}
+          height={240}
+          sizes="(max-width: 480px) calc(100vw - 32px), (max-width: 768px) calc(50vw - 20px), (max-width: 1024px) calc(33.33vw - 20px), calc(25vw - 20px)"
           loading="lazy"
-          quality={60}
+          quality={55}
           className={styles.categoryImage}
         />
         {/* Hover overlay improves focus on the card title without heavy visuals. */}

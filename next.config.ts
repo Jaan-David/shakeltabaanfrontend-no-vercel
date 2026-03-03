@@ -36,10 +36,10 @@ const nextConfig: NextConfig = {
    */
   experimental: {
     optimizeCss: true,              // Inline critical CSS
-    // optimizePackageImports: [      // Uncomment if you have large packages to optimize
-    //   'lucide-react',
-    //   'react-icons',
-    // ],
+    optimizePackageImports: [      // Tree-shake unused code from large packages
+      'lucide-react',
+      'react-icons',
+    ],
   },
   
   // Image configuration for external domains
@@ -224,6 +224,26 @@ const nextConfig: NextConfig = {
     });
 
     // Additional optimizations for production
+    if (!isServer && !dev) {
+      // Enable module concatenation (scope hoisting) for better tree-shaking
+      config.optimization = config.optimization || {};
+      config.optimization.concatenateModules = true;
+      config.optimization.usedExports = true;
+      config.optimization.sideEffects = true;
+      config.optimization.splitChunks = {
+        ...config.optimization.splitChunks,
+        chunks: 'all',
+        cacheGroups: {
+          // Separate vendor chunks for better caching
+          shared: {
+            chunks: 'all',
+            reuseExistingChunk: true,
+            enforce: true,
+          },
+        },
+      };
+    }
+    
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,

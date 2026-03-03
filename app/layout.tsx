@@ -115,6 +115,12 @@ export default function RootLayout({
           imageSizes="100vw"
           fetchPriority="high"
         />
+        
+        {/* DNS Prefetch & Preconnect for critical external resources */}
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
 
         {/* Contact Information (for search engines) */}
         <meta name="contact" content={seoConfig.contact.email} />
@@ -126,9 +132,9 @@ export default function RootLayout({
         <Script
           async
           src="https://www.googletagmanager.com/gtag/js?id=G-8V17H7W98Z"
-          strategy="lazyOnload"
+          strategy="afterInteractive"
         />
-        <Script id="ga-gtag" strategy="lazyOnload">
+        <Script id="ga-gtag" strategy="afterInteractive">
           {`window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
