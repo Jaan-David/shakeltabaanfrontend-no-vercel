@@ -900,11 +900,7 @@ function MarbleInfoContent() {
                             )
                           }
                           onDetailsClick={() => handleCategoryClick(category)}
-                          onOrderClick={() =>
-                            router.push(
-                              `/products?category=${encodeURIComponent(meta.title)}`
-                            )
-                          }
+                          onOrderClick={() => router.push("/products")}
                         />
                       );
                     })}
@@ -1050,34 +1046,14 @@ function MarbleInfoContent() {
                         )}
                       </div>
 
-                      <div
-                        className={`fixed inset-0 z-50 ${
-                          isModalOpen ? "pointer-events-auto" : "pointer-events-none"
-                        }`}
-                        aria-hidden={!isModalOpen}
-                      >
-                        <button
-                          className={`absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 ${
-                            isModalOpen ? "opacity-100" : "opacity-0"
-                          }`}
-                          onClick={closeTypeDetails}
-                          aria-label="إغلاق التفاصيل"
-                        />
-                        <div
-                          className={`relative flex h-full items-end justify-center px-4 pb-4 pt-16 transition-all duration-300 sm:items-start sm:pb-10 sm:pt-10 ${
-                            isModalOpen ? "opacity-100" : "opacity-0"
-                          }`}
-                        >
-                          <div
-                            ref={modalRef}
-                            role="dialog"
-                            aria-modal="true"
-                            className={`w-full transform rounded-3xl border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.25)] transition-all duration-300 sm:mx-auto sm:max-h-[90vh] sm:w-[min(80vw,1100px)] ${
-                              isModalOpen
-                                ? "translate-y-0 scale-100 sm:translate-y-0 sm:scale-100"
-                                : "translate-y-full scale-100 sm:-translate-y-10 sm:scale-95"
-                            }`}
-                          >
+                      {isModalOpen && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center">
+                          <button
+                            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+                            onClick={closeTypeDetails}
+                            aria-label="إغلاق التفاصيل"
+                          />
+                          <div className="relative max-h-[90vh] w-full max-w-[90vw] sm:max-w-[80vw] lg:max-w-[1100px] rounded-3xl border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.25)]">
                             <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
                               <div>
                                 <p className="text-xs font-semibold text-blue-600">تفاصيل النوع</p>
@@ -1106,7 +1082,10 @@ function MarbleInfoContent() {
                               </button>
                             </div>
 
-                            <div className="max-h-[80vh] overflow-y-auto px-6 pb-6 pt-5 sm:max-h-[75vh]">
+                            <div
+                              ref={modalRef}
+                              className="max-h-[calc(90vh-80px)] overflow-y-auto px-6 pb-6 pt-5"
+                            >
                               {isModalLoading ? (
                                 <div className="space-y-6">
                                   <div className="h-60 w-full animate-pulse rounded-2xl bg-slate-100" />
@@ -1223,15 +1202,14 @@ function MarbleInfoContent() {
                             </div>
                           </div>
                         </div>
-                      </div>
+                      )}
                     </>
                   )}
                 </div>
               )}
             </div>
 
-            {/* CTA Section */
-            /* Sections "What is Marble", "Difference between Marble and Granite", "Care Tips", "Detailed Guide" removed */ }
+            {/* CTA Section */}
             <div className="bg-white rounded-2xl p-8 border border-[#cbd5f5] text-center transition-all hover:border-[#3b82f6] hover:shadow-[0_12px_30px_rgba(59,130,246,0.15)] hover:-translate-y-1">
               <h2 className="text-3xl font-semibold text-[#0f172a] mb-4">
                 جاهز لاختيار الرخام المثالي؟

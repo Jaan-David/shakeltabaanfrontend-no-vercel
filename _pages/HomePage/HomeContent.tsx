@@ -232,10 +232,18 @@ function HeroSection({
                       <Zap size={18} />
                       تصفح المنتجات
                     </Link>
-                    <Link href="/inquiries" className={secondaryClass}>
+                    <button
+                      onClick={() => {
+                        const element = document.getElementById('special-requests');
+                        if (element) {
+                          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }}
+                      className={secondaryClass}
+                    >
                       <Star size={18} />
                       طلب خاص
-                    </Link>
+                    </button>
                     <Link href="/marble-info" className={guidanceClass}>
                       ازاي تختار نوع رخامتك؟
                       <HelpCircle size={16} />
@@ -300,7 +308,7 @@ function CTARequestSection() {
   const mode = CTA_MODES[activeMode];
 
   return (
-    <section className="px-4 py-12 sm:py-16 md:py-20 bg-gradient-to-b from-white to-slate-50">
+    <section id="special-requests" className="px-4 py-12 sm:py-16 md:py-20 bg-gradient-to-b from-white to-slate-50 scroll-mt-20">
       <div className="mx-auto max-w-6xl">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 md:p-12 shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
           
