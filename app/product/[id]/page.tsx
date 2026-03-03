@@ -4,9 +4,13 @@ import { notFound } from "next/navigation";
 import ProductPage, { ProductData } from "@/_pages/ProductPage/ProductPage";
 import { fetchProductByIdISR } from "@/services/api/products";
 import { reviewService } from "@/services/api/reviews";
+import {
+  buildProductFaqByCategory,
+  getCategoryContentById,
+  getCategoryRelatedLinks,
+} from "@/lib/categoryContentMap";
 
 import { canonicalBaseUrl, generateSEO, seoConfig } from "@/config/seo.config";
-import { marbleUseCategories } from "@/app/marble-uses/data";
 
 const buildProductKeywords = (product: any) => {
   const name = product?.name || product?.nameAr || "";
@@ -96,27 +100,6 @@ const buildProductMetaDescription = (product: any, material: string) => {
   }
 
   return description;
-};
-
-const buildProductFaqItems = (product: any, material: string) => {
-  const name = product?.name || product?.nameAr || "هذا المنتج";
-  return [
-    {
-      question: `ما سعر المتر من ${name} في مصر؟`,
-      answer:
-        `السعر يعتمد على المقاس والسُمك والمصدر. تواصل مع شق التعبان للحصول على سعر متر ${material} المناسب لمشروعك بدقة.`,
-    },
-    {
-      question: `ما أفضل استخدامات ${name}؟`,
-      answer:
-        `يُستخدم ${name} في الأرضيات والمطابخ والواجهات حسب درجة التحمل والصيانة المطلوبة، ويمكن لفريق شق التعبان ترشيح الاستخدام الأنسب.`,
-    },
-    {
-      question: `ما الفرق بين ${name} والبدائل الأخرى؟`,
-      answer:
-        `البدائل تختلف في المتانة ومقاومة البقع والتكلفة. مقارنة ${material} مع الجرانيت أو الكوارتز تساعدك على اختيار الأفضل حسب ميزانيتك.`,
-    },
-  ];
 };
 
 function getImageList(
@@ -303,8 +286,13 @@ export default async function ProductByIdPage({
     const absoluteImages = imageList.map((img) => toAbsoluteUrl(img));
     const priceValue = Number(apiProduct.price ?? 0);
     const hasPrice = Number.isFinite(priceValue) && priceValue > 0;
-    const materialType = detectMaterialType(apiProduct);
-    const faqItems = buildProductFaqItems(apiProduct, materialType);
+    const faqItems = buildProductFaqByCategory({
+      category: apiProduct.category,
+      productName: apiProduct.name || apiProduct.nameAr,
+      color: apiProduct.color,
+      origin: apiProduct.origin,
+      withInstallation: apiProduct.withInstallation,
+    });
     const faqJsonLd = {
       "@context": "https://schema.org",
       "@type": "FAQPage",
@@ -317,18 +305,8 @@ export default async function ProductByIdPage({
         },
       })),
     };
-    const relatedUseCategories = marbleUseCategories
-      .filter((item) => {
-        const title = item.title;
-        if (materialType === "كوارتز") {
-          return title.includes("مطبخ") || title.includes("مطابخ");
-        }
-        if (materialType === "جرانيت") {
-          return title.includes("واجه") || title.includes("سلالم") || title.includes("أرضيات");
-        }
-        return title.includes("أرضيات") || title.includes("مداخل") || title.includes("حمامات");
-      })
-      .slice(0, 3);
+    const categoryContent = getCategoryContentById(apiProduct.category);
+    const relatedLinks = getCategoryRelatedLinks(apiProduct.category);
 
     const brandName =
       typeof apiProduct.brand === "string" && apiProduct.brand.trim().length > 0
@@ -437,36 +415,37 @@ export default async function ProductByIdPage({
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
               <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-                روابط مفيدة لاختيار {materialType}
+                روابط تساعدك في اختيار أفضل
               </h2>
-              <ul className="mt-5 space-y-3 text-sm text-slate-600 sm:text-base">
-                <li>
-                  <Link
-                    href="/marble-info"
-                    className="font-semibold text-blue-700 hover:text-blue-600"
-                  >
-                    تعرف على أنواع الرخام والجرانيت والكوارتز في مصر
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href={`/products?category=${encodeURIComponent(materialType)}`}
-                    className="font-semibold text-blue-700 hover:text-blue-600"
-                  >
-                    تصفح منتجات {materialType} وأسعارها في مصر
-                  </Link>
-                </li>
-                {relatedUseCategories.map((item) => (
-                  <li key={item.id}>
-                    <Link
-                      href={`/marble-uses/${item.slug}`}
-                      className="font-semibold text-blue-700 hover:text-blue-600"
-                    >
-                      استخدامات {item.title} للمشاريع المختلفة
-                    </Link>
-                  </li>
+              <div className="mt-6 space-y-6">
+                {Array.from(new Set(relatedLinks.map((item) => item.group))).map((group) => (
+                  <div key={group}>
+                    <h3 className="text-base font-semibold text-slate-800 sm:text-lg mb-3">
+                      {group}
+                    </h3>
+                    <ul className="space-y-2">
+                      {relatedLinks
+                        .filter((item) => item.group === group)
+                        .map((item) => (
+                          <li key={`${item.group}-${item.href}-${item.label}`}>
+                            <Link
+                              href={item.href}
+                              className="flex items-center text-sm text-blue-700 hover:text-blue-600 transition-colors font-medium group"
+                            >
+                              <span className="inline-block w-1.5 h-1.5 bg-blue-400 rounded-full mr-2 group-hover:bg-blue-500" />
+                              {item.label}
+                            </Link>
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
                 ))}
-              </ul>
+              </div>
+              {categoryContent?.seoIntro && (
+                <p className="mt-8 text-sm leading-7 text-slate-600 pt-6 border-t border-slate-100">
+                  {categoryContent.seoIntro}
+                </p>
+              )}
             </div>
           </div>
         </section>

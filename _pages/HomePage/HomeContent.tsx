@@ -1,9 +1,10 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import dynamicImport from "next/dynamic";
-import { ArrowLeft, HelpCircle, Star, Zap, Users } from "lucide-react";
+import { ArrowLeft, HelpCircle, Star, Zap, Users, BookOpen } from "lucide-react";
 import { getPrimaryMedia } from "@/utils/media";
 import Card from "@/components/UI/Card/Card";
 import CategoriesGrid from "@/_pages/CategoriesPage/CategoriesGrid";
@@ -20,26 +21,16 @@ const PartnersSection = dynamicImport(
 export const dynamic = 'force-dynamic';
 
 export default function HomeContent() {
-  const apiBaseUrl =
-    process.env.NEXT_PUBLIC_API_URL || "https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net/app/v1";
-  const imageBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || apiBaseUrl).replace(
-    /\/app\/v1\/?$/,
-    ""
-  );
-
+  const router = useRouter();
+  
   const heroImage = {
     src: "/slider/1.jpg",
     alt: "صورة الرخام الرئيسية",
   };
 
-  const [showProducts, setShowProducts] = useState(false);
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [categories, setCategories] = useState<CategoryType[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [userName, setUserName] = useState<string>('منصة شق الثعبان');
-  const [productSearch, setProductSearch] = useState('');
   const isMounted = useRef(false);
 
   const fixedCategories: CategoryType[] = [
@@ -51,20 +42,6 @@ export default function HomeContent() {
     { id: "رخام مصنع", name: "رخام مصنع" },
     { id: "اعمال النحت", name: "اعمال النحت" },
   ];
-
-  const normalizeProductImage = (src?: string) => {
-    if (!src) return "/acessts/NoImage.jpg";
-    if (src.startsWith("http://") || src.startsWith("https://")) return src;
-    if (src.startsWith("/")) return src;
-    return `${imageBaseUrl}/${src.replace(/^\//, "")}`;
-  };
-
-  const getOfferStatus = (product: any): boolean => {
-    if (product?.isOffer) return true;
-    if (product?.offerLinearPrice && Number(product.offerLinearPrice) > 0) return true;
-    if (product?.offerCubicPrice && Number(product.offerCubicPrice) > 0) return true;
-    return false;
-  };
 
   useEffect(() => {
     isMounted.current = true;
@@ -99,39 +76,10 @@ export default function HomeContent() {
     };
   }, []);
 
-  const handleCategoryClick = async (categoryId: string, categoryName: string) => {
-    setSelectedCategory(categoryName);
-    setLoading(true);
-    setShowProducts(true);
-    
-    try {
-      const filters = { category: categoryName, limit: 50 };
-      const productsData = await productService.getProducts(filters);
-      setProducts(productsData.data || []);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
+  const handleCategoryClick = (categoryId: string, categoryName: string) => {
+    // Navigate to products page
+    router.push(`/products?category=${encodeURIComponent(categoryName)}`);
   };
-
-  const handleBackToCategories = () => {
-    setShowProducts(false);
-    setSelectedCategory('');
-    setProducts([]);
-    setProductSearch('');
-  };
-
-  const filteredProducts = showProducts
-    ? products.filter((product) => {
-        const name = String(product?.name || product?.nameAr || '').toLowerCase();
-        const desc = String(product?.description || product?.descriptionAr || '').toLowerCase();
-        const query = productSearch.trim().toLowerCase();
-        if (!query) return true;
-        return name.includes(query) || desc.includes(query);
-      })
-    : products;
 
   return (
     <div className="min-h-screen bg-white">
@@ -141,28 +89,18 @@ export default function HomeContent() {
       {/* ============ CTA REQUEST SECTION ============ */}
       <CTARequestSection />
 
-      {/* ============ CATEGORIES OR PRODUCTS ============ */}
-      {!showProducts ? (
-        <CategoriesSection
-          categories={categories}
-          categoriesLoading={categoriesLoading}
-          onCategoryClick={handleCategoryClick}
-        />
-      ) : (
-        <ProductsSection
-          selectedCategory={selectedCategory}
-          filteredProducts={filteredProducts}
-          loading={loading}
-          productSearch={productSearch}
-          onSearchChange={setProductSearch}
-          onBack={handleBackToCategories}
-          normalizeProductImage={normalizeProductImage}
-          getOfferStatus={getOfferStatus}
-        />
-      )}
+      {/* ============ CATEGORIES SECTION ============ */}
+      <CategoriesSection
+        categories={categories}
+        categoriesLoading={categoriesLoading}
+        onCategoryClick={handleCategoryClick}
+      />
+
+      {/* ============ MARBLE USES GUIDE SECTION ============ */}
+      <MarbleUsesGuideSection />
 
       {/* ============ PARTNERS SECTION ============ */}
-      {!showProducts && <PartnersSection />}
+      <PartnersSection />
     </div>
   );
 }
@@ -464,13 +402,13 @@ function CategoriesSection({
         {/* Header */}
         <div className="mb-10 sm:mb-12 md:mb-16 text-center space-y-2 sm:space-y-3">
           <h2 id="categories-title" className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900">
-            التصنيفات
+            اكتشف المنتجات
           </h2>
           <p className="text-lg sm:text-xl text-slate-600">
-            اختر نوع الحجر الذي تبحث عنه
+            استكشف أنواع الرخام والجرانيت المختلفة
           </p>
           <p className="text-sm sm:text-base text-slate-500">
-            ابدأ التصفح حسب الفئة لتسهيل عملية البحث والاختيار
+            اختر من الفئات أدناه لاكتشاف منتجاتنا الرائعة
           </p>
         </div>
 
@@ -485,112 +423,87 @@ function CategoriesSection({
   );
 }
 
-// ============ PRODUCTS SECTION ============
-function ProductsSection({
-  selectedCategory,
-  filteredProducts,
-  loading,
-  productSearch,
-  onSearchChange,
-  onBack,
-  normalizeProductImage,
-  getOfferStatus,
-}: {
-  selectedCategory: string;
-  filteredProducts: any[];
-  loading: boolean;
-  productSearch: string;
-  onSearchChange: (value: string) => void;
-  onBack: () => void;
-  normalizeProductImage: (src?: string) => string;
-  getOfferStatus: (product: any) => boolean;
-}) {
+// ============ MARBLE USES GUIDE SECTION ============
+function MarbleUsesGuideSection() {
+  const marbleGuides = [
+    {
+      title: "رخام المطابخ",
+      description: "اختر أفضل أنواع الرخام والكوارتز والجرانيت لمطبخك بأسعار منافسة",
+      link: "/marble-uses/rokhama-almatabekh",
+      icon: "🍳",
+    },
+    {
+      title: "أرضيات رخام",
+      description: "دليل شامل لأنواع الرخام المناسبة لأرضيات المنازل والعقارات",
+      link: "/marble-uses/ardiat-rokham",
+      icon: "🏠",
+    },
+    {
+      title: "الرخام في الحمامات",
+      description: "حلول مثالية للحمامات بتصاميم عصرية وراقية وتشطيبات فاخرة",
+      link: "/marble-uses/rokham-hammam",
+      icon: "🚿",
+    },
+    {
+      title: "رخام السلالم",
+      description: "أنواع رخام متينة وآمنة للسلالم بتصاميم عصرية",
+      link: "/marble-uses/rokham-salalem",
+      icon: "🪜",
+    },
+    {
+      title: "المطابخ المودرن",
+      description: "تصاميم مطابخ عصرية مع خامات حديثة وألوان متنوعة",
+      link: "/marble-uses/khammat-matbekh-maodern",
+      icon: "✨",
+    },
+  ];
+
   return (
-    <section className="py-12 sm:py-16 md:py-20 px-4" aria-labelledby="products-title">
+    <section className="py-12 sm:py-16 md:py-20 px-4 bg-gradient-to-b from-slate-50 to-white" aria-labelledby="guides-title">
       <div className="mx-auto max-w-6xl">
-        {/* Header with Back Button */}
-        <div className="mb-10 sm:mb-12 md:mb-16">
-          <button
-            onClick={onBack}
-            className="inline-flex items-center gap-2 mb-6 text-blue-600 hover:text-blue-700 font-semibold transition-colors group"
-            aria-label="العودة للتصنيفات"
-          >
-            <ArrowLeft size={20} className="transition-transform group-hover:-translate-x-1" />
-            العودة للتصنيفات
-          </button>
-
-          <div className="text-center space-y-3">
-            <h2 id="products-title" className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900">
-              منتجاتنا
+        {/* Header */}
+        <div className="mb-10 sm:mb-12 md:mb-16 text-center space-y-2 sm:space-y-3">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <BookOpen className="w-8 h-8 text-blue-600" />
+            <h2 id="guides-title" className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900">
+              دليل استخدام الرخام
             </h2>
-            <p className="text-lg sm:text-xl text-slate-600">
-              {selectedCategory}
-            </p>
           </div>
+          <p className="text-lg sm:text-xl text-slate-600">
+            أدلة شاملة لاختيار أفضل أنواع الرخام لحاجاتك
+          </p>
         </div>
 
-        {/* Search Bar */}
-        <div className="mb-8 sm:mb-10">
-          <input
-            type="search"
-            value={productSearch}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="ابحث عن منتج..."
-            className="w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-3 sm:py-4 text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            aria-label="بحث المنتجات"
-          />
-        </div>
+        {/* Grid */}
+        <div className="grid gap-4 sm:gap-5 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+          {marbleGuides.map((guide, index) => (
+            <Link
+              key={index}
+              href={guide.link}
+              className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1"
+            >
+              {/* Icon */}
+              <div className="text-5xl mb-4">{guide.icon}</div>
+              
+              {/* Content */}
+              <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">
+                {guide.title}
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                {guide.description}
+              </p>
 
-        {/* Loading State */}
-        {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500" />
-          </div>
-        ) : filteredProducts.length === 0 ? (
-          // Empty State
-          <div className="text-center py-20">
-            <div className="text-6xl mb-4">📦</div>
-            <h3 className="text-2xl font-bold text-slate-900 mb-2">لا توجد منتجات</h3>
-            <p className="text-slate-600">لم نتمكن من العثور على منتجات مطابقة</p>
-          </div>
-        ) : (
-          // Products Grid
-          <div className="grid gap-4 sm:gap-5 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredProducts.map((product, index) => (
-              <div key={product._id || product.id || index} className="h-full">
-                <Card
-                  productId={String(product._id || product.id || index)}
-                  productImg={normalizeProductImage(
-                    getPrimaryMedia(
-                      [product.imageList?.[0] || null, product.image || null],
-                      "/acessts/NoImage.jpg"
-                    )
-                  )}
-                  productName={product.name || "منتج"}
-                  productCategory={product.category || "غير محدد"}
-                  productPrice={String(product.price || 0)}
-                  hasOffer={getOfferStatus(product)}
-                  IsKG={product.IsKG}
-                  IsTON={product.IsTON}
-                  IsLITER={product.IsLITER}
-                  IsCUBIC_METER={product.IsCUBIC_METER}
-                  pricePerLinearMeter={product.pricePerLinearMeter}
-                  pricePerCubicMeter={product.pricePerCubicMeter}
-                  offerLinearPrice={product.offerLinearPrice}
-                  offerCubicPrice={product.offerCubicPrice}
-                  color={product.color}
-                  qualityGrade={product.qualityGrade}
-                  isOffer={product.isOffer}
-                  organizationName={product.organizationName}
-                  organizationId={product.organizationId}
-                  showOrganizationInline
-                  showQualityGrade={false}
-                  showMinimalMarbleInfo
-                />
+              {/* Arrow */}
+              <div className="flex items-center gap-2 text-blue-600 font-semibold text-sm group-hover:translate-x-1 transition-transform">
+                <span>اعرف أكثر</span>
+                <ArrowLeft size={16} />
               </div>
-            ))}
-          </div>
-        )}
+
+              {/* Hover Background */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );

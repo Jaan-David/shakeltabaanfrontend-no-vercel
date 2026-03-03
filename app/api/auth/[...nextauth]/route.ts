@@ -259,9 +259,24 @@ const authOptions: NextAuthOptions = {
     }
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: true,
+  debug: process.env.NEXTAUTH_DEBUG === "true",
 };
 
 const handler = NextAuth(authOptions);
 
-export { handler as GET, handler as POST };
+const safeHandler = async (
+  request: Request,
+  context: any
+) => {
+  try {
+    return await handler(request, context);
+  } catch (error) {
+    console.error("❌ [NextAuth] Route handler failed:", error);
+    return Response.json(
+      { error: "Authentication service temporarily unavailable" },
+      { status: 500 }
+    );
+  }
+};
+
+export { safeHandler as GET, safeHandler as POST };

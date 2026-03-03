@@ -186,10 +186,6 @@ const ProductPage: React.FC<{ data: ProductData }> = ({ data }) => {
         <div className="flex flex-col lg:flex-row gap-6 max-w-[95%] mx-auto">
           <div className="flex flex-col order-2 lg:order-1 flex-1 space-y-6">
             <Suspense fallback={<SectionLoader />}>
-              <Specs specs={[]} />
-            </Suspense>
-            
-            <Suspense fallback={<SectionLoader />}>
               <Ratings
                 average={currentRating}
                 total={currentRatingCount}
@@ -203,6 +199,10 @@ const ProductPage: React.FC<{ data: ProductData }> = ({ data }) => {
                 productId={product._id} 
                 onReviewAdded={handleReviewAction}
               />
+            </Suspense>
+
+            <Suspense fallback={<SectionLoader />}>
+              <Specs specs={[]} product={product} />
             </Suspense>
           </div>
         </div>

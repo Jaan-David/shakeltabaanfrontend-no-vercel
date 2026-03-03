@@ -1,5 +1,6 @@
 // app/layout.tsx - Server Component with SEO Config
 import "./globals.css";
+import "keen-slider/keen-slider.min.css";
 import AppShell from "@/components/Layout/AppShell";
 // import GoogleTranslate from "@/components/Layout/Translator/GoogleTranslator";
 import ClientProviders from "@/components/providers/ClientProvider";

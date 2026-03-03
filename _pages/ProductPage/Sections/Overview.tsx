@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
+import Link from "next/link";
 import { Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import { CustomMedia } from "@/components/UI/Image/Images";
 import PriceRow from "@/components/UI/Price/PriceRow";
@@ -7,6 +8,7 @@ import { cartService, checkProductUnitConflict } from "@/services/api/cart";
 import { useRouter } from "next/navigation";
 import { isAuthenticated } from "@/utils/auth";
 import Alert from "@/components/UI/Alert/alert";
+import { buildProductBadgesByCategory, getCategoryContentById } from "@/lib/categoryContentMap";
 
 // Import the FavoritesContext directly but mark it as client-side only
 let FavoritesContext: any;
@@ -146,10 +148,22 @@ const Overview: React.FC<Props> = ({
     hasLinearPrice ? 'linear' : 'cubic'
   );
 
+  const categoryBadges = useMemo(
+    () =>
+      buildProductBadgesByCategory({
+        category,
+        withInstallation,
+        isOffer,
+      }),
+    [category, withInstallation, isOffer]
+  );
+
+  const categoryContent = useMemo(() => getCategoryContentById(category), [category]);
+
   const parsedQuantity = Number(quantityInput);
   const quantityValue = Number.isFinite(parsedQuantity) ? parsedQuantity : NaN;
   const isQuantityValid = Number.isFinite(quantityValue) && quantityValue >= safeMinAmount;
-  
+
   // Define available units based on props - show related units together
   const unitOptions = React.useMemo(() => {
     const options: Array<{key: string, label: string}> = [];
@@ -237,6 +251,19 @@ const Overview: React.FC<Props> = ({
     [isUNIT, isKG, isTON, isLITER, isCUBIC_METER]);
 
   const [selectedUnit, setSelectedUnit] = useState<string>(unitOptions[0]?.key || 'unit');
+
+  const footerPriceSummary = useMemo(() => {
+    const cubic = Number(offerCubicPrice || pricePerCubicMeter || 0);
+    if (cubic > 0) return `${cubic.toLocaleString("ar-EG")} ج.م / م²`;
+
+    const linear = Number(offerLinearPrice || pricePerLinearMeter || 0);
+    if (linear > 0) return `${linear.toLocaleString("ar-EG")} ج.م / م طولي`;
+
+    const base = Number(price || 0);
+    if (base > 0) return `${base.toLocaleString("ar-EG")} ج.م / ${selectedUnit || "وحدة"}`;
+
+    return "السعر عند الطلب";
+  }, [offerCubicPrice, pricePerCubicMeter, offerLinearPrice, pricePerLinearMeter, price, selectedUnit]);
   
   // Calculate displayed price based on selected unit
   const displayedPrice = useMemo(() => {
@@ -462,7 +489,7 @@ const Overview: React.FC<Props> = ({
   };
 
   return (
-    <section className="bg-white max-w-6xl mx-auto rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-6 lg:p-8" dir="rtl">
+    <section className="bg-white max-w-6xl mx-auto rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-6 lg:p-8 pb-28 lg:pb-8" dir="rtl">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-7 lg:order-2">
           <div
@@ -528,6 +555,32 @@ const Overview: React.FC<Props> = ({
               ))}
             </div>
           )}
+
+          {categoryContent && (
+            <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+              <h2 className="text-base font-bold text-slate-900">{categoryContent.title}</h2>
+              <p className="mt-2 text-sm text-slate-600 leading-7">{categoryContent.shortDescription}</p>
+
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="rounded-xl border border-slate-200 bg-white p-3">
+                  <h3 className="text-sm font-semibold text-slate-900 mb-2">أهم المميزات</h3>
+                  <ul className="list-disc list-inside space-y-1 text-sm text-slate-600">
+                    {categoryContent.keyFeatures.slice(0, 3).map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-white p-3">
+                  <h3 className="text-sm font-semibold text-slate-900 mb-2">أفضل استخدام</h3>
+                  <ul className="list-disc list-inside space-y-1 text-sm text-slate-600">
+                    {categoryContent.bestUsedFor.slice(0, 3).map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="lg:col-span-5 lg:order-1 flex flex-col gap-6">
@@ -550,11 +603,14 @@ const Overview: React.FC<Props> = ({
             <span className="px-3 py-1 rounded-full border border-slate-200 bg-slate-50 text-sm text-slate-600">
               {category}
             </span>
-            {isOffer && (
-              <span className="px-3 py-1 rounded-full bg-rose-600 text-white text-sm font-semibold shadow-sm">
-                عرض خاص
+            {categoryBadges.map((badge) => (
+              <span
+                key={badge}
+                className="px-3 py-1 rounded-full border border-blue-200 bg-blue-50 text-sm text-blue-700"
+              >
+                {badge}
               </span>
-            )}
+            ))}
           </div>
 
           {withInstallation === true && (
@@ -645,6 +701,12 @@ const Overview: React.FC<Props> = ({
               >
                 أضف إلى السلة
               </button>
+              <Link
+                href="/inquiries"
+                className="w-full rounded-xl border border-blue-200 bg-blue-50 py-3 text-center text-blue-700 font-bold hover:bg-blue-100 transition-colors"
+              >
+                طلب عرض توريد
+              </Link>
               <div className="rounded-xl border border-slate-200 bg-white px-3 py-3">
                 <div className="flex items-center justify-between gap-3">
                   <label htmlFor="quantity-input" className="text-sm text-slate-500">
@@ -722,6 +784,24 @@ const Overview: React.FC<Props> = ({
             </div>
           </div>
 
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h3 className="text-sm font-bold text-slate-900 mb-3">ملخص سريع عن المنتج</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+              <div className="rounded-xl bg-slate-50 border border-slate-200 p-3">
+                <p className="text-slate-500 text-xs mb-1">المورد</p>
+                <p className="text-slate-900 font-semibold">{organizationName || organizationId || "غير محدد"}</p>
+              </div>
+              <div className="rounded-xl bg-slate-50 border border-slate-200 p-3">
+                <p className="text-slate-500 text-xs mb-1">السعر والوحدة</p>
+                <p className="text-slate-900 font-semibold">{footerPriceSummary}</p>
+              </div>
+              <div className="rounded-xl bg-slate-50 border border-slate-200 p-3">
+                <p className="text-slate-500 text-xs mb-1">التقييم</p>
+                <p className="text-slate-900 font-semibold">{rating.toFixed(1)} / 5 ({ratingCount})</p>
+              </div>
+            </div>
+          </div>
+
           {description && (
             <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
               {description}
@@ -768,6 +848,24 @@ const Overview: React.FC<Props> = ({
               </div>
             </div>
           )}
+        </div>
+      </div>
+
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-slate-200 p-3 lg:hidden">
+        <div className="mx-auto max-w-6xl grid grid-cols-2 gap-2">
+          <button
+            className="rounded-xl bg-blue-600 py-3 text-white font-bold hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            disabled={stockQty === 0 || isAdding}
+            onClick={handleAddToCart}
+          >
+            أضف إلى السلة
+          </button>
+          <Link
+            href="/inquiries"
+            className="rounded-xl border border-blue-200 bg-blue-50 py-3 text-center text-blue-700 font-bold hover:bg-blue-100 transition-colors"
+          >
+            طلب عرض توريد
+          </Link>
         </div>
       </div>
 

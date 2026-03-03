@@ -32,19 +32,19 @@ const RelatedProducts: React.FC<{ currentProductId?: string }> = ({
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const start = () => {
+  const start = useCallback(() => {
     if (timerRef.current) return;
     const slider = instanceRef.current;
     if (!slider) return;
     timerRef.current = setInterval(() => slider.next(), 2500);
-  };
+  }, []);
 
-  const stop = () => {
+  const stop = useCallback(() => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
-  };
+  }, []);
 
   const BASE_IMAGE_URL =
     process.env.NEXT_PUBLIC_API_BASE_URL ||
@@ -121,52 +121,54 @@ const RelatedProducts: React.FC<{ currentProductId?: string }> = ({
   if (!products.length) return null;
 
   return (
-    <div className="mt-10 sm:mt-12">
-      <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">منتجات قد تعجبك</h2>
+    <div className="mt-10 sm:mt-12 w-full">
+      <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 px-4 sm:px-0">منتجات قد تعجبك</h2>
 
-      <div
-        ref={sliderRef}
-        className="keen-slider px-3 sm:px-0"
-        onMouseEnter={stop}
-        onMouseLeave={start}
-      >
-        {products.map((product, index) => (
-          <div
-            key={`${product._id || product.id}-${index}`}
-            className="keen-slider__slide flex h-auto"
-          >
-            <Link href={`/product/${product._id || product.id}`} className="block w-full">
-              <Card
-                productId={String(product._id || product.id || index)}
-                productImg={getPrimaryImage(product)}
-                productName={product.name || "منتج"}
-                productCategory={product.category || "غير محدد"}
-                productPrice={String(product.price || 0)}
-                product={mapToUiProduct(product)}
-                hasOffer={Boolean(
-                  (product as { hasOffer?: boolean }).hasOffer || product.isOffer
-                )}
-                IsKG={product.IsKG}
-                IsTON={product.IsTON}
-                IsLITER={product.IsLITER}
-                IsCUBIC_METER={product.IsCUBIC_METER}
-                pricePerLinearMeter={product.pricePerLinearMeter}
-                pricePerCubicMeter={product.pricePerCubicMeter}
-                offerLinearPrice={product.offerLinearPrice}
-                offerCubicPrice={product.offerCubicPrice}
-                color={product.color}
-                qualityGrade={product.qualityGrade}
-                isOffer={product.isOffer}
-                organizationName={product.organizationName}
-                organizationId={product.organizationId}
-                showOrganizationInline
-                showQualityGrade={false}
-                showMinimalMarbleInfo
-                showActionButton={false}
-              />
-            </Link>
+      <div className="w-full overflow-hidden -mx-4 sm:mx-0">
+        <div
+          ref={sliderRef}
+          className="keen-slider px-4 sm:px-0"
+          onMouseEnter={stop}
+          onMouseLeave={start}
+        >
+          {products.map((product, index) => (
+            <div
+              key={`${product._id || product.id}-${index}`}
+              className="keen-slider__slide min-w-0 flex-shrink-0 h-auto"
+            >
+              <Link href={`/product/${product._id || product.id}`} className="block w-full h-full">
+                <Card
+                  productId={String(product._id || product.id || index)}
+                  productImg={getPrimaryImage(product)}
+                  productName={product.name || "منتج"}
+                  productCategory={product.category || "غير محدد"}
+                  productPrice={String(product.price || 0)}
+                  product={mapToUiProduct(product)}
+                  hasOffer={Boolean(
+                    (product as { hasOffer?: boolean }).hasOffer || product.isOffer
+                  )}
+                  IsKG={product.IsKG}
+                  IsTON={product.IsTON}
+                  IsLITER={product.IsLITER}
+                  IsCUBIC_METER={product.IsCUBIC_METER}
+                  pricePerLinearMeter={product.pricePerLinearMeter}
+                  pricePerCubicMeter={product.pricePerCubicMeter}
+                  offerLinearPrice={product.offerLinearPrice}
+                  offerCubicPrice={product.offerCubicPrice}
+                  color={product.color}
+                  qualityGrade={product.qualityGrade}
+                  isOffer={product.isOffer}
+                  organizationName={product.organizationName}
+                  organizationId={product.organizationId}
+                  showOrganizationInline
+                  showQualityGrade={false}
+                  showMinimalMarbleInfo
+                  showActionButton={false}
+                />
+              </Link>
           </div>
         ))}
+        </div>
       </div>
     </div>
   );
