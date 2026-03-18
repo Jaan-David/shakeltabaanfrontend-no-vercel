@@ -1,8 +1,9 @@
 "use client"
-import { useMemo, useCallback, useState } from 'react';
+import { useMemo, useCallback, useEffect, useState } from 'react';
 import Image, { type StaticImageData } from "next/image";
 
 import styles from '@/components/UI/Card/card.module.css';
+import { resolveProductPricing } from '@/utils/pricing';
 
 // Components
 import { CustomMedia } from '@/components/UI/Image/Images';
@@ -44,6 +45,13 @@ interface CardProps {
     pricePerCubicMeter?: string | number;
     offerLinearPrice?: string | number | null;
     offerCubicPrice?: string | number | null;
+    offerPrice?: string | number | null;
+    offerSquarePrice?: string | number | null;
+    minPrice?: string | number | null;
+    maxPrice?: string | number | null;
+    pricePerSquareMeter?: string | number | null;
+    priceOnRequest?: boolean;
+    customPriceLabel?: string;
     color?: string;
     qualityGrade?: string;
     isOffer?: boolean;
@@ -56,19 +64,8 @@ interface CardProps {
     hasOffer?: boolean;
     isVerifiedSupplier?: boolean;
     alwaysShowBothPrices?: boolean;
+    withInstallation?: boolean;
 }
-
-// Helper function to format price
-const formatPrice = (price: string | number | undefined): string => {
-    if (!price) return '0';
-    const numericPrice = typeof price === 'string' 
-        ? parseFloat(price.replace(/[^0-9.]/g, ''))
-        : price;
-    
-    if (isNaN(numericPrice)) return '0';
-    
-    return numericPrice.toLocaleString('ar-EG');
-};
 
 // Helper function to calculate discount percentage
 const calculateDiscountPercentage = (originalPrice: number, currentPrice: number): number => {
@@ -93,6 +90,13 @@ function Card({
     pricePerCubicMeter,
     offerLinearPrice = null,
     offerCubicPrice = null,
+    offerPrice = null,
+    offerSquarePrice = null,
+    minPrice = null,
+    maxPrice = null,
+    pricePerSquareMeter = null,
+    priceOnRequest = false,
+    customPriceLabel,
     color,
     qualityGrade,
     organizationName,
@@ -101,11 +105,14 @@ function Card({
     showMinimalMarbleInfo = false,
     showActionButton = true,
     hasOffer = false,
-    isVerifiedSupplier = false
+    isVerifiedSupplier = false,
+    withInstallation,
+    product
 }: CardProps) {
     const { toggle, isFavorite } = useFavorites();
     const router = useRouter();
     const [showLoginAlert, setShowLoginAlert] = useState(false);
+    const [useContainFit, setUseContainFit] = useState(false);
 
     const numericPrice = useMemo(() => {
         const n = parseFloat(String(productPrice ?? '0').replace(/[^0-9.]/g, ''));
@@ -126,6 +133,10 @@ function Card({
         return !imageSrc || imageSrc.includes('NoImage');
     }, [imageSrc]);
 
+    useEffect(() => {
+        setUseContainFit(false);
+    }, [imageSrc]);
+
     const id = useMemo(() => productId || productName || imageSrc, [productId, productName, imageSrc]);
 
     const loved = isFavorite(id!);
@@ -138,9 +149,52 @@ function Card({
         return 0;
     }, [discount, numericOriginalPrice, numericPrice]);
 
+    const resolvedPricing = useMemo(() => {
+        return resolveProductPricing(
+            {
+                price: productPrice ?? product?.price,
+                offerPrice: offerPrice ?? product?.offerPrice,
+                pricePerSquareMeter:
+                    pricePerSquareMeter ?? product?.pricePerSquareMeter ?? product?.pricePerCubicMeter,
+                offerSquarePrice:
+                    offerSquarePrice ?? product?.offerSquarePrice ?? product?.offerCubicPrice,
+                pricePerCubicMeter: pricePerCubicMeter ?? product?.pricePerCubicMeter,
+                offerCubicPrice: offerCubicPrice ?? product?.offerCubicPrice,
+                pricePerLinearMeter: pricePerLinearMeter ?? product?.pricePerLinearMeter,
+                offerLinearPrice: offerLinearPrice ?? product?.offerLinearPrice,
+                minPrice: minPrice ?? product?.minPrice,
+                maxPrice: maxPrice ?? product?.maxPrice,
+                priceOnRequest: priceOnRequest || product?.priceOnRequest,
+                customPriceLabel: customPriceLabel ?? product?.customPriceLabel,
+            },
+            {
+                preferredOrder: ['square', 'linear', 'fixed', 'cubic'],
+                treatCubicAsSquare: true,
+            }
+        );
+    }, [
+        productPrice,
+        product,
+        offerPrice,
+        pricePerSquareMeter,
+        offerSquarePrice,
+        pricePerCubicMeter,
+        offerCubicPrice,
+        offerLinearPrice,
+        pricePerLinearMeter,
+        minPrice,
+        maxPrice,
+        priceOnRequest,
+        customPriceLabel,
+    ]);
+
     const showSpecialOfferBadge = useMemo(() => {
-        return hasOffer === true;
-    }, [hasOffer]);
+        return hasOffer === true || resolvedPricing.mode === 'offer';
+    }, [hasOffer, resolvedPricing.mode]);
+
+    const hasInstallation = useMemo(() => {
+        return withInstallation === true || product?.withInstallation === true;
+    }, [withInstallation, product?.withInstallation]);
 
     const imageBadgeText = useMemo(() => {
         if (badge) return badge;
@@ -184,44 +238,18 @@ function Card({
         router.push(`/product/${slug}`);
     }, [router, productName, productId, isLoading]);
 
-    const normalizePrice = (value?: string | number | null): number | null => {
-        if (value === null || value === undefined) return null;
-        if (typeof value === 'string') {
-            const parsed = Number(value.replace(/[^0-9.]/g, ''));
-            return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
-        }
-        return Number.isFinite(value) && value > 0 ? value : null;
-    };
+    const handleImageLoad = useCallback((event: any) => {
+        const target = (event?.currentTarget || event?.target) as HTMLImageElement | null;
+        if (!target) return;
 
-    const renderPriceChip = (
-        label: string,
-        price?: string | number | null,
-        offerPrice?: string | number | null
-    ) => {
-        const basePrice = normalizePrice(price);
-        const discountedPrice = normalizePrice(offerPrice);
+        const naturalWidth = target.naturalWidth || 0;
+        const naturalHeight = target.naturalHeight || 0;
+        if (!naturalWidth || !naturalHeight) return;
 
-        if (!basePrice && !discountedPrice) return null;
-
-        const showOffer = !!(basePrice && discountedPrice && discountedPrice < basePrice);
-        const displayPrice = showOffer ? discountedPrice : (basePrice ?? discountedPrice);
-
-        return (
-            <div className={styles.priceChip}>
-                <span className={styles.priceChipLabel}>{label}</span>
-                {showOffer && basePrice && (
-                    <span className={styles.priceChipOld}>
-                        {formatPrice(basePrice)} ج.م
-                    </span>
-                )}
-                <div className={styles.priceChipMain}>
-                    <span className={styles.priceChipValue}>{formatPrice(displayPrice ?? 0)}</span>
-                    <span className={styles.priceChipUnit}>ج.م</span>
-                </div>
-            </div>
-        );
-    };
-
+        const isPortrait = naturalHeight > naturalWidth;
+        const isSmall = naturalWidth < 420 || naturalHeight < 320;
+        setUseContainFit(isPortrait || isSmall);
+    }, []);
 
     if (isLoading) {
         return (
@@ -308,12 +336,15 @@ function Card({
                             <CustomMedia
                                 src={imageSrc}
                                 alt={productName || 'صورة المنتج'}
-                                width={320}
-                                height={240}
+                                width={400}
+                                height={300}
                                 sizes="(max-width: 475px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                                rounded="md"
-                                className={styles.img}
-                                objectFit="cover"
+                                className={styles.imageMedia}
+                                imageClassName={`${styles.img} ${useContainFit ? styles.small : ''}`}
+                                objectFit={useContainFit ? 'contain' : 'cover'}
+                                loading="lazy"
+                                decoding="async"
+                                onLoad={handleImageLoad}
                                 priority={false}
                             />
                         )}
@@ -341,6 +372,12 @@ function Card({
                         </div>
                     </div>
 
+                    {hasInstallation && (
+                        <div className={styles.metaBadges}>
+                            <span className={styles.installationBadge}>متاح تركيب</span>
+                        </div>
+                    )}
+
                     <h2
                         className={styles.productName}
                         title={productName}
@@ -367,11 +404,25 @@ function Card({
                         </div>
                     )}
 
-                    <div className={styles.priceChips}>
-                        {renderPriceChip('م مربع', pricePerCubicMeter, offerCubicPrice)}
-                        {renderPriceChip('م طولي', pricePerLinearMeter, offerLinearPrice)}
-                        {!pricePerCubicMeter && !offerCubicPrice && !pricePerLinearMeter && !offerLinearPrice && (
-                            <span className={styles.priceOnRequest}>السعر عند الطلب</span>
+                    <div className={styles.priceBox}>
+                        <span className={styles.priceBoxLabel}>{resolvedPricing.label}</span>
+                        {resolvedPricing.mode === 'offer' && resolvedPricing.oldDisplay && (
+                            <span className={styles.priceBoxOld}>بدلاً من {resolvedPricing.oldDisplay}</span>
+                        )}
+                        <span
+                            className={`${styles.priceBoxValue} ${
+                                resolvedPricing.mode === 'request' ? styles.priceBoxMuted : ''
+                            }`}
+                        >
+                            {resolvedPricing.display}
+                        </span>
+                        {resolvedPricing.mode === 'range' && (
+                            <span className={styles.priceBoxHint}>
+                                السعر متغير وبيتأكد بعد الاتفاق، لكن في الرينج ده.
+                            </span>
+                        )}
+                        {resolvedPricing.mode === 'request' && (
+                            <span className={styles.priceBoxHint}>سيتم تحديد السعر بعد التواصل</span>
                         )}
                     </div>
 

@@ -40,6 +40,8 @@ const getPrimaryImage = (product: ApiProduct): string => {
 
 const getOfferStatus = (product: ApiProduct): boolean => {
   if (product.isOffer) return true;
+  if (product.offerPrice && Number(product.offerPrice) > 0) return true;
+  if (product.offerSquarePrice && Number(product.offerSquarePrice) > 0) return true;
   if (product.offerLinearPrice && Number(product.offerLinearPrice) > 0) return true;
   if (product.offerCubicPrice && Number(product.offerCubicPrice) > 0) return true;
   return false;
@@ -351,15 +353,23 @@ export default function ProductsPage() {
                     IsTON={product.IsTON}
                     IsLITER={product.IsLITER}
                     IsCUBIC_METER={product.IsCUBIC_METER}
+                    pricePerSquareMeter={product.pricePerSquareMeter}
                     pricePerLinearMeter={product.pricePerLinearMeter}
                     pricePerCubicMeter={product.pricePerCubicMeter}
+                    offerPrice={product.offerPrice}
+                    offerSquarePrice={product.offerSquarePrice}
                     offerLinearPrice={product.offerLinearPrice}
                     offerCubicPrice={product.offerCubicPrice}
+                    minPrice={product.minPrice}
+                    maxPrice={product.maxPrice}
+                    priceOnRequest={product.priceOnRequest}
+                    customPriceLabel={product.customPriceLabel}
                     color={product.color}
                     qualityGrade={product.qualityGrade}
                     isOffer={product.isOffer}
                     organizationName={product.organizationName}
                     organizationId={product.organizationId}
+                    withInstallation={product.withInstallation}
                     showOrganizationInline
                     showQualityGrade={false}
                     showMinimalMarbleInfo

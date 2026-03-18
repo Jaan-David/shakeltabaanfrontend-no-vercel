@@ -157,27 +157,47 @@
   transform: scale(0.9);
 }
 
-/* Product Image Container */
-.cardImage{
+/* Product Image Container - Marketplace Standard (4:3 aspect ratio) */
+.cardImage,
+.imageBox {
   position: relative;
-  background: linear-gradient(to bottom right, #F8FAFC, #F1F5F9);
+  background: #f1f3f5;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+  border-radius: 18px;
+  border: none;
+  flex-shrink: 0;
 }
 
-/* ✅ FIXED: Proper image centering and covering */
+.imageMedia {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  overflow: hidden;
+  background: #f1f3f5;
+}
+
+/* FIXED: Proper image centering and covering with marketplace-level consistency */
 .img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center center;
   display: block;
-  transition: transform 0.5s ease;
+  transform: translateZ(0);
+  transition: transform 0.3s ease;
+  will-change: transform;
+}
+
+.small {
+  object-fit: contain !important;
+  object-position: center center !important;
+  padding: 8px;
+  background: #f1f3f5;
 }
 
 .placeholderImage {
@@ -189,8 +209,8 @@
   justify-content: center;
   gap: 10px;
   color: #94A3B8;
-  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+  background: #f3f4f6;
+  border: none;
 }
 
 .placeholderIcon {
@@ -205,9 +225,10 @@
   opacity: 0.7;
 }
 
-@media (hover: hover) and (min-width: 1024px) {
-  .card:hover .img {
-    transform: scale(1.08);
+/* Hover effect for image zoom - consistent across all devices */
+@media (hover: hover) {
+  .card:hover .img:not(.small) {
+    transform: translateZ(0) scale(1.05);
   }
 }
 
@@ -233,7 +254,8 @@
 }
 
 .card:hover .quickActions,
-.cardImage:focus-within .quickActions {
+.cardImage:focus-within .quickActions,
+.imageBox:focus-within .quickActions {
   opacity: 1;
   transform: translateY(0);
 }
@@ -781,17 +803,19 @@
     height: 32px;
   }
 
-  .cardImage {
+  .cardImage,
+  .imageBox {
     width: 100%;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 4 / 3;
   }
 
   .img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center;
+    object-position: center center;
     display: block;
+    transform: translateZ(0);
   }
 
   .availableText {
@@ -834,9 +858,10 @@
     height: 30px;
   }
 
-  .cardImage {
+  .cardImage,
+  .imageBox {
     margin: 0;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 4 / 3;
     width: 100%;
   }
 
@@ -845,8 +870,9 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center;
+    object-position: center center;
     display: block;
+    transform: translateZ(0);
   }
 
   .availableText {
@@ -1025,14 +1051,83 @@
   font-weight: 700;
 }
 
+/* Missing Price Box Styles - Price Display Section */
+.priceBox {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  background: #F0F9FF;
+  border: 1px solid #BAE6FD;
+  border-radius: 12px;
+  margin: 8px 0;
+}
+
+.priceBoxLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.priceBoxOld {
+  font-size: 0.85rem;
+  color: #94A3B8;
+  text-decoration: line-through;
+  font-weight: 600;
+}
+
+.priceBoxValue {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #1D4ED8;
+  line-height: 1.2;
+}
+
+.priceBoxMuted {
+  color: #64748B;
+  font-weight: 600;
+}
+
+.priceBoxHint {
+  font-size: 0.75rem;
+  color: #64748B;
+  font-weight: 500;
+  font-style: italic;
+  margin-top: 4px;
+}
+
+/* Installation and Meta Badges */
+.metaBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 6px 0;
+}
+
+.installationBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #DCFCE7 0%, #BBFCE6 100%);
+  border: 1px solid #BBF7D0;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #166534;
+}
+
 /* Very small phones */
 @media screen and (max-width: 375px) {
   .card {
     min-height: 210px;
   }
 
-  .cardImage {
-    aspect-ratio: 16 / 9;
+  .cardImage,
+  .imageBox {
+    aspect-ratio: 4 / 3;
   }
 
   .productName {
@@ -1041,6 +1136,10 @@
 
   .priceValue {
     font-size: 0.85rem;
+  }
+
+  .priceBoxValue {
+    font-size: 1.1rem;
   }
 }
 

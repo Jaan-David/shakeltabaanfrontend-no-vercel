@@ -167,8 +167,15 @@ const ProductPage: React.FC<{ data: ProductData }> = ({ data }) => {
             isCUBIC_METER={product.IsCUBIC_METER}
             pricePerLinearMeter={product.pricePerLinearMeter}
             pricePerCubicMeter={product.pricePerCubicMeter}
+            pricePerSquareMeter={product.pricePerSquareMeter}
             offerLinearPrice={product.offerLinearPrice}
             offerCubicPrice={product.offerCubicPrice}
+            offerSquarePrice={product.offerSquarePrice}
+            offerPrice={product.offerPrice}
+            minPrice={product.minPrice}
+            maxPrice={product.maxPrice}
+            priceOnRequest={product.priceOnRequest}
+            customPriceLabel={product.customPriceLabel}
             color={product.color}
             qualityGrade={product.qualityGrade}
             isOffer={product.isOffer}

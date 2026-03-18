@@ -5,6 +5,10 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 });
 
 const nextConfig: NextConfig = {
+  // Keep dev and production build artifacts isolated to avoid manifest/chunk conflicts
+  // when running `next dev` and `next build` in separate terminals.
+  distDir: process.env.NODE_ENV === 'development' ? '.next-dev' : '.next',
+
   // Enable compression (gzip by default, brotli on compatible servers)
   compress: true,
   
@@ -38,7 +42,9 @@ const nextConfig: NextConfig = {
     optimizeCss: true,              // Inline critical CSS
     optimizePackageImports: [      // Tree-shake unused code from large packages
       'lucide-react',
-      'react-icons',
+      // Keep react-icons out of optimizePackageImports.
+      // Next.js Webpack dev can generate a missing vendor chunk reference
+      // (`./vendor-chunks/react-icons.js`) for App Router pages.
     ],
   },
   
@@ -82,6 +88,7 @@ const nextConfig: NextConfig = {
       },
     ],
     formats: ['image/webp', 'image/avif'],
+    qualities: [60, 75, 85, 100],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,

@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import { CustomMedia } from "@/components/UI/Image/Images";
-import PriceRow from "@/components/UI/Price/PriceRow";
+import { resolveProductPricing } from "@/utils/pricing";
 import { cartService, checkProductUnitConflict } from "@/services/api/cart";
 import { useRouter } from "next/navigation";
 import { isAuthenticated } from "@/utils/auth";
@@ -35,8 +35,15 @@ type Props = {
   // Marble/Granite specific fields
   pricePerLinearMeter?: number;
   pricePerCubicMeter?: number;
+  pricePerSquareMeter?: number;
   offerLinearPrice?: number | null;
   offerCubicPrice?: number | null;
+  offerSquarePrice?: number | null;
+  offerPrice?: number | null;
+  minPrice?: number | null;
+  maxPrice?: number | null;
+  priceOnRequest?: boolean;
+  customPriceLabel?: string;
   color?: string;
   qualityGrade?: string;
   isOffer?: boolean;
@@ -111,8 +118,15 @@ const Overview: React.FC<Props> = ({
   isCUBIC_METER = false,
   pricePerLinearMeter,
   pricePerCubicMeter,
+  pricePerSquareMeter,
   offerLinearPrice = null,
   offerCubicPrice = null,
+  offerSquarePrice = null,
+  offerPrice = null,
+  minPrice,
+  maxPrice,
+  priceOnRequest = false,
+  customPriceLabel,
   color,
   qualityGrade,
   isOffer = false,
@@ -140,10 +154,6 @@ const Overview: React.FC<Props> = ({
   const hasCubicPrice = [pricePerCubicMeter, offerCubicPrice]
     .some((value) => Number(value) > 0);
   const hasMarbleUnits = hasLinearPrice || hasCubicPrice;
-  const hasAnyPrice = useMemo(() => {
-    return [pricePerCubicMeter, offerCubicPrice, pricePerLinearMeter, offerLinearPrice]
-      .some((value) => Number(value) > 0);
-  }, [pricePerCubicMeter, offerCubicPrice, pricePerLinearMeter, offerLinearPrice]);
   const [selectedUnitType, setSelectedUnitType] = useState<'linear' | 'cubic'>(
     hasLinearPrice ? 'linear' : 'cubic'
   );
@@ -252,18 +262,54 @@ const Overview: React.FC<Props> = ({
 
   const [selectedUnit, setSelectedUnit] = useState<string>(unitOptions[0]?.key || 'unit');
 
+  const resolvedPricing = useMemo(() => {
+    const preferredOrder =
+      selectedUnitType === "linear"
+        ? (["linear", "square", "fixed", "cubic"] as const)
+        : (["square", "cubic", "linear", "fixed"] as const);
+
+    return resolveProductPricing(
+      {
+        price,
+        offerPrice,
+        pricePerSquareMeter: pricePerSquareMeter ?? pricePerCubicMeter,
+        offerSquarePrice: offerSquarePrice ?? offerCubicPrice,
+        pricePerCubicMeter,
+        offerCubicPrice,
+        pricePerLinearMeter,
+        offerLinearPrice,
+        minPrice,
+        maxPrice,
+        priceOnRequest,
+        customPriceLabel,
+      },
+      {
+        preferredOrder: [...preferredOrder],
+        treatCubicAsSquare: true,
+      }
+    );
+  }, [
+    selectedUnitType,
+    price,
+    offerPrice,
+    pricePerSquareMeter,
+    pricePerCubicMeter,
+    offerSquarePrice,
+    offerCubicPrice,
+    pricePerLinearMeter,
+    offerLinearPrice,
+    minPrice,
+    maxPrice,
+    priceOnRequest,
+    customPriceLabel,
+  ]);
+
   const footerPriceSummary = useMemo(() => {
-    const cubic = Number(offerCubicPrice || pricePerCubicMeter || 0);
-    if (cubic > 0) return `${cubic.toLocaleString("ar-EG")} ج.م / م²`;
-
-    const linear = Number(offerLinearPrice || pricePerLinearMeter || 0);
-    if (linear > 0) return `${linear.toLocaleString("ar-EG")} ج.م / م طولي`;
-
-    const base = Number(price || 0);
-    if (base > 0) return `${base.toLocaleString("ar-EG")} ج.م / ${selectedUnit || "وحدة"}`;
-
-    return "السعر عند الطلب";
-  }, [offerCubicPrice, pricePerCubicMeter, offerLinearPrice, pricePerLinearMeter, price, selectedUnit]);
+    if (resolvedPricing.mode === "fixed" && resolvedPricing.unitKey === "fixed" && Number(price || 0) > 0) {
+      return `${Number(price || 0).toLocaleString("ar-EG")} ج / ${selectedUnit || "وحدة"}`;
+    }
+    return resolvedPricing.display;
+  }, [resolvedPricing, price, selectedUnit]);
   
   // Calculate displayed price based on selected unit
   const displayedPrice = useMemo(() => {
@@ -665,23 +711,31 @@ const Overview: React.FC<Props> = ({
             </div>
 
             <div className="mt-4 space-y-3">
-              <PriceRow
-                label="سعر المتر المربع"
-                price={pricePerCubicMeter}
-                offerPrice={offerCubicPrice}
-                unitLabel="م مربع"
-                size="primary"
-              />
-              <PriceRow
-                label="سعر المتر الطولي"
-                price={pricePerLinearMeter}
-                offerPrice={offerLinearPrice}
-                unitLabel="م طولي"
-                size="secondary"
-              />
-              {!hasAnyPrice && (
-                <div className="text-sm text-slate-500">السعر عند الطلب</div>
-              )}
+              <div className="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-slate-50 p-4 text-right shadow-sm">
+                <p className="text-xs font-semibold text-slate-500">{resolvedPricing.label}</p>
+                {resolvedPricing.mode === "offer" && resolvedPricing.oldDisplay && (
+                  <p className="mt-1 text-sm font-semibold text-slate-500 line-through">
+                    بدلاً من {resolvedPricing.oldDisplay}
+                  </p>
+                )}
+                <p
+                  className={`mt-1 text-2xl sm:text-3xl font-black tracking-tight ${
+                    resolvedPricing.mode === "request" ? "text-slate-700" : "text-blue-700"
+                  }`}
+                >
+                  {resolvedPricing.display}
+                </p>
+                {resolvedPricing.mode === "range" && (
+                  <p className="mt-2 text-sm text-slate-600">
+                    السعر متغير وبيتأكد بعد الاتفاق، لكن في الرينج ده.
+                  </p>
+                )}
+                {resolvedPricing.mode === "request" && (
+                  <p className="mt-2 text-sm text-slate-600">
+                    سيتم تحديد السعر بعد التواصل
+                  </p>
+                )}
+              </div>
             </div>
 
             {withInstallation && (

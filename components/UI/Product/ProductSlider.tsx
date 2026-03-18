@@ -109,15 +109,23 @@ function ProductSlider({
                 IsTON={product.IsTON}
                 IsLITER={product.IsLITER}
                 IsCUBIC_METER={product.IsCUBIC_METER}
+                pricePerSquareMeter={product.pricePerSquareMeter}
                 pricePerLinearMeter={product.pricePerLinearMeter}
                 pricePerCubicMeter={product.pricePerCubicMeter}
+                offerPrice={product.offerPrice}
+                offerSquarePrice={product.offerSquarePrice}
                 offerLinearPrice={product.offerLinearPrice}
                 offerCubicPrice={product.offerCubicPrice}
+                minPrice={product.minPrice}
+                maxPrice={product.maxPrice}
+                priceOnRequest={product.priceOnRequest}
+                customPriceLabel={product.customPriceLabel}
                 color={product.color}
                 qualityGrade={product.qualityGrade}
                 isOffer={product.isOffer}
                 organizationName={product.organizationName}
                 organizationId={product.organizationId}
+                withInstallation={product.withInstallation}
               />
             </div>
           ))}

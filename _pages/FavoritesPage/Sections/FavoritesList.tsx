@@ -10,10 +10,17 @@ export type FavoriteItem = {
   price: number;
   image: string;
   // Extended fields from API
+  pricePerSquareMeter?: number;
   pricePerLinearMeter?: number;
   pricePerCubicMeter?: number;
+  offerPrice?: number | null;
+  offerSquarePrice?: number | null;
   offerLinearPrice?: number | null;
   offerCubicPrice?: number | null;
+  minPrice?: number | null;
+  maxPrice?: number | null;
+  priceOnRequest?: boolean;
+  customPriceLabel?: string;
   category?: string;
   color?: string;
   qualityGrade?: string;
@@ -21,6 +28,7 @@ export type FavoriteItem = {
   organizationName?: string;
   organizationId?: string;
   stockQty?: number;
+  withInstallation?: boolean;
 };
 
 type Props = {
@@ -77,13 +85,21 @@ const FavoritesList: React.FC<Props> = ({ items, onRemove }) => {
                 reviewsCount={product.reviewsCount}
                 pricePerLinearMeter={product.pricePerLinearMeter}
                 pricePerCubicMeter={product.pricePerCubicMeter}
+                pricePerSquareMeter={product.pricePerSquareMeter}
+                offerPrice={product.offerPrice}
+                offerSquarePrice={product.offerSquarePrice}
                 offerLinearPrice={product.offerLinearPrice}
                 offerCubicPrice={product.offerCubicPrice}
+                minPrice={product.minPrice}
+                maxPrice={product.maxPrice}
+                priceOnRequest={product.priceOnRequest}
+                customPriceLabel={product.customPriceLabel}
                 color={product.color}
                 qualityGrade={product.qualityGrade}
                 isOffer={product.isOffer}
                 organizationName={product.organizationName}
                 organizationId={product.organizationId}
+                withInstallation={product.withInstallation}
                 showOrganizationInline
                 showQualityGrade={true}
                 showMinimalMarbleInfo={false}

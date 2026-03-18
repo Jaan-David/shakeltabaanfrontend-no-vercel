@@ -41,13 +41,21 @@ export interface Product {
   PurchasePrice?: number;
 
   // Marble/Granite specific fields
+  pricePerSquareMeter?: number;
   pricePerLinearMeter?: number;
   pricePerCubicMeter?: number;
+  offerPrice?: number | null;
+  offerSquarePrice?: number | null;
   offerLinearPrice?: number | null;
   offerCubicPrice?: number | null;
+  minPrice?: number | null;
+  maxPrice?: number | null;
+  priceOnRequest?: boolean;
+  customPriceLabel?: string;
   color?: string;
   qualityGrade?: string;
   isOffer?: boolean;
+  withInstallation?: boolean;
   _id?: string;
   
   // Organization field
@@ -171,10 +179,17 @@ const processProductImagesStatic = (product: any): Product => {
     imageList: uniqueImages.length > 0 ? uniqueImages : [],
     inStock: product.inStock !== undefined ? product.inStock : true,
     // Preserve marble/granite specific fields
+    pricePerSquareMeter: product.pricePerSquareMeter,
     pricePerLinearMeter: product.pricePerLinearMeter,
     pricePerCubicMeter: product.pricePerCubicMeter,
+    offerPrice: product.offerPrice,
+    offerSquarePrice: product.offerSquarePrice,
     offerLinearPrice: product.offerLinearPrice,
     offerCubicPrice: product.offerCubicPrice,
+    minPrice: product.minPrice,
+    maxPrice: product.maxPrice,
+    priceOnRequest: product.priceOnRequest,
+    customPriceLabel: product.customPriceLabel,
     color: product.color,
     qualityGrade: product.qualityGrade,
     isOffer: product.isOffer,

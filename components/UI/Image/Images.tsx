@@ -11,14 +11,18 @@ interface ImageProps {
   width?: number;
   height?: number;
   className?: string;
+  imageClassName?: string;
   objectFit?: "cover" | "contain" | "fill" | "none" | "scale-down";
   priority?: boolean;
   rounded?: "none" | "sm" | "md" | "lg" | "full";
   fallbackSrc?: string;
   fill?: boolean;
   onClick?: () => void;
+  onLoad?: (event: any) => void;
   style?: CSSProperties;
   sizes?: string;
+  loading?: "lazy" | "eager";
+  decoding?: "async" | "auto" | "sync";
 }
 
 interface MediaProps extends ImageProps {
@@ -104,14 +108,18 @@ export function CustomImage({
   width,
   height,
   className,
+  imageClassName,
   objectFit = "cover",
   priority,
   rounded = "none",
   fallbackSrc = "/acessts/NoImage.jpg",
   fill,
   onClick,
+  onLoad,
   style,
   sizes,
+  loading,
+  decoding = "async",
   ...props
 }: ImageProps) {
   const resolvedSrc = useMemo(() => resolveMediaSrc(src, fallbackSrc), [src, fallbackSrc]);
@@ -210,7 +218,9 @@ export function CustomImage({
           src={displaySrc as string}
           alt={alt}
           onError={handleError}
-          loading={priority ? "eager" : "lazy"}
+          onLoad={onLoad}
+          loading={loading ?? (priority ? "eager" : "lazy")}
+          decoding={decoding}
           crossOrigin="anonymous"
           className={cn(
             objectFit === "cover" && "object-cover",
@@ -219,9 +229,11 @@ export function CustomImage({
             objectFit === "none" && "object-none",
             objectFit === "scale-down" && "object-scale-down",
             "transition-opacity duration-300",
-            fill ? "absolute inset-0 h-full w-full" : ""
+            fill ? "absolute inset-0 h-full w-full" : "",
+            imageClassName
           )}
           style={style}
+          {...props}
         />
       ) : (
         <Image
@@ -232,6 +244,9 @@ export function CustomImage({
           height={!fill ? height : undefined}
           sizes={sizes}
           onError={handleError}
+          onLoad={onLoad}
+          loading={loading ?? (priority ? "eager" : "lazy")}
+          decoding={decoding}
           priority={priority}
           unoptimized={isRemoteSrc}
           className={cn(
@@ -240,7 +255,8 @@ export function CustomImage({
             objectFit === "fill" && "object-fill",
             objectFit === "none" && "object-none",
             objectFit === "scale-down" && "object-scale-down",
-            "transition-opacity duration-300"
+            "transition-opacity duration-300",
+            imageClassName
           )}
           style={style}
           {...props}
@@ -256,13 +272,17 @@ export function CustomMedia({
   width,
   height,
   className,
+  imageClassName,
   objectFit = "cover",
   priority,
   rounded = "none",
   fallbackSrc = "/acessts/NoImage.jpg",
   fill,
   onClick,
+  onLoad,
   style,
+  loading,
+  decoding = "async",
   controls = true,
   muted = true,
   loop = false,
@@ -282,13 +302,17 @@ export function CustomMedia({
         width={width}
         height={height}
         className={className}
+        imageClassName={imageClassName}
         objectFit={objectFit}
         priority={priority}
         rounded={rounded}
         fallbackSrc={fallbackSrc}
         fill={fill}
         onClick={onClick}
+        onLoad={onLoad}
         style={style}
+        loading={loading}
+        decoding={decoding}
         {...props}
       />
     );

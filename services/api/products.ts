@@ -38,10 +38,17 @@ export interface Product {
   createdAt?: string;
   updatedAt?: string;
   // Marble/Granite specific fields
+  pricePerSquareMeter?: number;
   pricePerLinearMeter?: number;
   pricePerCubicMeter?: number;
+  offerPrice?: number | null;
+  offerSquarePrice?: number | null;
   offerLinearPrice?: number | null;
   offerCubicPrice?: number | null;
+  minPrice?: number | null;
+  maxPrice?: number | null;
+  priceOnRequest?: boolean;
+  customPriceLabel?: string;
   color?: string;
   qualityGrade?: string;
   isOffer?: boolean;
