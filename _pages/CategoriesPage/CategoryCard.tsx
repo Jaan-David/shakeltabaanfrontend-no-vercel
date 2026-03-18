@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { KeyboardEvent, useEffect, useState } from "react";
 import styles from "./CategoriesGrid.module.css";
 
 interface CategoryCardProps {
@@ -10,7 +11,15 @@ interface CategoryCardProps {
 }
 
 export default function CategoryCard({ title, description, badge, image, onClick }: CategoryCardProps) {
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+  const fallbackSrc = "/acessts/placeholder.svg";
+  const resolvedImageSrc = image.startsWith("/") ? encodeURI(image) : image;
+  const [currentSrc, setCurrentSrc] = useState(resolvedImageSrc);
+
+  useEffect(() => {
+    setCurrentSrc(resolvedImageSrc);
+  }, [resolvedImageSrc]);
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       onClick();
@@ -28,14 +37,20 @@ export default function CategoryCard({ title, description, badge, image, onClick
     >
       <div className={styles.imageContainer}>
         <Image
-          src={image}
+          src={currentSrc}
           alt={title}
           width={320}
           height={240}
           sizes="(max-width: 480px) calc(100vw - 32px), (max-width: 768px) calc(50vw - 20px), (max-width: 1024px) calc(33.33vw - 20px), calc(25vw - 20px)"
           loading="lazy"
+          unoptimized
           quality={55}
           className={styles.categoryImage}
+          onError={() => {
+            if (currentSrc !== fallbackSrc) {
+              setCurrentSrc(fallbackSrc);
+            }
+          }}
         />
         {/* Hover overlay improves focus on the card title without heavy visuals. */}
         <div className={styles.imageOverlay} aria-hidden="true" />
