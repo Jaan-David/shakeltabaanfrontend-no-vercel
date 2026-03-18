@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 // Prevent static prerendering which causes auth context errors
 export const dynamic = 'force-dynamic';
@@ -13,6 +14,14 @@ interface PartnerCardProps {
 }
 
 export default function PartnerCard({ name, logo, typeLabel, location, href }: PartnerCardProps) {
+  const fallbackSrc = "/acessts/placeholder.svg";
+  const resolvedLogoSrc = encodeURI((logo || "").trim() || fallbackSrc);
+  const [currentLogoSrc, setCurrentLogoSrc] = useState(resolvedLogoSrc);
+
+  useEffect(() => {
+    setCurrentLogoSrc(resolvedLogoSrc);
+  }, [resolvedLogoSrc]);
+
   return (
     <Link
       href={href}
@@ -20,11 +29,17 @@ export default function PartnerCard({ name, logo, typeLabel, location, href }: P
     >
       <div className="flex h-16 w-16 items-center justify-center rounded-full border border-slate-200 bg-slate-50 shadow-sm">
         <Image
-          src={logo}
+          src={currentLogoSrc}
           alt={name}
           width={48}
           height={48}
           className="h-12 w-12 object-contain"
+          unoptimized
+          onError={() => {
+            if (currentLogoSrc !== fallbackSrc) {
+              setCurrentLogoSrc(fallbackSrc);
+            }
+          }}
         />
       </div>
       <h3 className="text-base font-semibold text-slate-900 line-clamp-2">{name}</h3>

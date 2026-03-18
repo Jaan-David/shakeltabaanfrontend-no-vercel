@@ -16,13 +16,27 @@ interface Partner {
   typeLabel: 'مصنع' | 'معرض' | 'شركة';
 }
 
-const imageBaseUrl = Api.replace(/\/app\/v1\/?$/, '');
+const imageBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || Api)
+  .replace(/\/app\/v1\/?$/, '')
+  .replace(/\/+$/, '');
 
 const normalizeApiImage = (path?: string | null): string => {
-  if (!path) return '/acessts/placeholder.svg';
-  if (path.startsWith('http://') || path.startsWith('https://')) return path;
-  const cleaned = path.startsWith('/') ? path.slice(1) : path;
-  return `${imageBaseUrl}/${cleaned}`;
+  const fallback = '/acessts/placeholder.svg';
+  if (!path?.trim()) return fallback;
+
+  const normalizedPath = path.trim().replace(/\\/g, '/');
+
+  if (normalizedPath.startsWith('http://') || normalizedPath.startsWith('https://')) {
+    return encodeURI(normalizedPath);
+  }
+
+  const cleaned = normalizedPath
+    .replace(/^\/+/, '')
+    .replace(/^public\//i, '');
+
+  if (!cleaned) return fallback;
+
+  return encodeURI(`${imageBaseUrl}/${cleaned}`);
 };
 
 export default function PartnersSection() {
