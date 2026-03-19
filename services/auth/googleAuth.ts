@@ -53,6 +53,11 @@ interface ErrorApiResponse {
   errors?: BackendFieldError[];
 }
 
+interface GoogleClientIdApiResponse {
+  clientId?: string;
+  message?: string;
+}
+
 export class AuthApiError extends Error {
   public statusCode?: number;
   public fieldErrors: Record<string, string>;
@@ -117,6 +122,7 @@ const AUTH_TOKEN_KEY = "auth_token";
 const LEGACY_TOKEN_KEY = "authToken";
 
 let googleScriptPromise: Promise<void> | null = null;
+let googleClientIdPromise: Promise<string> | null = null;
 
 const parseJsonSafe = async <T>(response: Response): Promise<T | null> => {
   try {
@@ -229,6 +235,64 @@ const getTokenOrThrow = (explicitToken?: string): string => {
   }
 
   return token;
+};
+
+export const getGoogleClientId = async (): Promise<string> => {
+  const clientIdFromEnv = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() ?? "";
+  if (clientIdFromEnv) {
+    return clientIdFromEnv;
+  }
+
+  if (typeof window === "undefined") {
+    throw new AuthApiError("Google Client ID is missing. Please set NEXT_PUBLIC_GOOGLE_CLIENT_ID.");
+  }
+
+  if (!googleClientIdPromise) {
+    googleClientIdPromise = (async () => {
+      try {
+        const response = await fetch("/api/config/google-client-id", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        const payload = await parseJsonSafe<GoogleClientIdApiResponse>(response);
+
+        if (!response.ok) {
+          throw new AuthApiError(
+            resolveErrorMessage(
+              "تعذر تحميل إعدادات Google. يرجى المحاولة مرة أخرى.",
+              {
+                message: payload?.message,
+              },
+              response.status
+            ),
+            {
+              statusCode: response.status,
+            }
+          );
+        }
+
+        const clientId = payload?.clientId?.trim() ?? "";
+        if (!clientId) {
+          throw new AuthApiError("إعدادات Google غير مكتملة. يرجى التواصل مع الدعم.");
+        }
+
+        return clientId;
+      } catch (error) {
+        googleClientIdPromise = null;
+
+        if (error instanceof AuthApiError) {
+          throw error;
+        }
+
+        throw new AuthApiError("تعذر تحميل إعدادات Google. يرجى التحقق من الاتصال والمحاولة مرة أخرى.", {
+          isNetworkError: true,
+        });
+      }
+    })();
+  }
+
+  return googleClientIdPromise;
 };
 
 export const loadGoogleIdentityScript = async (): Promise<void> => {

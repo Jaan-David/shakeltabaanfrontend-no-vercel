@@ -24,6 +24,7 @@ import { registerUser, RegisterRequest } from "../../../services/auth/register";
 import PolicyConsent from "@/components/Auth/PolicyConsent";
 import {
   AuthApiError,
+  getGoogleClientId,
   requestGoogleIdToken,
   signupWithGoogle,
 } from "@/services/auth/googleAuth";
@@ -377,15 +378,10 @@ function RegistrationFormComponent() {
   const handleGoogleSignup = async () => {
     setGoogleError("");
 
-    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
-    if (!googleClientId) {
-      setGoogleError("إعدادات Google غير مكتملة. يرجى التواصل مع الدعم.");
-      return;
-    }
-
     setIsGoogleLoading(true);
 
     try {
+      const googleClientId = await getGoogleClientId();
       const idToken = await requestGoogleIdToken(googleClientId);
       const response = await signupWithGoogle(idToken);
 

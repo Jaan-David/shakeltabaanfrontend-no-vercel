@@ -18,6 +18,7 @@ import {
 } from "@/services/auth/login";
 import {
   AuthApiError,
+  getGoogleClientId,
   requestGoogleIdToken,
   signupWithGoogle,
 } from "@/services/auth/googleAuth";
@@ -210,16 +211,10 @@ function LoginFormComponent() {
     setGoogleError("");
     setShowErrorAlert(false);
 
-    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
-
-    if (!googleClientId) {
-      setGoogleError("إعدادات Google غير مكتملة. يرجى التواصل مع الدعم.");
-      return;
-    }
-
     setIsGoogleLoading(true);
 
     try {
+      const googleClientId = await getGoogleClientId();
       const idToken = await requestGoogleIdToken(googleClientId);
       const response = await signupWithGoogle(idToken);
 
