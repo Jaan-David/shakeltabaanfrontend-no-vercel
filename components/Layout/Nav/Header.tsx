@@ -241,23 +241,7 @@ function Header({
 
   // Listen for storage changes and custom events
   useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "user_data" || e.key === "auth_token") {
-        if (isUserAuthenticated()) {
-          const userData = getCurrentUser();
-          setUser(userData);
-        } else {
-          setUser(null);
-        }
-      }
-    };
-
-    const handleTokenExpiry = () => {
-      setUser(null);
-      router.push("/login");
-    };
-
-    const handleAuthUpdate = () => {
+    const syncUserFromStorage = () => {
       if (isUserAuthenticated()) {
         const userData = getCurrentUser();
         setUser(userData);
@@ -266,14 +250,23 @@ function Header({
       }
     };
 
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "user_data" || e.key === "auth_token") {
+        syncUserFromStorage();
+      }
+    };
+
+    const handleTokenExpiry = () => {
+      setUser(null);
+      router.push("/login");
+    };
+
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener("tokenExpired", handleTokenExpiry);
-    window.addEventListener("authUpdated", handleAuthUpdate);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
       window.removeEventListener("tokenExpired", handleTokenExpiry);
-      window.removeEventListener("authUpdated", handleAuthUpdate);
     };
   }, [router]);
 

@@ -3,6 +3,7 @@ export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: '/users/login',
     LOGIN_SOCIAL:'/users/signWithSocial',
+    SIGNUP_WITH_GOOGLE: '/users/signup-with-google',
     REGISTER: '/users/signup',
     
     REFRESH_TOKEN: '/auth/refresh',

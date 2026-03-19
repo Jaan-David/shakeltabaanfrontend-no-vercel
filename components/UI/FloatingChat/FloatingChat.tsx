@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { FaWhatsapp } from 'react-icons/fa';
 import { inquiryService } from '@/services/api/inquiry';
 
@@ -9,6 +10,15 @@ interface FloatingChatProps {
 }
 
 export default function FloatingChat({ isOpen: externalOpen, onOpenChange }: FloatingChatProps) {
+  const pathname = usePathname();
+
+  const hiddenWhatsAppRoutes = ['/cart', '/inquiries', '/service-requests'];
+  const shouldHideWhatsApp = hiddenWhatsAppRoutes.some((route) => pathname?.startsWith(route));
+
+  if (shouldHideWhatsApp) {
+    return null;
+  }
+
   const [internalOpen, setInternalOpen] = useState(false);
   
   // Use externalOpen if provided, otherwise use internal state
@@ -29,7 +39,7 @@ export default function FloatingChat({ isOpen: externalOpen, onOpenChange }: Flo
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{ success?: boolean; message: string } | null>(null);
-  const whatsappHref = 'https://wa.me/201204246538';
+  const whatsappHref = 'https://wa.me/201026273185';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

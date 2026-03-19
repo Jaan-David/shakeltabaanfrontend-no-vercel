@@ -249,7 +249,7 @@ const CartPage = () => {
       const normalizedMessage = String(errorMessage).toLowerCase();
 
       if (errorMessage.includes('Currently, we only accept orders from Egyptian customers')) {
-        const extractedNumber = errorMessage.match(/\+?\d{8,}/)?.[0] || '201204246538';
+        const extractedNumber = errorMessage.match(/\+?\d{8,}/)?.[0] || '201026273185';
         const whatsappUrl = `https://wa.me/${extractedNumber.replace(/^\+/, '')}`;
         AlertHandler.warning(errorMessage, {
           buttons: [

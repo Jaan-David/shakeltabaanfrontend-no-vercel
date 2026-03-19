@@ -4,6 +4,7 @@
 import { SessionProvider } from "next-auth/react";
 import { FavoritesProvider } from "@/services/favorites/FavoritesContext";
 import AlertProvider from "@/components/providers/AlertProvider";
+import { AuthProvider } from "@/components/providers/AuthProvider";
 
 interface ClientProvidersProps {
   children: React.ReactNode;
@@ -12,11 +13,13 @@ interface ClientProvidersProps {
 export default function ClientProviders({ children }: ClientProvidersProps) {
   return (
     <SessionProvider>
-      <FavoritesProvider>
-        <AlertProvider>
-          {children}
-        </AlertProvider>
-      </FavoritesProvider>
+      <AuthProvider>
+        <FavoritesProvider>
+          <AlertProvider>
+            {children}
+          </AlertProvider>
+        </FavoritesProvider>
+      </AuthProvider>
     </SessionProvider>
   );
 }

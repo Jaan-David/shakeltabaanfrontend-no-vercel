@@ -150,9 +150,9 @@ const Footer = () => {
             <div className="flex flex-col gap-3 text-sm text-slate-200">
               <a
                 className="transition hover:text-blue-300 font-medium"
-                href="tel:+201204246538"
+                href="tel:+201026273185"
               >
-                📞 +201204246538
+                📞 +20 10 26273185
               </a>
               <a
                 className="transition hover:text-blue-300 font-medium"
@@ -162,7 +162,7 @@ const Footer = () => {
               </a>
               <a
                 className="transition hover:text-blue-300 font-medium"
-                href="https://wa.me/201204246538"
+                href="https://wa.me/201026273185"
               >
                 💬 واتساب مباشر
               </a>
@@ -266,9 +266,9 @@ const Footer = () => {
             <div className="flex flex-col gap-3 mb-4">
               <a
                 className="text-slate-200 transition hover:text-blue-300 font-medium text-sm flex items-center gap-2"
-                href="tel:+201204246538"
+                href="tel:+201026273185"
               >
-                📞 +201204246538
+                📞 +20 10 26273185
               </a>
               <a
                 className="text-slate-200 transition hover:text-blue-300 font-medium text-sm flex items-center gap-2"
@@ -278,7 +278,7 @@ const Footer = () => {
               </a>
               <a
                 className="text-slate-200 transition hover:text-blue-300 font-medium text-sm flex items-center gap-2"
-                href="https://wa.me/201204246538"
+                href="https://wa.me/201026273185"
               >
                 💬 واتساب مباشر
               </a>

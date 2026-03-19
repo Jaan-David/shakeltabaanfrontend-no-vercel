@@ -4,13 +4,26 @@ import { cn } from '@/lib/utils';
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   icon?: React.ReactNode;
   onIconClick?: () => void;
+  iconAriaLabel?: string;
   error?: boolean;
   iconPosition?: 'left' | 'right';
   readOnly?: boolean;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, icon, onIconClick, error, iconPosition = 'right', readOnly = false, ...props }, ref) => {
+  (
+    {
+      className,
+      icon,
+      onIconClick,
+      iconAriaLabel,
+      error,
+      iconPosition = 'right',
+      readOnly = false,
+      ...props
+    },
+    ref
+  ) => {
     const sidePadding = icon
       ? iconPosition === 'right'
         ? 'pr-12 pl-4'
@@ -34,16 +47,29 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {icon && (
-          <button
-            type="button"
-            onClick={onIconClick}
-            className={cn(
-              'absolute top-1/2 transform -translate-y-1/2 text-text-3 hover:text-text-2 transition-colors',
-              iconPosition === 'right' ? 'right-4' : 'left-4'
-            )}
-          >
-            {icon}
-          </button>
+          onIconClick ? (
+            <button
+              type="button"
+              onClick={onIconClick}
+              aria-label={iconAriaLabel || 'input action'}
+              className={cn(
+                'absolute top-1/2 transform -translate-y-1/2 text-text-3 hover:text-text-2 transition-colors',
+                iconPosition === 'right' ? 'right-4' : 'left-4'
+              )}
+            >
+              {icon}
+            </button>
+          ) : (
+            <span
+              aria-hidden="true"
+              className={cn(
+                'absolute top-1/2 transform -translate-y-1/2 text-text-3 pointer-events-none',
+                iconPosition === 'right' ? 'right-4' : 'left-4'
+              )}
+            >
+              {icon}
+            </span>
+          )
         )}
       </div>
     );

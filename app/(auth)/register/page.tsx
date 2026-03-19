@@ -3,16 +3,87 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
+import dynamic from "next/dynamic";
+import {
+  CheckCircle2,
+  Circle,
+  Eye,
+  EyeOff,
+  Mail,
+  Phone,
+  TriangleAlert,
+  UserRound,
+} from "lucide-react";
 import { Button } from "./../../../components/UI/Buttons/Button";
 import Input from "./../../../components/UI/Inputs/Input";
 import Logo from "@/public/logo/logo2.png";
 import Alert from "@/components/UI/Alert/alert";
+import GoogleAuthSection from "@/components/Auth/GoogleAuthSection";
 import styles from "./../auth.module.css";
 import { registerUser, RegisterRequest } from "../../../services/auth/register";
 import PolicyConsent from "@/components/Auth/PolicyConsent";
+import {
+  AuthApiError,
+  requestGoogleIdToken,
+  signupWithGoogle,
+} from "@/services/auth/googleAuth";
 
-export default function RegistrationForm() {
+const extractAuthErrorMessage = (error: unknown, fallback: string): string => {
+  if (error instanceof AuthApiError && typeof error.message === "string" && error.message.trim()) {
+    return error.message;
+  }
+
+  if (error && typeof error === "object" && "message" in error) {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === "string" && message.trim()) {
+      return message;
+    }
+  }
+
+  return fallback;
+};
+
+const getPasswordChecks = (value: string) => [
+  {
+    id: "minLength",
+    label: "8 أحرف على الأقل",
+    passed: value.length >= 8,
+    errorMessage: "كلمة المرور يجب أن تكون 8 أحرف على الأقل",
+  },
+  {
+    id: "uppercase",
+    label: "حرف كبير واحد على الأقل (A-Z)",
+    passed: /(?=.*[A-Z])/.test(value),
+    errorMessage: "كلمة المرور يجب أن تحتوي على حرف كبير",
+  },
+  {
+    id: "lowercase",
+    label: "حرف صغير واحد على الأقل (a-z)",
+    passed: /(?=.*[a-z])/.test(value),
+    errorMessage: "كلمة المرور يجب أن تحتوي على حرف صغير",
+  },
+  {
+    id: "number",
+    label: "رقم واحد على الأقل (0-9)",
+    passed: /(?=.*\d)/.test(value),
+    errorMessage: "كلمة المرور يجب أن تحتوي على رقم",
+  },
+  {
+    id: "special",
+    label: "رمز خاص واحد على الأقل (@$!%*?&#)",
+    passed: /(?=.*[@$!%*?&#])/.test(value),
+    errorMessage: "كلمة المرور يجب أن تحتوي على رمز خاص (@$!%*?&#)",
+  },
+];
+
+const getFirstPasswordError = (value: string) => {
+  const firstInvalidRule = getPasswordChecks(value).find((rule) => !rule.passed);
+  return firstInvalidRule?.errorMessage;
+};
+
+const isPasswordStrong = (value: string) => getPasswordChecks(value).every((rule) => rule.passed);
+
+function RegistrationFormComponent() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     firstName: "",
@@ -23,6 +94,8 @@ export default function RegistrationForm() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [googleError, setGoogleError] = useState("");
   const [hasAcceptedPolicies, setHasAcceptedPolicies] = useState(false);
   const [policyError, setPolicyError] = useState('');
   const [errors, setErrors] = useState<{
@@ -38,7 +111,6 @@ export default function RegistrationForm() {
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [validPass , setValidPass] = useState(false)
 
   const handelPass = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
@@ -46,22 +118,14 @@ export default function RegistrationForm() {
       ...prev,
       password: value,
     }));
-    // Check password validity
-    const isValid =
-      value.length >= 8 &&
-      /(?=.*[a-z])/.test(value) &&
-      /(?=.*[A-Z])/.test(value) &&
-      /(?=.*\d)/.test(value) &&
-      /(?=.*[@$!%*?&#])/.test(value);
-    setValidPass(isValid);
-    //console.log("Password valid:", isValid);
+
     if (errors.password) {
       setErrors((prev) => ({
         ...prev,
         password: "",
       }));
     }
-  }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -112,16 +176,11 @@ export default function RegistrationForm() {
 
     if (!formData.password) {
       newErrors.password = "كلمة المرور مطلوبة";
-    } else if (formData.password.length < 8) {
-      newErrors.password = "كلمة المرور يجب أن تكون 8 أحرف على الأقل";
-    } else if (!/(?=.*[a-z])/.test(formData.password)) {
-      newErrors.password = "كلمة المرور يجب أن تحتوي على حرف صغير";
-    } else if (!/(?=.*[A-Z])/.test(formData.password)) {
-      newErrors.password = "كلمة المرور يجب أن تحتوي على حرف كبير";
-    } else if (!/(?=.*\d)/.test(formData.password)) {
-      newErrors.password = "كلمة المرور يجب أن تحتوي على رقم";
-    } else if (!/(?=.*[@$!%*?&#])/.test(formData.password)) {
-      newErrors.password = "كلمة المرور يجب أن تحتوي على رمز خاص (@$!%*?&#)";
+    } else {
+      const passwordError = getFirstPasswordError(formData.password);
+      if (passwordError) {
+        newErrors.password = passwordError;
+      }
     }
 
     if (!formData.phoneNumber.trim()) {
@@ -139,8 +198,40 @@ export default function RegistrationForm() {
       formData.email.trim() &&
       /\S+@\S+\.\S+/.test(formData.email) &&
       formData.password &&
-      formData.password.length >= 8 &&
+      isPasswordStrong(formData.password) &&
       formData.phoneNumber.trim()
+    );
+  };
+
+  const passwordChecks = getPasswordChecks(formData.password);
+  const showPasswordChecklist = Boolean(formData.password) || Boolean(errors.password);
+
+  const getDisabledReason = () => {
+    if (isLoading || isGoogleLoading) return "";
+    if (!hasAcceptedPolicies) return "يرجى الموافقة على الشروط وسياسات المنصة لإكمال التسجيل.";
+    if (!formData.firstName.trim() || !formData.lastName.trim() || !formData.phoneNumber.trim()) {
+      return "يرجى استكمال جميع الحقول المطلوبة.";
+    }
+    if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email)) {
+      return "يرجى إدخال بريد إلكتروني صحيح.";
+    }
+    if (!isPasswordStrong(formData.password)) {
+      return "يرجى استيفاء متطلبات كلمة المرور قبل إنشاء الحساب.";
+    }
+
+    return "";
+  };
+
+  const disabledReason = getDisabledReason();
+
+  const renderInlineError = (message?: string) => {
+    if (!message) return null;
+
+    return (
+      <p className={styles.fieldError} role="alert">
+        <TriangleAlert size={14} aria-hidden="true" />
+        <span>{message}</span>
+      </p>
     );
   };
 
@@ -283,103 +374,158 @@ export default function RegistrationForm() {
     router.push("/active-code");
   };
 
+  const handleGoogleSignup = async () => {
+    setGoogleError("");
+
+    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
+    if (!googleClientId) {
+      setGoogleError("إعدادات Google غير مكتملة. يرجى التواصل مع الدعم.");
+      return;
+    }
+
+    setIsGoogleLoading(true);
+
+    try {
+      const idToken = await requestGoogleIdToken(googleClientId);
+      const response = await signupWithGoogle(idToken);
+
+      const redirectPath = response.data.needsProfileCompletion
+        ? "/complete-profile"
+        : "/home";
+      router.push(redirectPath);
+    } catch (error) {
+      const message = extractAuthErrorMessage(
+        error,
+        "تعذر التسجيل عبر Google. يرجى المحاولة مرة أخرى."
+      );
+
+      setGoogleError(message);
+      setAlertMessage(message);
+      setShowErrorAlert(true);
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
   return (
     <>
-      <div className={styles.container}>
-        <div className={styles.formWrapper}>
+      <div className={`${styles.container} ${styles.registerContainer}`}>
+        <div className={`${styles.formWrapper} ${styles.registerFormWrapper}`}>
           {/* Logo and Title */}
-          <div className={styles.header}>
-              <Image
-                src={Logo}
-                alt="Logo"
-                width={160}
-                height={48}
-                sizes="160px"
-                className={styles.logo}
-                priority
-              />
+          <div className={`${styles.header} ${styles.registerHeader}`}>
+            <Image
+              src={Logo}
+              alt="Logo"
+              width={160}
+              height={48}
+              sizes="160px"
+              className={styles.logo}
+              priority
+            />
 
-            <h2 className={styles.title}>إنشاء حساب جديد</h2>
+            <h2 className={`${styles.title} ${styles.registerTitle}`}>إنشاء حساب جديد</h2>
           </div>
 
           {/* Form */}
-          <div className={styles.form}>
+          <div className={`${styles.form} ${styles.registerForm}`}>
             {/* General Error Message */}
             {errors.general && (
-              <div className={styles.errorMessage}>
-                <p className={styles.errorText}>{errors.general}</p>
+              <div className={styles.registerGeneralError} role="alert">
+                <TriangleAlert size={16} aria-hidden="true" />
+                <p>{errors.general}</p>
               </div>
             )}
 
             {/* First Name and Last Name */}
-            <div className={styles.nameRow}>
-              <div className={styles.inputGroup}>
+            <div className={`${styles.nameRow} ${styles.registerNameRow}`}>
+              <div className={`${styles.inputGroup} ${styles.registerInputGroup}`}>
+                <label className={styles.fieldLabel} htmlFor="firstName">
+                  الاسم الأول
+                </label>
                 <Input
+                  id="firstName"
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleInputChange}
                   placeholder="الاسم الأول"
                   error={!!errors.firstName}
-                  className={styles.Input}
-                  disabled={isLoading}
+                  icon={<UserRound size={16} />}
+                  iconPosition="right"
+                  className={styles.registerInput}
+                  disabled={isLoading || isGoogleLoading}
                 />
-                {errors.firstName && (
-                  <p className={styles.errorText}>{errors.firstName}</p>
-                )}
+                {renderInlineError(errors.firstName)}
               </div>
-              <div className={styles.inputGroup}>
+
+              <div className={`${styles.inputGroup} ${styles.registerInputGroup}`}>
+                <label className={styles.fieldLabel} htmlFor="lastName">
+                  الاسم الأخير
+                </label>
                 <Input
+                  id="lastName"
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleInputChange}
                   placeholder="الاسم الأخير"
                   error={!!errors.lastName}
-                  className={styles.Input}
-                  disabled={isLoading}
+                  icon={<UserRound size={16} />}
+                  iconPosition="right"
+                  className={styles.registerInput}
+                  disabled={isLoading || isGoogleLoading}
                 />
-                {errors.lastName && (
-                  <p className={styles.errorText}>{errors.lastName}</p>
-                )}
+                {renderInlineError(errors.lastName)}
               </div>
             </div>
 
             {/* Phone Number */}
-            <div className={styles.inputGroup}>
+            <div className={`${styles.inputGroup} ${styles.registerInputGroup}`}>
+              <label className={styles.fieldLabel} htmlFor="phoneNumber">
+                رقم الهاتف
+              </label>
               <Input
+                id="phoneNumber"
                 type="tel"
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={handleInputChange}
                 placeholder="رقم الهاتف"
                 error={!!errors.phoneNumber}
-                className={styles.Input}
-                disabled={isLoading}
+                icon={<Phone size={16} />}
+                iconPosition="right"
+                className={styles.registerInput}
+                disabled={isLoading || isGoogleLoading}
               />
-              {errors.phoneNumber && (
-                <p className={styles.errorText}>{errors.phoneNumber}</p>
-              )}
+              {renderInlineError(errors.phoneNumber)}
             </div>
 
             {/* Email */}
-            <div className={styles.inputGroup}>
+            <div className={`${styles.inputGroup} ${styles.registerInputGroup}`}>
+              <label className={styles.fieldLabel} htmlFor="email">
+                البريد الإلكتروني
+              </label>
               <Input
+                id="email"
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder="البريد الإلكتروني"
                 error={!!errors.email}
-                className={styles.Input}
-                disabled={isLoading}
+                icon={<Mail size={16} />}
+                iconPosition="right"
+                className={styles.registerInput}
+                disabled={isLoading || isGoogleLoading}
               />
-              {errors.email && (
-                <p className={styles.errorText}>{errors.email}</p>
-              )}
+              {renderInlineError(errors.email)}
             </div>
 
             {/* Password */}
-            <div className={styles.inputGroup}>
+            <div className={`${styles.inputGroup} ${styles.registerInputGroup}`}>
+              <label className={styles.fieldLabel} htmlFor="password">
+                كلمة المرور
+              </label>
               <Input
+                id="password"
                 type={showPassword ? "text" : "password"}
                 name="password"
                 value={formData.password}
@@ -388,76 +534,98 @@ export default function RegistrationForm() {
                 error={!!errors.password}
                 icon={showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 onIconClick={() => setShowPassword(!showPassword)}
+                iconAriaLabel={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
                 iconPosition="left"
-                className={styles.Input}
-                disabled={isLoading}
+                className={styles.registerInput}
+                disabled={isLoading || isGoogleLoading}
               />
-              {/* Dynamic password requirements - always visible */}
-              {!validPass && (
-                <>
+
+              {showPasswordChecklist && (
                 <div className={styles.passwordRequirements}>
-                
-                <ul className={styles.requirementsList}>
-                  <li className={formData.password.length >= 8 ? styles.valid : styles.invalid}>
-                    • 8 أحرف على الأقل
-                  </li>
-                  <li className={/(?=.*[A-Z])/.test(formData.password) ? styles.valid : styles.invalid}>
-                    • حرف كبير واحد على الأقل (A-Z)
-                  </li>
-                  <li className={/(?=.*[a-z])/.test(formData.password) ? styles.valid : styles.invalid}>
-                    • حرف صغير واحد على الأقل (a-z)
-                  </li>
-                  <li className={/(?=.*\d)/.test(formData.password) ? styles.valid : styles.invalid}>
-                    • رقم واحد على الأقل (0-9)
-                  </li>
-                  <li className={/(?=.*[@$!%*?&#])/.test(formData.password) ? styles.valid : styles.invalid}>
-                    • رمز خاص واحد على الأقل (@$!%*?&#)
-                  </li>
-                </ul>
-              </div>
-               {errors.password && (
-                 <p className={styles.errorText}>{errors.password}</p>
-               )}
-              </>
+                  <p className={styles.passwordHint}>يجب أن تحتوي كلمة المرور على:</p>
+                  <ul className={styles.passwordChecklist}>
+                    {passwordChecks.map((rule) => (
+                      <li
+                        key={rule.id}
+                        className={rule.passed ? styles.ruleMet : styles.rulePending}
+                      >
+                        {rule.passed ? (
+                          <CheckCircle2 size={14} aria-hidden="true" />
+                        ) : (
+                          <Circle size={14} aria-hidden="true" />
+                        )}
+                        <span>{rule.label}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
+
+              {renderInlineError(errors.password)}
             </div>
 
-            <div className="mt-4">
+            <div className={styles.registerPolicySection}>
               <PolicyConsent
                 id="register-policy-consent"
                 checked={hasAcceptedPolicies}
                 onChange={(checked) => {
                   setHasAcceptedPolicies(checked);
                   if (checked) {
-                    setPolicyError('');
+                    setPolicyError("");
                   }
                 }}
                 errorMessage={policyError}
-                disabled={isLoading}
+                disabled={isLoading || isGoogleLoading}
               />
             </div>
 
             {/* Submit Button */}
-            <div className={styles.submitButtonWrapper}>
+            <div className={`${styles.submitButtonWrapper} ${styles.registerSubmitSection}`}>
               <Button
                 variant="custom"
                 fullWidth
                 rounded
                 size="lg"
-                className={`${styles.submitButton} ${
+                className={`${styles.submitButton} ${styles.registerSubmitButton} ${
                   isFormValid()
                     ? styles.submitButtonValid
                     : styles.submitButtonInvalid
                 } disabled:bg-gray-300 disabled:border-gray-300 disabled:text-slate-500`}
                 onClick={handleSubmit}
-                disabled={!isFormValid() || !hasAcceptedPolicies || isLoading}
+                disabled={!isFormValid() || !hasAcceptedPolicies || isLoading || isGoogleLoading}
               >
-                {isLoading ? "جاري إنشاء الحساب..." : "إنشاء حساب"}
+                {isLoading ? (
+                  <span className={styles.buttonLoadingContent}>
+                    <span className={styles.buttonSpinnerLight} aria-hidden="true" />
+                    <span>جاري إنشاء الحساب...</span>
+                  </span>
+                ) : (
+                  "إنشاء حساب"
+                )}
               </Button>
+
+              {disabledReason && (
+                <p className={styles.submitStatusHint} role="status" aria-live="polite">
+                  <TriangleAlert size={14} aria-hidden="true" />
+                  <span>{disabledReason}</span>
+                </p>
+              )}
+
+              <p className={styles.submitMicrocopy}>
+                بإنشائك حساب، أنت توافق على الشروط وسياسة الخصوصية.
+              </p>
             </div>
 
+            <GoogleAuthSection
+              onContinue={handleGoogleSignup}
+              isLoading={isGoogleLoading}
+              disabled={isLoading}
+              errorMessage={googleError}
+              onRetry={googleError ? handleGoogleSignup : undefined}
+            />
+
             {/* Login Link */}
-            <div className={styles.loginSection}>
+            <div className={`${styles.loginSection} ${styles.registerLoginSection}`}>
               <p className={styles.loginText}>
                 هل لديك حساب؟{" "}
                 <button
@@ -468,7 +636,7 @@ export default function RegistrationForm() {
                     e.stopPropagation();
                     router.push("/login");
                   }}
-                  disabled={isLoading}
+                  disabled={isLoading || isGoogleLoading}
                 >
                   تسجيل الدخول
                 </button>
@@ -512,3 +680,9 @@ export default function RegistrationForm() {
     </>
   );
 }
+
+const RegistrationForm = dynamic(() => Promise.resolve(RegistrationFormComponent), {
+  ssr: false,
+});
+
+export default RegistrationForm;

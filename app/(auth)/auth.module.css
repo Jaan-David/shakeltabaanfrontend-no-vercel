@@ -40,11 +40,13 @@
 .title {
   font-size: 1.875rem;
   font-weight: 700;
+  line-height: 1.35;
   background: linear-gradient(135deg, #1D4ED8 0%, #60A5FA 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-bottom: 0.1rem;
+  padding-bottom: 0.08em;
   letter-spacing: -0.5px;
 }
 
@@ -54,6 +56,245 @@
   gap: 0.7rem;
   width: 100%;
   flex: 1;
+}
+
+/* Register-specific hierarchy and spacing refinements */
+.registerContainer {
+  width: min(92vw, 460px);
+  max-width: 480px;
+  min-height: auto;
+  height: auto;
+  margin: 4vh auto;
+  padding: 2rem 1.5rem;
+  border-radius: 16px;
+  direction: rtl;
+}
+
+.registerFormWrapper {
+  direction: rtl;
+}
+
+.registerHeader {
+  margin-bottom: 2rem;
+}
+
+.registerTitle {
+  font-size: clamp(1.95rem, 1.65rem + 1vw, 2.35rem);
+  font-weight: 800;
+  margin-bottom: 0;
+}
+
+.registerForm {
+  gap: 1rem;
+}
+
+.registerNameRow {
+  gap: 1rem;
+}
+
+.registerInputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.fieldLabel {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.registerInput {
+  background-color: #ffffff !important;
+  border: 1px solid #d6e1ee !important;
+  box-shadow: 0 1px 2px rgba(11, 31, 51, 0.06);
+  height: 3rem;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+.registerInput:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14), 0 4px 12px rgba(37, 99, 235, 0.08) !important;
+}
+
+.registerInput::placeholder {
+  color: #98a2b3 !important;
+}
+
+.registerGeneralError {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 77, 79, 0.26);
+  background: rgba(255, 77, 79, 0.08);
+  color: #ff4d4f;
+  font-size: 0.82rem;
+  padding: 0.55rem 0.7rem;
+  animation: auth-fade-in 180ms ease;
+}
+
+.registerGeneralError p {
+  margin: 0;
+}
+
+.fieldError {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #ff4d4f;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  margin-top: 0.05rem;
+  animation: auth-fade-in 180ms ease;
+}
+
+.registerPolicySection {
+  margin-top: 0.5rem;
+  margin-bottom: 0.2rem;
+}
+
+.registerSubmitSection {
+  padding-top: 0.7rem;
+  margin-top: 0.4rem;
+}
+
+.registerSubmitButton {
+  min-height: 3.15rem;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+.buttonLoadingContent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.buttonSpinnerLight {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-top-color: #ffffff;
+  animation: auth-spin 0.8s linear infinite;
+}
+
+.submitStatusHint {
+  margin-top: 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  color: #b54708;
+}
+
+.submitMicrocopy {
+  margin-top: 0.45rem;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: #64748b;
+}
+
+.registerLoginSection {
+  margin-top: 1.4rem;
+}
+
+.loginContainer {
+  width: min(92vw, 460px);
+  max-width: 480px;
+  min-height: auto;
+  height: auto;
+  margin: 4vh auto;
+  padding: 2rem 1.5rem;
+  border-radius: 16px;
+  direction: rtl;
+}
+
+.loginFormWrapper {
+  direction: rtl;
+}
+
+.loginHeader {
+  margin-bottom: 2rem;
+}
+
+.loginTitle {
+  font-size: clamp(1.95rem, 1.65rem + 1vw, 2.3rem);
+  font-weight: 800;
+  margin-bottom: 0;
+}
+
+.loginForm {
+  gap: 1rem;
+}
+
+.loginInputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.loginInput {
+  background-color: #ffffff !important;
+  border: 1px solid #d6e1ee !important;
+  box-shadow: 0 1px 2px rgba(11, 31, 51, 0.06);
+  height: 3rem;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+.loginInput:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14), 0 4px 12px rgba(37, 99, 235, 0.08) !important;
+}
+
+.loginInput::placeholder {
+  color: #98a2b3 !important;
+}
+
+.loginGeneralError {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 77, 79, 0.26);
+  background: rgba(255, 77, 79, 0.08);
+  color: #ff4d4f;
+  font-size: 0.82rem;
+  padding: 0.55rem 0.7rem;
+  animation: auth-fade-in 180ms ease;
+}
+
+.loginGeneralError p {
+  margin: 0;
+}
+
+.loginForgotPasswordSection {
+  margin-top: 0.15rem;
+  margin-bottom: 0.35rem;
+}
+
+.loginSubmitSection {
+  padding-top: 0.7rem;
+  margin-top: 0.4rem;
+}
+
+.loginSubmitButton {
+  min-height: 3.15rem;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+.loginRegisterSection {
+  margin-top: 1.4rem;
 }
 
 .nameRow {
@@ -86,50 +327,54 @@
 }
 
 .passwordRequirements {
-  margin-top: 8px;
+  margin-top: 0.4rem;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 0.55rem 0.7rem;
 }
 
 .passwordHint {
-  font-size: 0.875rem;
-  color: #8B95A5;
-  margin-bottom: 6px;
+  font-size: 0.76rem;
+  color: #64748b;
+  margin: 0 0 0.35rem;
   text-align: right;
-  display: inline;
+  line-height: 1.5;
 }
 
-.requirementsList {
+.passwordChecklist {
   list-style: none;
   padding: 0;
   margin: 0;
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   text-align: right;
-  list-style: none;
   display: flex;
-  flex-direction: row;
-  color: var(--error);
+  flex-direction: column;
+  gap: 0.28rem;
 }
 
-.requirementsList li {
-  padding: 2px 0;
-  transition: color 0.2s ease;
+.passwordChecklist li {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  transition: color 180ms ease;
 }
 
-.requirementsList li.valid {
-  visibility: hidden;
+.ruleMet {
+  color: #15803d;
+}
+
+.rulePending {
+  color: #64748b;
 }
 
 .errorText {
-  color: #EF4444;
+  color: #ff4d4f;
   font-size: 0.75rem;
   margin-top: 0.25rem;
   text-align: right;
-}
-
-.passwordHint {
-  color: #EF4444;
-  font-size: 0.75rem;
-  margin-top: 0.25rem;
-  text-align: right;
+  line-height: 1.45;
 }
 
 .errorMessage {
@@ -156,7 +401,7 @@
   display: flex;
   justify-self: center;
   border: none;
-  transition: all 0.3s ease-in-out;
+  transition: all 180ms ease-in-out;
   border-radius: 12px;
   font-weight: 600;
   font-size: 1.1rem;
@@ -177,8 +422,9 @@
 }
 
 .submitButtonInvalid {
-  background-color: rgba(139, 149, 165, 0.14) !important;
-  color: rgba(139, 149, 165, 0.6) !important;
+  background-color: #dbe3ef !important;
+  border: 1px solid #d0dae8 !important;
+  color: #7b8797 !important;
   cursor: not-allowed;
 }
 
@@ -191,6 +437,7 @@
 .loginText {
   color: #8B95A5;
   font-size: 0.875rem;
+  line-height: 1.6;
   margin: 0;
 }
 
@@ -199,6 +446,8 @@
   font-weight: 600;
   background: none;
   border: none;
+  line-height: 1.5;
+  padding-bottom: 0.06em;
   cursor: pointer;
   text-decoration: none;
   font-size: inherit;
@@ -279,6 +528,124 @@
   border-color: rgba(10, 30, 51, 0.12);
 }
 
+.googleAuthSection {
+  margin-top: 1.5rem;
+}
+
+.authDivider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: rgba(11, 31, 51, 0.5);
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.95rem;
+}
+
+.authDivider::before,
+.authDivider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(10, 30, 51, 0.08) 0%,
+    rgba(10, 30, 51, 0.2) 50%,
+    rgba(10, 30, 51, 0.08) 100%
+  );
+}
+
+.googleAuthButton {
+  width: 100%;
+  height: 3.15rem;
+  border-radius: 12px;
+  border: 1px solid rgba(10, 30, 51, 0.18);
+  background-color: #ffffff;
+  color: #0b1f33;
+  font-size: 0.96rem;
+  font-weight: 600;
+  transition: all 180ms ease;
+}
+
+.googleAuthButton:hover:not(:disabled) {
+  border-color: rgba(37, 99, 235, 0.45);
+  box-shadow: 0 10px 20px rgba(11, 31, 51, 0.12);
+  transform: translateY(-1px);
+}
+
+.googleAuthButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.googleButtonContent,
+.googleButtonLoading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  direction: rtl;
+}
+
+.buttonSpinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(37, 99, 235, 0.18);
+  border-top-color: #2563eb;
+  animation: auth-spin 0.8s linear infinite;
+}
+
+.socialErrorContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.retryButton {
+  border: none;
+  background: transparent;
+  color: #1d4ed8;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.retryButton:hover {
+  text-decoration: underline;
+}
+
+.helperText {
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.6;
+  text-align: right;
+}
+
+@keyframes auth-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes auth-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .registerSection {
   text-align: center;
   margin-top: 1.5rem;
@@ -288,6 +655,7 @@
 .registerText {
   color: rgba(139, 149, 165, 0.85);
   font-size: 0.875rem;
+  line-height: 1.6;
   margin: 0;
 }
 
@@ -296,6 +664,8 @@
   font-weight: 600;
   background: none;
   border: none;
+  line-height: 1.5;
+  padding-bottom: 0.06em;
   cursor: pointer;
   text-decoration: none;
   font-size: inherit;
@@ -413,6 +783,15 @@
     height: 45px;
   }
 
+  .googleAuthButton {
+    height: 2.85rem;
+    font-size: 0.92rem;
+  }
+
+  .authDivider {
+    margin-bottom: 0.6rem;
+  }
+
   .forgotPasswordSection {
     margin-top: 0;
     margin-bottom: 0.8rem;
@@ -429,6 +808,65 @@
 
   .registerSection {
     margin-top: 1.2rem;
+  }
+
+  .registerContainer {
+    width: 92%;
+    margin: 18% auto;
+    padding: 1.3rem;
+    border-radius: 14px;
+  }
+
+  .registerHeader {
+    margin-bottom: 1.6rem;
+  }
+
+  .registerTitle {
+    font-size: 1.55rem;
+  }
+
+  .registerForm {
+    gap: 0.85rem;
+  }
+
+  .registerNameRow {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .registerInput {
+    height: 2.9rem;
+  }
+
+  .registerSubmitButton {
+    min-height: 3rem;
+  }
+
+  .loginContainer {
+    width: 92%;
+    margin: 18% auto;
+    padding: 1.3rem;
+    border-radius: 14px;
+  }
+
+  .loginHeader {
+    margin-bottom: 1.6rem;
+  }
+
+  .loginTitle {
+    font-size: 1.55rem;
+  }
+
+  .loginForm {
+    gap: 0.85rem;
+  }
+
+  .loginInput {
+    height: 2.9rem;
+  }
+
+  .loginSubmitButton {
+    min-height: 3rem;
   }
 }
 
@@ -513,6 +951,11 @@
     height: 40px;
   }
 
+  .googleAuthButton {
+    height: 2.7rem;
+    font-size: 0.88rem;
+  }
+
   .forgotPasswordSection {
     margin-bottom: 0.6rem;
   }
@@ -524,6 +967,32 @@
   .socialLoginSection {
     margin-top: 1rem;
     margin-bottom: 0.6rem;
+  }
+
+  .registerContainer {
+    margin: 24% auto;
+    padding: 1rem;
+  }
+
+  .registerTitle {
+    font-size: 1.35rem;
+  }
+
+  .registerInput {
+    height: 2.7rem;
+  }
+
+  .loginContainer {
+    margin: 24% auto;
+    padding: 1rem;
+  }
+
+  .loginTitle {
+    font-size: 1.35rem;
+  }
+
+  .loginInput {
+    height: 2.7rem;
   }
 }
 
@@ -575,9 +1044,40 @@
     height: 35px;
   }
 
+  .googleAuthButton {
+    height: 2.6rem;
+    font-size: 0.84rem;
+  }
+
   .errorText, .passwordHint {
     font-size: 0.7rem;
     line-height: 1.1;
+  }
+
+  .registerContainer {
+    margin: 8% auto;
+    padding: 0.9rem;
+  }
+
+  .registerTitle {
+    font-size: 1.2rem;
+  }
+
+  .registerInput {
+    height: 2.55rem;
+  }
+
+  .loginContainer {
+    margin: 8% auto;
+    padding: 0.9rem;
+  }
+
+  .loginTitle {
+    font-size: 1.2rem;
+  }
+
+  .loginInput {
+    height: 2.55rem;
   }
 }
 

@@ -19,7 +19,7 @@ type BackendUser = {
 };
 
 const debugLog = (...args: unknown[]) => {
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.NEXTAUTH_DEBUG === "true") {
     console.log(...args);
   }
 };
@@ -248,14 +248,34 @@ const authOptions: NextAuthOptions = {
       debugLog('🔄 [NextAuth Redirect Callback]');
       debugLog('📍 [NextAuth] URL:', url);
       debugLog('📍 [NextAuth] Base URL:', baseUrl);
-      
-      // If there's an error, redirect to login with error param
+
+      // Clean up legacy OAuth callback urls that were used by old login flow.
+      if (url.includes("oauth=success") || url.includes("oauth=callback")) {
+        return baseUrl;
+      }
+
+      // Keep explicit error redirects untouched so UI can display them.
       if (url.includes('error=')) {
         return url;
       }
-      
-      // Redirect to login page for client-side localStorage handling
-      return `${baseUrl}/login?oauth=success`;
+
+      // Support relative callback URLs.
+      if (url.startsWith('/')) {
+        return `${baseUrl}${url}`;
+      }
+
+      // Allow same-origin absolute callback URLs.
+      try {
+        const target = new URL(url);
+        if (target.origin === baseUrl) {
+          return url;
+        }
+      } catch {
+        // Fall through to the safe default.
+      }
+
+      // Fallback: keep users on the app root.
+      return baseUrl;
     }
   },
   secret: process.env.NEXTAUTH_SECRET,

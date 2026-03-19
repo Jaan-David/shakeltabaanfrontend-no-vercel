@@ -81,7 +81,7 @@ function InquiriesPageContent() {
     const normalizedMessage = rawMessage.toLowerCase();
 
     if (normalizedMessage.includes('only accept inquiries from egyptian customers')) {
-      const phoneMatch = rawMessage.match(/\+?\d{8,}/)?.[0] || '201204246538';
+      const phoneMatch = rawMessage.match(/\+?\d{8,}/)?.[0] || '201026273185';
       const cleanPhone = phoneMatch.replace(/^\+/, '');
       return {
         message: rawMessage,

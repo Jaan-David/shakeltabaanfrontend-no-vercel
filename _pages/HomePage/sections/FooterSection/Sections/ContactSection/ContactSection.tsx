@@ -13,7 +13,7 @@ interface ContactInfoProps {
 
 const ContactInfo: React.FC<ContactInfoProps> = ({ contacts }) => {
   const defaultContacts: ContactItem[] = [
-    { type: "phone", value: "+201204246538" },
+    { type: "phone", value: "+20 10 26273185" },
     { type: "email", value: ["info@shak-elt3ban.com"] },
   ];
 
