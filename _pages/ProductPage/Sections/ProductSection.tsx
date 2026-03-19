@@ -8,7 +8,17 @@ const imageBaseUrl = (
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   process.env.NEXT_PUBLIC_API_URL ||
   'https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net/app/v1'
-).replace(/\/app\/v1\/?$/, '');
+)
+  .replace(/\/app\/v1\/?$/, '')
+  .replace(/\/+$/, '');
+
+const encodeUrlSafely = (url: string): string => {
+  try {
+    return encodeURI(decodeURI(url));
+  } catch {
+    return encodeURI(url);
+  }
+};
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -16,9 +26,29 @@ export default function ProductsPage() {
 
   const normalizeProductImage = (src?: string) => {
     if (!src) return '/acessts/NoImage.jpg';
-    if (src.startsWith('http://') || src.startsWith('https://')) return src;
-    if (src.startsWith('/')) return src;
-    return `${imageBaseUrl}/${src.replace(/^\//, '')}`;
+    const normalized = src.trim().replace(/\\/g, '/');
+    if (!normalized) return '/acessts/NoImage.jpg';
+
+    if (normalized.startsWith('http://') || normalized.startsWith('https://')) {
+      return encodeUrlSafely(normalized);
+    }
+
+    if (
+      normalized.startsWith('/acessts/') ||
+      normalized.startsWith('/categories/') ||
+      normalized.startsWith('/icons/') ||
+      normalized.startsWith('/logo/')
+    ) {
+      return encodeUrlSafely(normalized);
+    }
+
+    const cleaned = normalized
+      .replace(/^\/+/, '')
+      .replace(/^public\//i, '');
+
+    if (!cleaned) return '/acessts/NoImage.jpg';
+
+    return encodeUrlSafely(`${imageBaseUrl}/${cleaned}`);
   };
 
   useEffect(() => {

@@ -164,10 +164,30 @@ async function fetchOrganizationProfile(
 }
 
 const normalizeApiImage = (path?: string | null): string => {
-  if (!path) return "/acessts/NoImage.jpg";
-  if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  const cleaned = path.startsWith("/") ? path.slice(1) : path;
-  return `${API_IMAGE_BASE_URL}/${cleaned}`;
+  const fallback = "/acessts/NoImage.jpg";
+  if (!path?.trim()) return fallback;
+
+  const encodeUrlSafely = (url: string): string => {
+    try {
+      return encodeURI(decodeURI(url));
+    } catch {
+      return encodeURI(url);
+    }
+  };
+
+  const normalized = path.trim().replace(/\\/g, "/");
+
+  if (normalized.startsWith("http://") || normalized.startsWith("https://")) {
+    return encodeUrlSafely(normalized);
+  }
+
+  const cleaned = normalized
+    .replace(/^\/+/, "")
+    .replace(/^public\//i, "");
+
+  if (!cleaned) return fallback;
+
+  return encodeUrlSafely(`${API_IMAGE_BASE_URL}/${cleaned}`);
 };
 
 export default async function OrganizationProfilePage({

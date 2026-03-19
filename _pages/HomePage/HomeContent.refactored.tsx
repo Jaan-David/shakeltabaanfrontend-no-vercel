@@ -9,7 +9,7 @@ import Card from "@/components/UI/Card/Card";
 import CategoriesGrid from "@/_pages/CategoriesPage/CategoriesGrid";
 import { Category as CategoryType } from '@/services/product/categories';
 import { productService } from '@/services/api/products';
-import { ProfileService } from '@/services/profile/profile';
+import { ProfileError, ProfileService } from '@/services/profile/profile';
 
 const PartnersSection = dynamicImport(
   () => import("@/_pages/HomePage/PartnersSection"),
@@ -80,7 +80,13 @@ export default function HomeContent() {
           setUserName(`مرحباً ${profileData.firstName}${lastName}`);
         }
       } catch (error) {
-        console.error('Error fetching user profile:', error);
+        if (error instanceof ProfileError && (error.statusCode === 401 || error.statusCode === 404)) {
+          return;
+        }
+
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Home profile fetch warning:', error);
+        }
       }
     };
 

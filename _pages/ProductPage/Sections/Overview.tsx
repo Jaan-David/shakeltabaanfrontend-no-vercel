@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
-import { Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, X } from "lucide-react";
 import { CustomMedia } from "@/components/UI/Image/Images";
 import { resolveProductPricing } from "@/utils/pricing";
 import { cartService, checkProductUnitConflict } from "@/services/api/cart";
@@ -332,10 +332,15 @@ const Overview: React.FC<Props> = ({
   }, [hasLinearPrice, hasCubicPrice]);
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isImagePreviewOpen, setIsImagePreviewOpen] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
   const [isHovering, setIsHovering] = useState(false);
   const [isManualNavigation, setIsManualNavigation] = useState(false);
   const [showLoginAlert, setShowLoginAlert] = useState(false);
   const router = useRouter();
+  const MIN_ZOOM = 1;
+  const MAX_ZOOM = 4;
+  const ZOOM_STEP = 0.25;
 
   const [isMounted, setIsMounted] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -421,6 +426,45 @@ const Overview: React.FC<Props> = ({
     setTimeout(() => setIsManualNavigation(false), 5000);
   }, []);
 
+  const clampZoom = useCallback((value: number) => {
+    return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, value));
+  }, [MAX_ZOOM, MIN_ZOOM]);
+
+  const openImagePreview = useCallback(() => {
+    setIsImagePreviewOpen(true);
+    setZoomLevel(1);
+  }, []);
+
+  const closeImagePreview = useCallback(() => {
+    setIsImagePreviewOpen(false);
+    setZoomLevel(1);
+  }, []);
+
+  const zoomIn = useCallback(() => {
+    setZoomLevel((prev) => clampZoom(prev + ZOOM_STEP));
+  }, [clampZoom, ZOOM_STEP]);
+
+  const zoomOut = useCallback(() => {
+    setZoomLevel((prev) => clampZoom(prev - ZOOM_STEP));
+  }, [clampZoom, ZOOM_STEP]);
+
+  const handleImageWheel = useCallback((event: React.WheelEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const delta = event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP;
+    setZoomLevel((prev) => clampZoom(prev + delta));
+  }, [clampZoom, ZOOM_STEP]);
+
+  useEffect(() => {
+    if (!isImagePreviewOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isImagePreviewOpen]);
+
   useEffect(() => {
     if (imageList.length <= 1 || isHovering || isManualNavigation) return;
 
@@ -433,6 +477,26 @@ const Overview: React.FC<Props> = ({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (isImagePreviewOpen) {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeImagePreview();
+          return;
+        }
+
+        if (event.key === "+" || event.key === "=") {
+          event.preventDefault();
+          zoomIn();
+          return;
+        }
+
+        if (event.key === "-" || event.key === "_") {
+          event.preventDefault();
+          zoomOut();
+          return;
+        }
+      }
+
       if (imageList.length <= 1) return;
 
       if (event.key === "ArrowLeft") {
@@ -446,7 +510,7 @@ const Overview: React.FC<Props> = ({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [imageList.length, nextImage, prevImage]);
+  }, [imageList.length, nextImage, prevImage, isImagePreviewOpen, closeImagePreview, zoomIn, zoomOut]);
 
   const handleAddToCart = async () => {
     if (stockQty === 0 || isAdding) return;
@@ -539,9 +603,10 @@ const Overview: React.FC<Props> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-7 lg:order-2">
           <div
-            className="w-full aspect-[16/9] lg:aspect-[4/3] bg-slate-50 rounded-2xl overflow-hidden flex items-center justify-center relative border border-slate-200"
+            className="w-full aspect-[16/9] lg:aspect-[4/3] bg-slate-50 rounded-2xl overflow-hidden flex items-center justify-center relative border border-slate-200 cursor-zoom-in"
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
+            onClick={openImagePreview}
           >
             {!isMounted ? (
               <div className="h-full w-full animate-pulse bg-slate-200" />
@@ -560,14 +625,20 @@ const Overview: React.FC<Props> = ({
             {imageList.length > 1 && (
               <>
                 <button
-                  onClick={prevImage}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    prevImage();
+                  }}
                   className="absolute left-3 top-1/2 -translate-y-1/2 bg-slate-900/70 hover:bg-slate-900 text-white p-2 rounded-full transition-all duration-300 hover:scale-105 shadow-lg z-10"
                   aria-label="Previous image"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={nextImage}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    nextImage();
+                  }}
                   className="absolute right-3 top-1/2 -translate-y-1/2 bg-slate-900/70 hover:bg-slate-900 text-white p-2 rounded-full transition-all duration-300 hover:scale-105 shadow-lg z-10"
                   aria-label="Next image"
                 >
@@ -593,6 +664,7 @@ const Overview: React.FC<Props> = ({
                   <CustomMedia
                     src={img || "/acessts/placeholder.svg"}
                     alt={`${title} thumbnail ${index + 1}`}
+                    className="w-full h-full"
                     fill
                     objectFit="cover"
                     fallbackSrc="/acessts/placeholder.svg"
@@ -922,6 +994,98 @@ const Overview: React.FC<Props> = ({
           </Link>
         </div>
       </div>
+
+      {isImagePreviewOpen && (
+        <div
+          className="fixed inset-0 z-[70] bg-slate-950/95 p-2 sm:p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="معاينة صورة المنتج"
+          onClick={closeImagePreview}
+        >
+          <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-2 sm:gap-3" onClick={(event) => event.stopPropagation()}>
+            <div className="flex items-center justify-between gap-2 text-white">
+              <p className="text-sm font-semibold">
+                صورة {currentImageIndex + 1} من {imageList.length}
+              </p>
+
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <button
+                  type="button"
+                  onClick={zoomOut}
+                  className="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-white/40 bg-white/10 transition-colors hover:bg-white/20 disabled:opacity-50"
+                  aria-label="تصغير الصورة"
+                  disabled={zoomLevel <= MIN_ZOOM}
+                >
+                  <ZoomOut className="h-4 w-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={zoomIn}
+                  className="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-white/40 bg-white/10 transition-colors hover:bg-white/20 disabled:opacity-50"
+                  aria-label="تكبير الصورة"
+                  disabled={zoomLevel >= MAX_ZOOM}
+                >
+                  <ZoomIn className="h-4 w-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={closeImagePreview}
+                  className="inline-flex h-9 items-center justify-center gap-1 rounded-full border border-white/40 bg-white/10 px-3 text-sm font-semibold text-white transition-colors hover:bg-white/20 sm:h-10"
+                  aria-label="إغلاق المعاينة"
+                >
+                  <X className="h-4 w-4" />
+                  خروج
+                </button>
+              </div>
+            </div>
+
+            <div
+              className="relative flex-1 overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 bg-black/40"
+              onWheel={handleImageWheel}
+            >
+              <div
+                className="relative h-full w-full origin-center transition-transform duration-200 ease-out"
+                style={{ transform: `scale(${zoomLevel})` }}
+              >
+                <CustomMedia
+                  src={imageList[currentImageIndex] || "/acessts/placeholder.svg"}
+                  alt={`${title} - Preview ${currentImageIndex + 1}`}
+                  fill
+                  objectFit="contain"
+                  className="h-full w-full"
+                  fallbackSrc="/acessts/placeholder.svg"
+                  priority
+                />
+              </div>
+
+              {imageList.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={prevImage}
+                    className="absolute left-2 sm:left-4 top-1/2 z-10 -translate-y-1/2 rounded-full border border-white/40 bg-black/40 p-1.5 sm:p-2 text-white transition-colors hover:bg-black/60"
+                    aria-label="الصورة السابقة"
+                  >
+                    <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={nextImage}
+                    className="absolute right-2 sm:right-4 top-1/2 z-10 -translate-y-1/2 rounded-full border border-white/40 bg-black/40 p-1.5 sm:p-2 text-white transition-colors hover:bg-black/60"
+                    aria-label="الصورة التالية"
+                  >
+                    <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {showLoginAlert && (
         <Alert

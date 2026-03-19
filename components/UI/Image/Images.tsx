@@ -40,13 +40,39 @@ const ALLOWED_PROXY_HOSTS = new Set([
   "shakeltabaanstorage.blob.core.windows.net",
 ]);
 
+const LOCAL_PUBLIC_PREFIXES = [
+  "/acessts/",
+  "/categories/",
+  "/icons/",
+  "/logo/",
+  "/slider/",
+  "/fonts/",
+  "/data/",
+  "/_next/",
+  "/site.webmanifest",
+  "/favicon",
+  "/robots.txt",
+  "/sitemap.xml",
+];
+
+const encodeUrlSafely = (url: string): string => {
+  try {
+    return encodeURI(decodeURI(url));
+  } catch {
+    return encodeURI(url);
+  }
+};
+
 const resolveMediaSrc = (src: string | StaticImageData, fallbackSrc: string) => {
   if (typeof src !== "string") {
     return src;
   }
-  const trimmed = src.trim();
+  const trimmed = src.trim().replace(/\\/g, "/");
   if (!trimmed) {
     return fallbackSrc;
+  }
+  if (trimmed.startsWith("data:") || trimmed.startsWith("blob:")) {
+    return trimmed;
   }
   if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
     try {
@@ -58,22 +84,56 @@ const resolveMediaSrc = (src: string | StaticImageData, fallbackSrc: string) => 
         return `/api/media?url=${encodeURIComponent(trimmed)}`;
       }
     } catch {
-      return trimmed;
+      return encodeUrlSafely(trimmed);
     }
+    return encodeUrlSafely(trimmed);
+  }
+  if (trimmed.startsWith("/api/media?")) {
     return trimmed;
   }
+
   if (trimmed.startsWith("/")) {
-    return trimmed;
+    if (LOCAL_PUBLIC_PREFIXES.some((prefix) => trimmed.startsWith(prefix))) {
+      return encodeUrlSafely(trimmed);
+    }
+
+    const apiBase = (
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      "https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net/app/v1"
+    )
+      .replace(/\/app\/v1\/?$/, "")
+      .replace(/\/+$/, "");
+
+    const cleaned = trimmed
+      .replace(/^\/+/, "")
+      .replace(/^public\//i, "");
+
+    if (!cleaned) {
+      return fallbackSrc;
+    }
+
+    return encodeUrlSafely(`${apiBase}/${cleaned}`);
   }
+
   const apiBase = (
     process.env.NEXT_PUBLIC_API_BASE_URL ||
     process.env.NEXT_PUBLIC_API_URL ||
     "https://shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net/app/v1"
-  ).replace(/\/app\/v1\/?$/, "");
-  if (!apiBase) {
-    return `/${trimmed}`;
+  )
+    .replace(/\/app\/v1\/?$/, "")
+    .replace(/\/+$/, "");
+
+  const cleaned = trimmed.replace(/^public\//i, "").replace(/^\/+/, "");
+
+  if (!cleaned) {
+    return fallbackSrc;
   }
-  return `${apiBase}/${trimmed.replace(/^\//, "")}`;
+
+  if (!apiBase) {
+    return encodeUrlSafely(`/${cleaned}`);
+  }
+  return encodeUrlSafely(`${apiBase}/${cleaned}`);
 };
 
 const getProxyTarget = (value: string): string | null => {

@@ -126,6 +126,17 @@ const getAuthToken = (): string | null => {
   return null;
 };
 
+const clearLocalAuthArtifacts = (): void => {
+  if (typeof window === 'undefined') return;
+
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('refresh_token');
+  localStorage.removeItem('user_data');
+  localStorage.removeItem('token_expiry');
+  localStorage.removeItem('login_time');
+};
+
 // Helper function to get authorization headers
 const getAuthHeaders = (): Record<string, string> => {
   const token = getAuthToken();
@@ -184,12 +195,14 @@ export const getUserProfile = async (): Promise<ProfileResponse> => {
       
       switch (response.status) {
         case 401:
+          clearLocalAuthArtifacts();
           errorMessage = data?.message || 'انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى.';
           break;
         case 403:
           errorMessage = data?.message || 'غير مصرح لك بالوصول إلى هذه البيانات';
           break;
         case 404:
+          clearLocalAuthArtifacts();
           errorMessage = data?.message || 'لم يتم العثور على بيانات المستخدم';
           break;
         case 500:
@@ -251,7 +264,11 @@ export const getUserProfile = async (): Promise<ProfileResponse> => {
     };
 
   } catch (error: any) {
-    console.error('❌ Profile fetch error:', error);
+    if (
+      !(error instanceof ProfileError && (error.statusCode === 401 || error.statusCode === 404))
+    ) {
+      console.error('❌ Profile fetch error:', error);
+    }
     
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
       throw new ProfileError('خطأ في الشبكة - يرجى التحقق من اتصال الإنترنت', 0, true);

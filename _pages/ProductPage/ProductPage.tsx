@@ -144,7 +144,7 @@ const ProductPage: React.FC<{ data: ProductData }> = ({ data }) => {
     ...(product.images || []),
     product.image,
   ]);
-  const safeMediaList = mediaList.length ? mediaList : ['/placeholder-product.jpg'];
+  const safeMediaList = mediaList.length ? mediaList : ['/acessts/NoImage.jpg'];
 
   return (
     <div className="min-h-screen bg-white font-beiruti">

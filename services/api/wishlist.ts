@@ -104,24 +104,11 @@ function checkAuthentication(): { isAuthenticated: boolean; token: string | null
   const user = UserStorage.getUser();
   const token = UserStorage.getToken();
 
-  const result = {
+  return {
     isAuthenticated: user !== null && token !== null,
     token,
     user
   };
-
-  // Debug logging
-  if (typeof window !== 'undefined') {
-    console.log('🔍 checkAuthentication result:', {
-      isAuthenticated: result.isAuthenticated,
-      hasUser: !!user,
-      hasToken: !!token,
-      userId: user?._id,
-      tokenPreview: token ? token.substring(0, 20) + '...' : null
-    });
-  }
-
-  return result;
 }
 
 // Error for unauthenticated users
@@ -222,12 +209,13 @@ export const wishlistService = {
           };
         }
 
-        // Log other errors
-        console.error('Error fetching wishlist:', {
-          status: error?.response?.status,
-          data: error?.response?.data,
-          message: error?.message || String(error)
-        });
+        // Avoid noisy production logs for non-critical wishlist failures.
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('[wishlist.getAll] fallback to empty list', {
+            status: error?.response?.status,
+            message: error?.message || String(error)
+          });
+        }
 
         // Return empty data for other errors
         return {
@@ -239,8 +227,10 @@ export const wishlistService = {
         };
       }
     } catch (error: any) {
-      // This catch block is for non-API errors
-      console.error('Unexpected error in wishlist getAll:', error);
+      // This catch block is for non-API errors.
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('[wishlist.getAll] unexpected fallback to empty list', error);
+      }
       // Return empty wishlist instead of crashing
       return {
         status: 'success',
