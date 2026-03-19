@@ -5,24 +5,22 @@ interface GoogleTranslateProps {
   pageLanguage?: string;
 }
 
-declare global {
-  interface Window {
-    googleTranslateElementInit?: () => void;
-    google?: {
-      translate: {
-        TranslateElement: new (
-          options: {
-            pageLanguage: string;
-            includedLanguages?: string;
-            layout?: number;
-            autoDisplay?: boolean;
-          },
-          elementId: string
-        ) => void;
-      };
+type TranslateWindow = Window & {
+  googleTranslateElementInit?: () => void;
+  google?: {
+    translate?: {
+      TranslateElement: new (
+        options: {
+          pageLanguage: string;
+          includedLanguages?: string;
+          layout?: number;
+          autoDisplay?: boolean;
+        },
+        elementId: string
+      ) => void;
     };
-  }
-}
+  };
+};
 
 const GoogleTranslate: React.FC<GoogleTranslateProps> = ({ 
   pageLanguage = 'ar' 
@@ -99,10 +97,12 @@ const GoogleTranslate: React.FC<GoogleTranslateProps> = ({
     }
 
     // Initialize Google Translate
-    window.googleTranslateElementInit = () => {
-      if (window.google?.translate && translateContainer) {
+    const translateWindow = window as TranslateWindow;
+
+    translateWindow.googleTranslateElementInit = () => {
+      if (translateWindow.google?.translate && translateContainer) {
         try {
-          new window.google.translate.TranslateElement(
+          new translateWindow.google.translate.TranslateElement(
             {
               pageLanguage: pageLanguage,
               includedLanguages: 'ar,en',
