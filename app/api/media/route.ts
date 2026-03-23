@@ -4,6 +4,11 @@ const ALLOWED_HOSTS = new Set([
   "shakeltabaanstorage.blob.core.windows.net",
 ]);
 
+const isAllowedHost = (hostname: string) => {
+  if (ALLOWED_HOSTS.has(hostname)) return true;
+  return hostname.endsWith(".blob.core.windows.net");
+};
+
 export async function GET(request: NextRequest) {
   const urlParam = request.nextUrl.searchParams.get("url");
   if (!urlParam) {
@@ -17,7 +22,7 @@ export async function GET(request: NextRequest) {
     return new Response("Invalid url", { status: 400 });
   }
 
-  if (!ALLOWED_HOSTS.has(target.hostname)) {
+  if (!isAllowedHost(target.hostname)) {
     return new Response("Host not allowed", { status: 403 });
   }
 

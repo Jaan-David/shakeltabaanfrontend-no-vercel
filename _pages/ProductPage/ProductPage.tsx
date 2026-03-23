@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { Product } from '@/services/api/products';
-import { normalizeMediaList } from '@/utils/media';
+import { getProductMediaList, normalizeMediaList } from '@/utils/media';
 // import { console } from 'inspector';
 
 // Lazy load heavy components
@@ -139,11 +139,7 @@ const ProductPage: React.FC<{ data: ProductData }> = ({ data }) => {
     );
   }
 
-  const mediaList = normalizeMediaList([
-    ...(product.imageList || []),
-    ...(product.images || []),
-    product.image,
-  ]);
+  const mediaList = normalizeMediaList(getProductMediaList(product));
   const safeMediaList = mediaList.length ? mediaList : ['/acessts/NoImage.jpg'];
 
   return (

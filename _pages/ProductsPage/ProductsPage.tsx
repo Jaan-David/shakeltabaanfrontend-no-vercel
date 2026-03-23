@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getPrimaryMedia } from "@/utils/media";
+import { getPrimaryMedia, getProductMediaList } from "@/utils/media";
 import {
   productService,
   type Product as ApiProduct,
@@ -21,22 +21,10 @@ type RatingOption = 0 | 3 | 4 | 4.5;
 type SortOption = "relevance" | "price_asc" | "price_desc" | "rating_desc" | "newest";
 
 const getPrimaryImage = (product: ApiProduct): string => {
-  const first = getPrimaryMedia(
-    [
-      ...(Array.isArray(product.imageList) ? product.imageList : []),
-      ...(Array.isArray(product.images) ? product.images : []),
-      product.image,
-    ],
-    PLACEHOLDER_SRC
-  );
+  const first = getPrimaryMedia(getProductMediaList(product), PLACEHOLDER_SRC);
 
   if (first.startsWith("http")) return first.replace("http://", "https://");
-
-  const baseUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL ||
-    process.env.NEXT_PUBLIC_API_URL ||
-    "";
-  return `${baseUrl}${first.startsWith("/") ? "" : "/"}${first}`;
+  return first;
 };
 
 const getOfferStatus = (product: ApiProduct): boolean => {

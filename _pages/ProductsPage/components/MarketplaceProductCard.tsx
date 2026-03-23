@@ -4,6 +4,7 @@ import { useMemo, useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Heart, Star } from "lucide-react";
 import { resolveProductPricing } from "@/utils/pricing";
+import { isVideoMediaUrl } from "@/utils/media";
 import { CustomMedia } from "@/components/UI/Image/Images";
 import Alert from "@/components/UI/Alert/alert";
 import { useFavorites } from "@/services/favorites/FavoritesContext";
@@ -34,6 +35,7 @@ export default function MarketplaceProductCard({
 
   const [showLoginAlert, setShowLoginAlert] = useState(false);
   const [useContainFit, setUseContainFit] = useState(false);
+  const isVideoPreview = useMemo(() => isVideoMediaUrl(imageSrc || ""), [imageSrc]);
 
   const productId = String(product._id || product.id || "");
   const favoriteKey = productId || product.name || imageSrc;
@@ -175,6 +177,11 @@ export default function MarketplaceProductCard({
             className={styles.imageMedia}
             imageClassName={`${styles.image} ${useContainFit ? styles.imageContain : ""}`}
             fallbackSrc={PLACEHOLDER_SRC}
+            controls={isVideoPreview ? false : undefined}
+            autoPlay={isVideoPreview}
+            muted={isVideoPreview}
+            loop={isVideoPreview}
+            playsInline={isVideoPreview}
             loading="lazy"
             decoding="async"
             onLoad={onImageLoad}

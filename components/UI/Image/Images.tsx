@@ -27,6 +27,7 @@ interface ImageProps {
 
 interface MediaProps extends ImageProps {
   controls?: boolean;
+  autoPlay?: boolean;
   muted?: boolean;
   loop?: boolean;
   playsInline?: boolean;
@@ -39,6 +40,11 @@ const VIDEO_REGEX = /\.(mp4|mov|m4v|webm|ogv|ogg)(\?|#|$)/i;
 const ALLOWED_PROXY_HOSTS = new Set([
   "shakeltabaanstorage.blob.core.windows.net",
 ]);
+
+const isAllowedProxyHost = (hostname: string) => {
+  if (ALLOWED_PROXY_HOSTS.has(hostname)) return true;
+  return hostname.endsWith(".blob.core.windows.net");
+};
 
 const LOCAL_PUBLIC_PREFIXES = [
   "/acessts/",
@@ -78,8 +84,7 @@ const resolveMediaSrc = (src: string | StaticImageData, fallbackSrc: string) => 
     try {
       const url = new URL(trimmed);
       if (
-        ALLOWED_PROXY_HOSTS.has(url.hostname) &&
-        (HEIC_REGEX.test(trimmed) || VIDEO_REGEX.test(trimmed))
+        isAllowedProxyHost(url.hostname)
       ) {
         return `/api/media?url=${encodeURIComponent(trimmed)}`;
       }
@@ -150,8 +155,12 @@ const getProxyTarget = (value: string): string | null => {
 
 const isVideoSource = (src: string | StaticImageData): boolean => {
   if (typeof src !== "string") return false;
+  if (src.includes("#video")) return true;
+  if (/(^|[/?&=_-])video([/?&=_-]|$)/i.test(src)) return true;
   if (VIDEO_REGEX.test(src)) return true;
   const proxied = getProxyTarget(src);
+  if (proxied && proxied.includes("#video")) return true;
+  if (proxied && /(^|[/?&=_-])video([/?&=_-]|$)/i.test(proxied)) return true;
   return proxied ? VIDEO_REGEX.test(proxied) : false;
 };
 
@@ -344,6 +353,7 @@ export function CustomMedia({
   loading,
   decoding = "async",
   controls = true,
+  autoPlay = false,
   muted = true,
   loop = false,
   playsInline = true,
@@ -400,6 +410,7 @@ export function CustomMedia({
         width={!fill ? width : undefined}
         height={!fill ? height : undefined}
         controls={controls}
+        autoPlay={autoPlay}
         muted={muted}
         loop={loop}
         playsInline={playsInline}

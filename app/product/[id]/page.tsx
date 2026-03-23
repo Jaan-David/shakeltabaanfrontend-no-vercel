@@ -9,6 +9,7 @@ import {
   getCategoryContentById,
   getCategoryRelatedLinks,
 } from "@/lib/categoryContentMap";
+import { getProductMediaList, isVideoMediaUrl } from "@/utils/media";
 
 import { canonicalBaseUrl, generateSEO, seoConfig } from "@/config/seo.config";
 
@@ -102,17 +103,9 @@ const buildProductMetaDescription = (product: any, material: string) => {
   return description;
 };
 
-function getImageList(
-  p?: { imageList?: string[]; images?: string[]; image?: string } | null
-): string[] {
-  const list =
-    p?.imageList && Array.isArray(p.imageList) && p.imageList.length > 0
-      ? p.imageList
-      : Array.isArray(p?.images)
-      ? p.images
-      : [];
+function getImageList(p?: Record<string, any> | null): string[] {
+  const list = getProductMediaList(p);
   if (list.length > 0) return list;
-  if (p?.image) return [p.image];
   return ["/acessts/NoImage.jpg"]; // Fixed placeholder path
 }
 
@@ -294,7 +287,9 @@ export default async function ProductByIdPage({
     //console.log(`✅ Product page data prepared successfully`);
     const canonicalUrl = `${getSiteUrl()}/product/${encodeURIComponent(decodedId)}`;
     const imageList = getImageList(apiProduct);
-    const absoluteImages = imageList.map((img) => toAbsoluteUrl(img));
+    const absoluteImages = imageList
+      .filter((img) => !isVideoMediaUrl(img))
+      .map((img) => toAbsoluteUrl(img));
     const priceValue = Number(apiProduct.price ?? 0);
     const hasPrice = Number.isFinite(priceValue) && priceValue > 0;
     const faqItems = buildProductFaqByCategory({
