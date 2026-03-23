@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Card from "@/components/UI/Card/Card";
 import { getPrimaryMedia } from "@/utils/media";
 import {
   productService,
@@ -12,6 +11,8 @@ import {
 import ProductsHeader from "./components/ProductsHeader";
 import FilterSidebar from "./components/FilterSidebar";
 import MobileFilterDrawer from "./components/MobileFilterDrawer";
+import MarketplaceProductCard from "./components/MarketplaceProductCard";
+import styles from "./ProductsPage.module.css";
 
 const PLACEHOLDER_SRC = "/acessts/NoImage.jpg";
 const DEFAULT_LIMIT = 200;
@@ -258,7 +259,7 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white font-beiruti">
+    <div className="min-h-screen bg-[#f3f0ea] font-beiruti">
       <div className="mx-auto w-full max-w-7xl px-4 py-6 space-y-4">
         <ProductsHeader
           title="كل المنتجات"
@@ -296,32 +297,25 @@ export default function ProductsPage() {
           </aside>
 
           <div className="space-y-4">
-            <div className="sticky top-[110px] z-10 rounded-xl border border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
+            <div className="sticky top-[110px] z-10 rounded-2xl bg-[#f8f6f2]/95 px-4 py-3 shadow-[0_10px_22px_rgba(15,23,42,0.08)] backdrop-blur">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <span className="text-sm text-slate-600">
+                <span className="text-sm text-slate-500">
                   عدد النتائج: {sortedProducts.length}
                 </span>
                 <div className="flex items-center gap-2">
-                  <label className="text-xs font-semibold text-slate-600">
+                  <label className="text-xs font-medium text-slate-500">
                     ترتيب حسب
                   </label>
                   <select
                     value={sortBy}
                     onChange={(event) => setSortBy(event.target.value as SortOption)}
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 focus:border-blue-600 focus:outline-none"
+                    className="rounded-full border border-transparent bg-white px-3 py-2 text-xs text-slate-700 shadow-[0_6px_14px_rgba(15,23,42,0.08)] focus:border-slate-300 focus:outline-none"
                   >
                     <option value="relevance">الأكثر صلة</option>
                     <option value="rating_desc">الأعلى تقييماً</option>
                     <option value="newest">الأحدث</option>
                   </select>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setIsMobileFiltersOpen(true)}
-                  className="lg:hidden rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:text-blue-600 min-h-[44px]"
-                >
-                  فلتر البحث
-                </button>
               </div>
             </div>
 
@@ -339,40 +333,13 @@ export default function ProductsPage() {
                 لا توجد منتجات مطابقة للبحث الحالي.
               </div>
             ) : (
-              <div className="grid gap-4 sm:gap-5 md:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className={styles.resultsGrid}>
                 {sortedProducts.map((product, index) => (
-                  <Card
+                  <MarketplaceProductCard
                     key={product._id || product.id || index}
-                    productId={String(product._id || product.id || index)}
-                    productImg={getPrimaryImage(product)}
-                    productName={product.name || "منتج"}
-                    productCategory={product.category || "غير محدد"}
-                    productPrice={String(product.price || 0)}
+                    product={product}
+                    imageSrc={getPrimaryImage(product)}
                     hasOffer={getOfferStatus(product)}
-                    IsKG={product.IsKG}
-                    IsTON={product.IsTON}
-                    IsLITER={product.IsLITER}
-                    IsCUBIC_METER={product.IsCUBIC_METER}
-                    pricePerSquareMeter={product.pricePerSquareMeter}
-                    pricePerLinearMeter={product.pricePerLinearMeter}
-                    pricePerCubicMeter={product.pricePerCubicMeter}
-                    offerPrice={product.offerPrice}
-                    offerSquarePrice={product.offerSquarePrice}
-                    offerLinearPrice={product.offerLinearPrice}
-                    offerCubicPrice={product.offerCubicPrice}
-                    minPrice={product.minPrice}
-                    maxPrice={product.maxPrice}
-                    priceOnRequest={product.priceOnRequest}
-                    customPriceLabel={product.customPriceLabel}
-                    color={product.color}
-                    qualityGrade={product.qualityGrade}
-                    isOffer={product.isOffer}
-                    organizationName={product.organizationName}
-                    organizationId={product.organizationId}
-                    withInstallation={product.withInstallation}
-                    showOrganizationInline
-                    showQualityGrade={false}
-                    showMinimalMarbleInfo
                   />
                 ))}
               </div>
@@ -384,9 +351,9 @@ export default function ProductsPage() {
       <button
         type="button"
         onClick={() => setIsMobileFiltersOpen(true)}
-        className="fixed bottom-5 right-5 z-30 flex items-center gap-2 rounded-full bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-lg lg:hidden min-h-[44px]"
+        className="fixed bottom-5 right-5 z-30 inline-flex min-h-[42px] items-center rounded-full bg-slate-800/95 px-4 py-2 text-xs font-medium text-slate-50 shadow-[0_12px_24px_rgba(15,23,42,0.28)] lg:hidden"
       >
-        فلتر البحث
+        تصفية
       </button>
 
       <MobileFilterDrawer

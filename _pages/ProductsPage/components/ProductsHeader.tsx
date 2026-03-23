@@ -58,13 +58,13 @@ export default function ProductsHeader({
   ];
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-5 shadow-sm md:px-6">
+    <section className="rounded-3xl bg-[#f8f6f2] px-4 py-5 shadow-[0_12px_28px_rgba(15,23,42,0.08)] md:px-6">
       <div className="grid gap-4 lg:grid-cols-[1fr_minmax(0,2fr)_1fr] lg:items-center">
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-800 md:text-3xl">
             {title}
           </h1>
-          <p className="text-sm text-slate-600 md:text-base">{subtitle}</p>
+          <p className="text-sm text-slate-500 md:text-base">{subtitle}</p>
         </div>
 
         <div className="lg:order-none">
@@ -78,7 +78,7 @@ export default function ProductsHeader({
         </div>
 
         <div className="flex items-center justify-start lg:justify-end">
-          <span className="inline-flex items-center rounded-full bg-blue-600/10 px-3 py-1 text-xs font-semibold text-blue-700">
+          <span className="inline-flex items-center rounded-full bg-slate-100/90 px-3 py-1 text-xs font-medium text-slate-500">
             {resultCount} منتج
           </span>
         </div>

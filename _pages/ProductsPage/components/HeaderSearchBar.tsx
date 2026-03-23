@@ -21,7 +21,7 @@ export default function HeaderSearchBar({
 
   return (
     <div className="relative">
-      <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+      <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-slate-400">
         <svg
           viewBox="0 0 24 24"
           aria-hidden="true"
@@ -42,14 +42,14 @@ export default function HeaderSearchBar({
         onChange={handleChange}
         placeholder={placeholder}
         aria-label={ariaLabel}
-        className="w-full rounded-2xl border border-slate-200 bg-white px-10 py-3 text-sm text-slate-900 shadow-sm transition focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100 hover:border-blue-400"
+        className="w-full rounded-full border border-transparent bg-white px-12 py-3 text-sm text-slate-800 shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition focus:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-200"
       />
       {value ? (
         <button
           type="button"
           onClick={onClear}
           aria-label="مسح البحث"
-          className="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-700"
+          className="absolute inset-y-0 right-4 flex items-center text-slate-400 transition hover:text-slate-700"
         >
           <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
             <path

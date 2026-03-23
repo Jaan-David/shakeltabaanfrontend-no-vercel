@@ -14,7 +14,7 @@ interface ContactInfoProps {
 const ContactInfo: React.FC<ContactInfoProps> = ({ contacts }) => {
   const defaultContacts: ContactItem[] = [
     { type: "phone", value: "+20 10 26273185" },
-    { type: "email", value: ["info@shak-elt3ban.com"] },
+    { type: "email", value: ["Shkelte3ban@gmail.com"] },
   ];
 
   const finalContacts = contacts || defaultContacts;

@@ -156,9 +156,9 @@ const Footer = () => {
               </a>
               <a
                 className="transition hover:text-blue-300 font-medium"
-                href="mailto:info@shak-elt3ban.com"
+                href="mailto:Shkelte3ban@gmail.com"
               >
-                📧 info@shak-elt3ban.com
+                📧 Shkelte3ban@gmail.com
               </a>
               <a
                 className="transition hover:text-blue-300 font-medium"
@@ -272,9 +272,9 @@ const Footer = () => {
               </a>
               <a
                 className="text-slate-200 transition hover:text-blue-300 font-medium text-sm flex items-center gap-2"
-                href="mailto:info@shak-elt3ban.com"
+                href="mailto:Shkelte3ban@gmail.com"
               >
-                📧 info@shak-elt3ban.com
+                📧 Shkelte3ban@gmail.com
               </a>
               <a
                 className="text-slate-200 transition hover:text-blue-300 font-medium text-sm flex items-center gap-2"
