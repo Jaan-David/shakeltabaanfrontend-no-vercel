@@ -99,6 +99,7 @@ function InquiriesPageContent() {
       const result = await inquiryService.getInquiries({ 
         page: 1, 
         limit: 100,
+        type: 'normal',
         status: statusParam
       });
       setInquiries(result.inquiries || []);

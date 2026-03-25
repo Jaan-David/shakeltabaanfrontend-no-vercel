@@ -147,7 +147,7 @@ export const inquiryService = {
     
     if (filters?.page) params.append('page', filters.page.toString());
     if (filters?.limit) params.append('limit', filters.limit.toString());
-    if (filters?.type) params.append('type', filters.type);
+    params.append('type', filters?.type || 'normal');
     if (filters?.status) params.append('status', filters.status);
 
     const response = await apiClient.get(`${BASE_URL}/inquiries?${params.toString()}`);
