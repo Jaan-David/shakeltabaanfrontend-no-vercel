@@ -36,9 +36,10 @@ const Footer = () => {
               <Image
                 src="/logo/logo2.png"
                 alt="منصة شق الثعبان"
-                width={56}
-                height={56}
-                className="h-14 w-14 object-contain"
+                width={677}
+                height={369}
+                sizes="(max-width: 1024px) 120px, 150px"
+                className="h-auto w-28 lg:w-[9.25rem] shrink-0 object-contain"
               />
               <span className="text-lg font-semibold text-white">منصة شق الثعبان</span>
             </div>
@@ -184,9 +185,10 @@ const Footer = () => {
               <Image
                 src="/logo/logo2.png"
                 alt="منصة شق الثعبان"
-                width={48}
-                height={48}
-                className="h-12 w-12 object-contain"
+                width={677}
+                height={369}
+                sizes="120px"
+                className="h-auto w-28 shrink-0 object-contain"
               />
               <span className="text-base font-semibold text-white">منصة شق الثعبان</span>
             </div>

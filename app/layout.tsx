@@ -28,6 +28,7 @@ export const metadata: Metadata = {
     telephone: false,
   },
   metadataBase: new URL(canonicalBaseUrl),
+  manifest: '/site.webmanifest',
   alternates: {
     canonical: '/',
     languages: {
@@ -61,13 +62,13 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: seoConfig.images.favicon, sizes: '32x32', type: 'image/png' },
-      { url: seoConfig.images.favicon, sizes: '48x48', type: 'image/png' },
-      { url: seoConfig.images.favicon, sizes: '192x192', type: 'image/png' },
+      { url: '/logo/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/logo/favicon-48.png', sizes: '48x48', type: 'image/png' },
+      { url: '/logo/app-icon-192.png', sizes: '192x192', type: 'image/png' },
     ],
-    shortcut: seoConfig.images.favicon,
+    shortcut: '/logo/favicon-32.png',
     apple: {
-      url: seoConfig.images.favicon,
+      url: '/logo/apple-touch-icon.png',
       sizes: '180x180',
       type: 'image/png',
     },

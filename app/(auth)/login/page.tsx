@@ -240,9 +240,9 @@ function LoginFormComponent() {
             <Image
               src={Logo}
               alt="Logo"
-              width={160}
-              height={48}
-              sizes="160px"
+              width={677}
+              height={369}
+              sizes="(max-width: 768px) 180px, 220px"
               className={styles.logo}
               priority
             />

@@ -339,8 +339,9 @@ function Header({
               <Image
                 src={Logo}
                 alt="منصة شق الثعبان"
-                width={40}
-                height={40}
+                width={677}
+                height={369}
+                sizes="(max-width: 640px) 80px, 96px"
                 className={styles.logoImage}
                 priority
               />

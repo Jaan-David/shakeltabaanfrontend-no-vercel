@@ -9,7 +9,7 @@ const HeroSection = () => {
         <div className="flex flex-col items-center justify-center text-center space-y-6 sm:space-y-8 lg:space-y-12">
           
           {/* Logo Section */}
-          <div className="w-[280px] h-[280px] sm:w-[330px] sm:h-[330px] lg:w-[400px] lg:h-[400px] animate-fade-in">
+          <div className="w-[340px] h-[185px] sm:w-[420px] sm:h-[229px] lg:w-[500px] lg:h-[272px] animate-fade-in">
             <div className="relative w-full h-full">
               <Image
                 src="/logo/logo1.png"
@@ -17,7 +17,7 @@ const HeroSection = () => {
                 fill
                 priority
                 className="object-contain drop-shadow-2xl"
-                sizes="(max-width: 640px) 280px, (max-width: 1024px) 330px, 400px"
+                sizes="(max-width: 640px) 340px, (max-width: 1024px) 420px, 500px"
               />
             </div>
           </div>

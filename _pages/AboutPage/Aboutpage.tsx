@@ -18,13 +18,14 @@ export default function AboutPage() {
     >
       {/* ===== Header ===== */}
       <section className="flex flex-col items-center text-center gap-4">
-        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 p-3 shadow-sm">
-          <div className="w-full h-full bg-white rounded-xl flex items-center justify-center">
+        <div className="w-48 h-28 sm:w-56 sm:h-32 rounded-2xl bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 p-2 shadow-sm">
+          <div className="relative w-full h-full bg-white rounded-xl flex items-center justify-center">
             <Image
               src="/logo/logo1.png"
               alt="منصة شق الثعبان"
-              width={150}
-              height={150}
+              fill
+              className="object-contain"
+              sizes="(max-width: 640px) 192px, 224px"
             />
           </div>
         </div>

@@ -10,11 +10,11 @@ const AboutUsSection = () => {
           </div>
           
           {/* logo - positioned on the right */}
-          <div className="w-[50%] sm:w-[40%] md:w-[50%]   lg:w-[50%] h-[6vh] sm:h-[6.5vh] md:h-[7vh] lg:h-[100%] flex  ">
+          <div className="w-28 sm:w-32 md:w-36 lg:w-44 flex items-center">
             <img
             src="/logo/logo2.png"
             alt="شق التعبان"
-            className="w-full h-full object-contain "
+            className="w-full h-auto object-contain"
             />
           </div>
         </div>

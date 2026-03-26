@@ -32,7 +32,7 @@ export const seoConfig = {
     ogImage: '/og-image.jpg',
     twitterImage: '/twitter-image.jpg',
     logo: '/logo/logo1.png',
-    favicon: '/logo/logo1.png', // Updated to use logo1.png for all icon variants
+    favicon: '/logo/favicon-32.png',
   },
   
   // Default Keywords
