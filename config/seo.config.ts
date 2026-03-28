@@ -29,8 +29,8 @@ export const seoConfig = {
 
   // Default Images for Social Sharing
   images: {
-    ogImage: '/og-image.jpg',
-    twitterImage: '/twitter-image.jpg',
+    ogImage: '/logo/logo1.png',
+    twitterImage: '/logo/logo1.png',
     logo: '/logo/logo1.png',
     favicon: '/logo/favicon-32.png',
   },
@@ -146,8 +146,8 @@ export const generateSEO = ({
       images: [
         {
           url: ogImage,
-          width: 1200,
-          height: 630,
+          width: 677,
+          height: 369,
           alt: title,
         },
       ],

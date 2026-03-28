@@ -38,8 +38,8 @@ export const metadata = {
     images: [
       {
         url: ogImage,
-        width: 1200,
-        height: 630,
+        width: 677,
+        height: 369,
         alt: marbleInfoTitle,
       },
     ],

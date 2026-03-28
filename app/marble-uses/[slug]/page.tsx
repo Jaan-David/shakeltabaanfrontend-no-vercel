@@ -69,7 +69,7 @@ export async function generateMetadata({ params }: MarbleUsePageProps) {
   const title = buildMetaTitle(category);
   const description = buildMetaDescription(category);
   const pageUrl = `${canonicalBaseUrl}/marble-uses/${category.slug}`;
-  const ogImage = toAbsoluteUrl(category.heroImage);
+  const ogImage = `${canonicalBaseUrl}${seoConfig.images.ogImage.startsWith("/") ? seoConfig.images.ogImage : `/${seoConfig.images.ogImage}`}`;
 
   return {
     title,
@@ -95,8 +95,8 @@ export async function generateMetadata({ params }: MarbleUsePageProps) {
       images: [
         {
           url: ogImage,
-          width: 1200,
-          height: 630,
+          width: 677,
+          height: 369,
           alt: title,
         },
       ],
