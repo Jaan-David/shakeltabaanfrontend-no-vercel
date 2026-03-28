@@ -13,17 +13,15 @@ export const seoConfig = {
   
   // Social Media Links
   socialLinks: {
-    facebook: 'https://facebook.com/shakeltaaban',
-    twitter: 'https://twitter.com/shakeltaaban',
-    instagram: 'https://instagram.com/shakeltaaban',
-    linkedin: 'https://linkedin.com/company/shakeltaaban',
-    youtube: 'https://youtube.com/@shakeltaaban',
+    facebook: 'https://www.facebook.com/share/19RrLGxbAr/?mibextid=wwXIfr',
+    instagram: 'https://www.instagram.com/shkelteaban?igsh=bmZtcnlnYWNtcmZj&utm_source=qr',
+    tiktok: 'https://www.tiktok.com/@shak.el.taaban?_r=1&_t=ZS-94vjfcGEADZ',
   },
   
   // Contact Information
   contact: {
-    email: '',
-    phone: '+',
+    email: 'Shkelte3ban@gmail.com',
+    phone: '+201026273185',
     address: '',
   },
 
