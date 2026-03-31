@@ -307,6 +307,11 @@ export default function ProductsPage() {
               </div>
             </div>
 
+            <div className="rounded-2xl border border-slate-200/80 bg-slate-100/60 px-3 py-2 text-center sm:px-4 sm:py-3">
+              <p className="text-xs text-slate-600 sm:text-sm">
+               يتم إضافة منتجات جديدة يوميًا .....   انتظرونا قريبًا              </p>
+            </div>
+
             {isLoading ? (
               <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
                 <div className="inline-block h-10 w-10 animate-spin rounded-full border-b-2 border-blue-600"></div>
