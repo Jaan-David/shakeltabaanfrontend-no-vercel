@@ -75,7 +75,7 @@ export default function PartnersSection() {
         const mappedPartners: Partner[] = data
           .filter((org: Organization) => {
             // Exclude ala5las organization
-            return org.name?.toLowerCase() !== 'ala5las';
+            return org.name?.toLowerCase() !== 'ala5cvlas';
           })
           .map((org: Organization, index: number) => {
             const rawPhoto = org.photo || '';
