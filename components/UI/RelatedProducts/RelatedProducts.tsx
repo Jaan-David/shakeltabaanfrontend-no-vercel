@@ -7,9 +7,8 @@ import {
   productService,
   ProductFilters,
 } from "@/services/api/products";
-import type { Product as UiProduct } from "@/services/product/products";
-import Card from "@/components/UI/Card/Card";
 import { getPrimaryMedia } from "@/utils/media";
+import { resolveProductPricing } from "@/utils/pricing";
 
 const RelatedProducts: React.FC<{ currentProductId?: string }> = ({
   currentProductId,
@@ -68,19 +67,27 @@ const RelatedProducts: React.FC<{ currentProductId?: string }> = ({
     return `${BASE_IMAGE_URL}${first.startsWith("/") ? "" : "/"}${first}`;
   };
 
-  const mapToUiProduct = (p: ApiProduct): UiProduct => {
-    const imageUrl = getPrimaryImage(p);
-
-    return {
-      ...p,
-      id: p._id || p.id || "",
-      image: imageUrl,
-      images: [imageUrl],
-      imageList: [imageUrl],
-      inStock: typeof p.stockQty === "number" ? p.stockQty > 0 : true,
-      stockQuantity: p.stockQty,
-      stockQty: p.stockQty,
-    } as UiProduct;
+  const getResolvedPricing = (product: ApiProduct) => {
+    return resolveProductPricing(
+      {
+        price: product.price,
+        offerPrice: product.offerPrice,
+        pricePerSquareMeter: product.pricePerSquareMeter,
+        offerSquarePrice: product.offerSquarePrice,
+        pricePerCubicMeter: product.pricePerCubicMeter,
+        offerCubicPrice: product.offerCubicPrice,
+        pricePerLinearMeter: product.pricePerLinearMeter,
+        offerLinearPrice: product.offerLinearPrice,
+        minPrice: product.minPrice,
+        maxPrice: product.maxPrice,
+        priceOnRequest: product.priceOnRequest,
+        customPriceLabel: product.customPriceLabel,
+      },
+      {
+        preferredOrder: ["square", "linear", "fixed", "cubic"],
+        treatCubicAsSquare: true,
+      }
+    );
   };
 
   const fetchRelatedProducts = useCallback(async () => {
@@ -94,7 +101,17 @@ const RelatedProducts: React.FC<{ currentProductId?: string }> = ({
       };
 
       const response = await productService.getProducts(filters);
-      setProducts(response?.data || []);
+      let related = response?.data || [];
+
+      // Some backends may not support excludeId and can return empty results.
+      if (currentProductId && related.length === 0) {
+        const fallbackResponse = await productService.getProducts({ limit: 8 });
+        related = (fallbackResponse?.data || []).filter(
+          (item) => String(item._id || item.id) !== String(currentProductId)
+        );
+      }
+
+      setProducts(related);
     } catch {
       setError("حدث خطأ أثناء تحميل المنتجات المتعلقة");
       setProducts([]);
@@ -124,58 +141,59 @@ const RelatedProducts: React.FC<{ currentProductId?: string }> = ({
     <div className="mt-10 sm:mt-12 w-full">
       <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 px-4 sm:px-0">منتجات قد تعجبك</h2>
 
-      <div className="w-full overflow-hidden -mx-4 sm:mx-0">
+      <div className="w-full overflow-visible">
         <div
           ref={sliderRef}
-          className="keen-slider px-4 sm:px-0"
+          className="keen-slider"
           onMouseEnter={stop}
           onMouseLeave={start}
         >
-          {products.map((product, index) => (
-            <div
-              key={`${product._id || product.id}-${index}`}
-              className="keen-slider__slide min-w-0 flex-shrink-0 h-auto"
-            >
-              <Link href={`/product/${product._id || product.id}`} className="block w-full h-full">
-                <Card
-                  productId={String(product._id || product.id || index)}
-                  productImg={getPrimaryImage(product)}
-                  productName={product.name || "منتج"}
-                  productCategory={product.category || "غير محدد"}
-                  productPrice={String(product.price || 0)}
-                  product={mapToUiProduct(product)}
-                  hasOffer={Boolean(
-                    (product as { hasOffer?: boolean }).hasOffer || product.isOffer
-                  )}
-                  IsKG={product.IsKG}
-                  IsTON={product.IsTON}
-                  IsLITER={product.IsLITER}
-                  IsCUBIC_METER={product.IsCUBIC_METER}
-                  pricePerSquareMeter={product.pricePerSquareMeter}
-                  pricePerLinearMeter={product.pricePerLinearMeter}
-                  pricePerCubicMeter={product.pricePerCubicMeter}
-                  offerPrice={product.offerPrice}
-                  offerSquarePrice={product.offerSquarePrice}
-                  offerLinearPrice={product.offerLinearPrice}
-                  offerCubicPrice={product.offerCubicPrice}
-                  minPrice={product.minPrice}
-                  maxPrice={product.maxPrice}
-                  priceOnRequest={product.priceOnRequest}
-                  customPriceLabel={product.customPriceLabel}
-                  color={product.color}
-                  qualityGrade={product.qualityGrade}
-                  isOffer={product.isOffer}
-                  organizationName={product.organizationName}
-                  organizationId={product.organizationId}
-                  withInstallation={product.withInstallation}
-                  showOrganizationInline
-                  showQualityGrade={false}
-                  showMinimalMarbleInfo
-                  showActionButton={false}
-                />
-              </Link>
-          </div>
-        ))}
+          {products.map((product, index) => {
+            const pricing = getResolvedPricing(product);
+
+            return (
+              <div
+                key={`${product._id || product.id}-${index}`}
+                className="keen-slider__slide min-w-0 flex-shrink-0 h-auto"
+              >
+                <Link
+                  href={`/product/${product._id || product.id}`}
+                  className="block h-full rounded-2xl border border-slate-200 bg-white p-2 shadow-sm transition hover:shadow-md"
+                >
+                  <div className="relative mb-3 aspect-[4/3] overflow-hidden rounded-xl bg-slate-100">
+                    <img
+                      src={getPrimaryImage(product)}
+                      alt={product.name || "منتج"}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+
+                  <div className="space-y-1 px-1 pb-1 text-right">
+                    <p className="truncate text-xs text-slate-500">
+                      {product.organizationName || product.organizationId || "مورد معتمد"}
+                    </p>
+                    <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-semibold text-slate-900 sm:text-base">
+                      {product.name || "منتج"}
+                    </h3>
+                    <div className="space-y-0.5">
+                      <p className="text-[11px] text-slate-500">{pricing.label}</p>
+                      {pricing.mode === "offer" && pricing.oldDisplay && (
+                        <p className="text-[11px] text-slate-400 line-through">{pricing.oldDisplay}</p>
+                      )}
+                      <p className="text-sm font-semibold text-slate-800 sm:text-[15px]">
+                        {pricing.display}
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-end gap-1 text-xs text-slate-500 sm:text-sm">
+                      <span>★</span>
+                      <span>{(product.averageRate || 0).toFixed(1)}</span>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

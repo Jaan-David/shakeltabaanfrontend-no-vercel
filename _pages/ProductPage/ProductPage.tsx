@@ -211,7 +211,7 @@ const ProductPage: React.FC<{ data: ProductData }> = ({ data }) => {
         </div>
 
         <Suspense fallback={<SectionLoader />}>
-          <RelatedProducts />
+          <RelatedProducts currentProductId={product._id} />
         </Suspense>
       </div>
     </div>

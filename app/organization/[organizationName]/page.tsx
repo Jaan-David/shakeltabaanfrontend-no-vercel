@@ -190,6 +190,25 @@ const normalizeApiImage = (path?: string | null): string => {
   return encodeUrlSafely(`${API_IMAGE_BASE_URL}/${cleaned}`);
 };
 
+const resolveLocationHref = (location: string): string => {
+  const trimmed = location.trim();
+  if (!trimmed) return "";
+
+  if (
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("geo:")
+  ) {
+    return trimmed;
+  }
+
+  if (trimmed.startsWith("www.")) {
+    return `https://${trimmed}`;
+  }
+
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trimmed)}`;
+};
+
 export default async function OrganizationProfilePage({
   params,
 }: {
@@ -236,6 +255,9 @@ export default async function OrganizationProfilePage({
   const heroImageIsRemote = heroImage.startsWith("http://") || heroImage.startsWith("https://");
   const hasDescription = Boolean(orgProfile.description?.trim());
   const hasRating = typeof orgProfile.rating === "number";
+  const hasLocation = Boolean(orgProfile.location?.trim());
+  const locationText = orgProfile.location?.trim() || "";
+  const locationHref = hasLocation ? resolveLocationHref(locationText) : "";
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
   const organizationUrl = `${baseUrl}/organization/${encodeURIComponent(organizationId)}`;
@@ -310,6 +332,19 @@ export default async function OrganizationProfilePage({
                 <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
                   {orgProfile.name}
                 </h1>
+                {hasLocation ? (
+                  <p className="text-sm md:text-base text-slate-700">
+                    الموقع: {" "}
+                    <a
+                      href={locationHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-blue-700 hover:text-blue-800 hover:underline"
+                    >
+                      {locationText}
+                    </a>
+                  </p>
+                ) : null}
                 {hasDescription ? (
                   <p className="text-sm md:text-base text-slate-600 leading-relaxed">
                     {orgProfile.description}
@@ -364,6 +399,19 @@ export default async function OrganizationProfilePage({
             </div>
             <div className="flex-1 space-y-3 text-right">
               <h2 className="text-2xl md:text-3xl font-bold text-slate-900">{orgProfile.name}</h2>
+              {hasLocation ? (
+                <p className="text-sm md:text-base text-slate-700">
+                  الموقع: {" "}
+                  <a
+                    href={locationHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-blue-700 hover:text-blue-800 hover:underline"
+                  >
+                    {locationText}
+                  </a>
+                </p>
+              ) : null}
               {hasDescription ? (
                 <p className="text-sm md:text-base text-slate-600 leading-relaxed">
                   {orgProfile.description}
