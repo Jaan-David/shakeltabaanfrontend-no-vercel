@@ -101,17 +101,7 @@ const RelatedProducts: React.FC<{ currentProductId?: string }> = ({
       };
 
       const response = await productService.getProducts(filters);
-      let related = response?.data || [];
-
-      // Some backends may not support excludeId and can return empty results.
-      if (currentProductId && related.length === 0) {
-        const fallbackResponse = await productService.getProducts({ limit: 8 });
-        related = (fallbackResponse?.data || []).filter(
-          (item) => String(item._id || item.id) !== String(currentProductId)
-        );
-      }
-
-      setProducts(related);
+      setProducts(response?.data || []);
     } catch {
       setError("حدث خطأ أثناء تحميل المنتجات المتعلقة");
       setProducts([]);
@@ -141,10 +131,10 @@ const RelatedProducts: React.FC<{ currentProductId?: string }> = ({
     <div className="mt-10 sm:mt-12 w-full">
       <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 px-4 sm:px-0">منتجات قد تعجبك</h2>
 
-      <div className="w-full overflow-visible">
+      <div className="w-full overflow-hidden -mx-4 sm:mx-0">
         <div
           ref={sliderRef}
-          className="keen-slider"
+          className="keen-slider px-4 sm:px-0"
           onMouseEnter={stop}
           onMouseLeave={start}
         >
