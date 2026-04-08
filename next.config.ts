@@ -144,12 +144,12 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: `
               default-src 'self';
-              script-src 'self' 'unsafe-eval' 'unsafe-inline' www.googletagmanager.com www.google-analytics.com accounts.google.com accounts.gstatic.com;
+              script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://accounts.google.com https://accounts.gstatic.com https://connect.facebook.net;
               style-src 'self' 'unsafe-inline' fonts.googleapis.com;
-              img-src 'self' data: https: res.cloudinary.com marble-bajco.com shakeltabaanstorage.blob.core.windows.net www.googletagmanager.com;
+              img-src 'self' data: https: res.cloudinary.com marble-bajco.com shakeltabaanstorage.blob.core.windows.net https://www.googletagmanager.com https://www.facebook.com;
               font-src 'self' data: fonts.gstatic.com;
-              connect-src 'self' https: www.google-analytics.com www.googletagmanager.com accounts.google.com accounts.gstatic.com shakeltabaanstorage.blob.core.windows.net marble-bajco.com shk2t-t3ban.fly.dev shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net;
-              frame-src 'self' www.google.com accounts.google.com;
+              connect-src 'self' https: https://www.google-analytics.com https://www.googletagmanager.com https://accounts.google.com https://accounts.gstatic.com https://connect.facebook.net https://www.facebook.com shakeltabaanstorage.blob.core.windows.net marble-bajco.com shk2t-t3ban.fly.dev shakeltaaban-d8cwcdeteadge4fe.switzerlandnorth-01.azurewebsites.net;
+              frame-src 'self' https://www.google.com https://accounts.google.com https://www.googletagmanager.com https://www.facebook.com;
               media-src 'self' data: blob: https:;
               upgrade-insecure-requests;
             `.replace(/\s+/g, ' ').trim(),

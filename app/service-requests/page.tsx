@@ -8,6 +8,7 @@ import Alert from '@/components/UI/Alert/alert';
 import AlertHandler from '@/services/Utils/alertHandler';
 import { isUserAuthenticated } from '@/services/auth/login';
 import inquiryService, { type Inquiry, type InquiryReply } from '@/services/api/inquiry';
+import { Api } from '@/services/api/endpoints';
 import InquiriesHeader from '../inquiries/components/InquiriesHeader';
 import InquiryFilters from '../inquiries/components/InquiryFilters';
 import InquiryStatusBadge from '../inquiries/components/InquiryStatusBadge';
@@ -17,6 +18,29 @@ import ServiceRequestCard from './components/ServiceRequestCard';
 // Disable prerendering for service requests page to avoid build-time auth/client issues
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
+
+const API_IMAGE_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || Api)
+  .replace(/\/app\/v1\/?$/, '')
+  .replace(/\/+$/, '');
+
+const resolveInquiryImage = (value?: string | null): string | null => {
+  if (!value?.trim()) return null;
+
+  const normalized = value.trim().replace(/\\/g, '/');
+  if (
+    normalized.startsWith('http://') ||
+    normalized.startsWith('https://') ||
+    normalized.startsWith('data:') ||
+    normalized.startsWith('blob:')
+  ) {
+    return encodeURI(normalized);
+  }
+
+  const cleaned = normalized.replace(/^\/+/, '').replace(/^public\//i, '');
+  if (!cleaned) return null;
+
+  return encodeURI(`${API_IMAGE_BASE_URL}/${cleaned}`);
+};
 
 export default function ServiceRequestsPage() {
   return (
@@ -38,6 +62,7 @@ function ServiceRequestsPageContent() {
   // Create Service Request Form
   const [description, setDescription] = useState('');
   const [images, setImages] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Alerts
@@ -227,12 +252,22 @@ function ServiceRequestsPageContent() {
     if (e.target.files) {
       const files = Array.from(e.target.files);
       setImages(prev => [...prev, ...files].slice(0, 5));
+      e.target.value = '';
     }
   };
 
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
   };
+
+  useEffect(() => {
+    const objectUrls = images.map((file) => URL.createObjectURL(file));
+    setPreviewUrls(objectUrls);
+
+    return () => {
+      objectUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [images]);
 
   const filteredRequests = activeStatus === 'all' 
     ? requests 
@@ -383,11 +418,12 @@ function ServiceRequestsPageContent() {
                       {images.map((image, index) => (
                         <div key={index} className="relative aspect-square">
                           <Image
-                            src={URL.createObjectURL(image)}
+                            src={previewUrls[index] || '/acessts/NoImage.jpg'}
                             alt={`صورة ${index + 1}`}
                             fill
                             sizes="(max-width: 768px) 33vw, 20vw"
                             className="rounded-xl object-cover"
+                            unoptimized
                           />
                           <button
                             type="button"
@@ -474,7 +510,7 @@ function ServiceRequestsPageContent() {
                     {selectedRequest.imageList.map((img, index) => (
                       <div key={index} className="relative aspect-square">
                         <Image
-                          src={img}
+                          src={resolveInquiryImage(img) || '/acessts/NoImage.jpg'}
                           alt={`صورة ${index + 1}`}
                           fill
                           sizes="(max-width: 768px) 50vw, 33vw"

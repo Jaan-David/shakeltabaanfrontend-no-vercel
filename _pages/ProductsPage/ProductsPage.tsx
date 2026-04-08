@@ -309,7 +309,8 @@ export default function ProductsPage() {
 
             <div className="rounded-2xl border border-slate-200/80 bg-slate-100/60 px-3 py-2 text-center sm:px-4 sm:py-3">
               <p className="text-xs text-slate-600 sm:text-sm">
-               يتم إضافة منتجات جديدة يوميًا .....   انتظرونا قريبًا              </p>
+              .... يتم إضافة منتجات جديدة يوميًا .....   انتظرونا قريبًا        
+               و  في حاله عدم توفر منتج غير متوفر يرجي الطلب من الطلبات الخاصه       </p>
             </div>
 
             {isLoading ? (

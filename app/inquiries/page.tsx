@@ -12,6 +12,7 @@ import {
   type Inquiry,
   type InquiryReply
 } from '@/services/api/inquiry';
+import { Api } from '@/services/api/endpoints';
 import { isUserAuthenticated } from '@/services/auth/login';
 import AlertHandler from '@/services/Utils/alertHandler';
 import Alert from '@/components/UI/Alert/alert';
@@ -20,6 +21,29 @@ import InquiriesHeader from './components/InquiriesHeader';
 import InquiryCard from './components/InquiryCard';
 import InquiryFilters from './components/InquiryFilters';
 import InquiryStatusBadge from './components/InquiryStatusBadge';
+
+const API_IMAGE_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || Api)
+  .replace(/\/app\/v1\/?$/, '')
+  .replace(/\/+$/, '');
+
+const resolveInquiryImage = (value?: string | null): string | null => {
+  if (!value?.trim()) return null;
+
+  const normalized = value.trim().replace(/\\/g, '/');
+  if (
+    normalized.startsWith('http://') ||
+    normalized.startsWith('https://') ||
+    normalized.startsWith('data:') ||
+    normalized.startsWith('blob:')
+  ) {
+    return encodeURI(normalized);
+  }
+
+  const cleaned = normalized.replace(/^\/+/, '').replace(/^public\//i, '');
+  if (!cleaned) return null;
+
+  return encodeURI(`${API_IMAGE_BASE_URL}/${cleaned}`);
+};
 
 export default function InquiriesPage() {
   return (
@@ -43,11 +67,21 @@ function InquiriesPageContent() {
   // Create Inquiry Form
   const [description, setDescription] = useState(marbleType ? `طلب لـ: ${marbleType}\n\nالتفاصيل:\n` : '');
   const [images, setImages] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Alerts
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    const objectUrls = images.map((file) => URL.createObjectURL(file));
+    setPreviewUrls(objectUrls);
+
+    return () => {
+      objectUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [images]);
 
   const getErrorMessage = (value: unknown, fallback: string) => {
     if (value && typeof value === 'object' && 'message' in value) {
@@ -349,6 +383,7 @@ function InquiriesPageContent() {
                   onChange={(e) => {
                     const files = Array.from(e.target.files || []).slice(0, 5);
                     setImages(files);
+                    e.target.value = '';
                   }}
                   className="hidden"
                   id="image-upload"
@@ -366,7 +401,7 @@ function InquiriesPageContent() {
                     <div key={idx} className="relative group">
                       <div className="w-full aspect-square bg-slate-100 rounded-lg overflow-hidden">
                         <Image
-                          src={URL.createObjectURL(img)}
+                          src={previewUrls[idx] || '/acessts/NoImage.jpg'}
                           alt="preview"
                           width={160}
                           height={160}
@@ -459,7 +494,7 @@ function InquiriesPageContent() {
                       {selectedInquiry.imageList.map((img, idx) => (
                         <div key={idx} className="aspect-square rounded-lg overflow-hidden bg-slate-100">
                           <Image
-                            src={img}
+                            src={resolveInquiryImage(img) || '/acessts/NoImage.jpg'}
                             alt="inquiry"
                             width={160}
                             height={160}

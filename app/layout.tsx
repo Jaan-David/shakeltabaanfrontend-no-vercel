@@ -112,9 +112,7 @@ export default function RootLayout({
         <link
           rel="preload"
           as="image"
-          href="/_next/image?url=%2Fslider%2F1.jpg&w=640&q=60"
-          imageSrcSet="/_next/image?url=%2Fslider%2F1.jpg&w=640&q=60 640w, /_next/image?url=%2Fslider%2F1.jpg&w=750&q=60 750w, /_next/image?url=%2Fslider%2F1.jpg&w=828&q=60 828w, /_next/image?url=%2Fslider%2F1.jpg&w=1080&q=60 1080w, /_next/image?url=%2Fslider%2F1.jpg&w=1200&q=60 1200w, /_next/image?url=%2Fslider%2F1.jpg&w=1920&q=60 1920w"
-          imageSizes="100vw"
+          href="/slider/1.jpg"
           fetchPriority="high"
         />
         
@@ -131,6 +129,35 @@ export default function RootLayout({
       </head>
       
       <body className="antialiased" suppressHydrationWarning={true}>
+        <Script id="meta-pixel" strategy="afterInteractive">
+          {`
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '1299741602300581');
+            fbq('track', 'PageView');
+            window.__META_PIXEL_INITIALIZED__ = true;
+            if (window.console && typeof window.console.debug === 'function') {
+              window.console.debug('[Meta Pixel] Base code initialized');
+            }
+          `}
+        </Script>
+
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            src="https://www.facebook.com/tr?id=1299741602300581&ev=PageView&noscript=1"
+            alt=""
+          />
+        </noscript>
+
         <Script
           async
           src="https://www.googletagmanager.com/gtag/js?id=G-8V17H7W98Z"

@@ -2,6 +2,30 @@ import { useState } from "react";
 import Image from "next/image";
 import InquiryStatusBadge from "./InquiryStatusBadge";
 import type { Inquiry } from "@/services/api/inquiry";
+import { Api } from "@/services/api/endpoints";
+
+const API_IMAGE_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || Api)
+  .replace(/\/app\/v1\/?$/, "")
+  .replace(/\/+$/, "");
+
+const resolveInquiryImage = (value?: string | null): string | null => {
+  if (!value?.trim()) return null;
+
+  const normalized = value.trim().replace(/\\/g, "/");
+  if (
+    normalized.startsWith("http://") ||
+    normalized.startsWith("https://") ||
+    normalized.startsWith("data:") ||
+    normalized.startsWith("blob:")
+  ) {
+    return encodeURI(normalized);
+  }
+
+  const cleaned = normalized.replace(/^\/+/, "").replace(/^public\//i, "");
+  if (!cleaned) return null;
+
+  return encodeURI(`${API_IMAGE_BASE_URL}/${cleaned}`);
+};
 
 interface InquiryCardProps {
   inquiry: Inquiry;
@@ -13,7 +37,7 @@ export default function InquiryCard({ inquiry, onViewDetails, onViewOffers }: In
   const title = inquiry.name?.trim() || "طلب خاص";
   const hasOffers = inquiry.reply.length > 0;
   const offerCount = inquiry.reply.length;
-  const previewImage = inquiry.imageList?.[0];
+  const previewImage = resolveInquiryImage(inquiry.imageList?.[0]);
   const [previewError, setPreviewError] = useState(false);
   const previewSrc = previewError ? "/acessts/NoImage.jpg" : previewImage;
 
