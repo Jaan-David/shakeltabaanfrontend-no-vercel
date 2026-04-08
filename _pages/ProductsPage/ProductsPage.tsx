@@ -16,6 +16,18 @@ import styles from "./ProductsPage.module.css";
 
 const PLACEHOLDER_SRC = "/acessts/NoImage.jpg";
 const DEFAULT_LIMIT = 200;
+const DEFAULT_POPULAR_KEYWORDS = [
+  "رخام",
+  "جرانيت",
+  "كوارتز",
+  "عواميد",
+  "سلالم",
+  "مطابخ",
+  "حمامات",
+  "ديكور",
+  "ارضيات",
+  "حوائط",
+];
 
 type RatingOption = 0 | 3 | 4 | 4.5;
 type SortOption = "relevance" | "price_asc" | "price_desc" | "rating_desc" | "newest";
@@ -128,6 +140,24 @@ export default function ProductsPage() {
     return Array.from(new Set(values));
   }, [products]);
 
+  const popularKeywords = useMemo(() => {
+    const collected = new Set<string>(DEFAULT_POPULAR_KEYWORDS);
+
+    products.forEach((product) => {
+      const rawUses = product.usesList;
+      if (!Array.isArray(rawUses)) return;
+
+      rawUses.forEach((item) => {
+        if (typeof item !== "string") return;
+        const normalized = item.trim();
+        if (!normalized) return;
+        collected.add(normalized);
+      });
+    });
+
+    return Array.from(collected);
+  }, [products]);
+
 
   const updateQueryParams = useCallback(
     () => {
@@ -179,10 +209,24 @@ export default function ProductsPage() {
     return products.filter((product) => {
       const name = product.name || "";
       const description = product.description || "";
+      const categoryValue = product.category || "";
+      const colorValue = product.color || "";
+      const brandValue = product.brand || "";
+      const organizationValue = product.organizationName || product.organizationId || "";
+      const uses = Array.isArray(product.usesList)
+        ? product.usesList
+            .filter((item): item is string => typeof item === "string")
+            .join(" ")
+        : "";
       const matchesSearch =
         !query ||
         name.toLowerCase().includes(query) ||
-        description.toLowerCase().includes(query);
+        description.toLowerCase().includes(query) ||
+        categoryValue.toLowerCase().includes(query) ||
+        colorValue.toLowerCase().includes(query) ||
+        brandValue.toLowerCase().includes(query) ||
+        organizationValue.toLowerCase().includes(query) ||
+        uses.toLowerCase().includes(query);
 
       const matchesCategory = category === "all" || product.category === category;
       const orgValue = product.organizationName || product.organizationId || "";
@@ -253,6 +297,7 @@ export default function ProductsPage() {
           title="كل المنتجات"
           subtitle="ابحث وفلتر بين منتجات الرخام والجرانيت والكوارتز بسهولة."
           search={search}
+          popularKeywords={popularKeywords}
           resultCount={sortedProducts.length}
           hasOffer={hasOffer}
           sortBy={sortBy}
@@ -309,8 +354,7 @@ export default function ProductsPage() {
 
             <div className="rounded-2xl border border-slate-200/80 bg-slate-100/60 px-3 py-2 text-center sm:px-4 sm:py-3">
               <p className="text-xs text-slate-600 sm:text-sm">
-              .... يتم إضافة منتجات جديدة يوميًا .....   انتظرونا قريبًا        
-               و  في حاله عدم توفر منتج غير متوفر يرجي الطلب من الطلبات الخاصه       </p>
+              .... يتم إضافة منتجات جديدة يوميًا ..... انتظرونا قريبًا..... و في حاله عدم توفر منتج غير متوفر يرجي الطلب من الطلبات الخاصه  </p>
             </div>
 
             {isLoading ? (

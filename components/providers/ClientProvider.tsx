@@ -1,6 +1,7 @@
 // app/ClientProviders.tsx
 "use client";
 
+import { Suspense } from "react";
 import { SessionProvider } from "next-auth/react";
 import { FavoritesProvider } from "@/services/favorites/FavoritesContext";
 import AlertProvider from "@/components/providers/AlertProvider";
@@ -14,7 +15,9 @@ interface ClientProvidersProps {
 export default function ClientProviders({ children }: ClientProvidersProps) {
   return (
     <SessionProvider>
-      <MetaPageView />
+      <Suspense fallback={null}>
+        <MetaPageView />
+      </Suspense>
       <AuthProvider>
         <FavoritesProvider>
           <AlertProvider>

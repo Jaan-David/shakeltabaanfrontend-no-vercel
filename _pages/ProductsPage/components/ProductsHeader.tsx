@@ -7,6 +7,7 @@ interface ProductsHeaderProps {
   title: string;
   subtitle: string;
   search: string;
+  popularKeywords: string[];
   resultCount: number;
   hasOffer: boolean;
   sortBy: SortOption;
@@ -20,6 +21,7 @@ export default function ProductsHeader({
   title,
   subtitle,
   search,
+  popularKeywords,
   resultCount,
   hasOffer,
   sortBy,
@@ -28,22 +30,19 @@ export default function ProductsHeader({
   onHasOfferChange,
   onSortChange,
 }: ProductsHeaderProps) {
+  const normalizedSearch = search.trim().toLowerCase();
+
   const chips = [
-    {
-      label: "رخام",
-      isActive: search === "رخام",
-      onClick: () => onSearchChange(search === "رخام" ? "" : "رخام"),
-    },
-    {
-      label: "جرانيت",
-      isActive: search === "جرانيت",
-      onClick: () => onSearchChange(search === "جرانيت" ? "" : "جرانيت"),
-    },
-    {
-      label: "كوارتز",
-      isActive: search === "كوارتز",
-      onClick: () => onSearchChange(search === "كوارتز" ? "" : "كوارتز"),
-    },
+    ...popularKeywords.map((keyword) => {
+      const normalizedKeyword = keyword.trim().toLowerCase();
+
+      return {
+        label: keyword,
+        isActive: normalizedSearch === normalizedKeyword,
+        onClick: () =>
+          onSearchChange(normalizedSearch === normalizedKeyword ? "" : keyword),
+      };
+    }),
     {
       label: "عروض",
       isActive: hasOffer,
