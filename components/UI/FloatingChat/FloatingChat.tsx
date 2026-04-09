@@ -12,7 +12,7 @@ interface FloatingChatProps {
 export default function FloatingChat({ isOpen: externalOpen, onOpenChange }: FloatingChatProps) {
   const pathname = usePathname();
 
-  const hiddenWhatsAppRoutes = ['/cart', '/inquiries', '/service-requests'];
+  const hiddenWhatsAppRoutes = ['/cart', '/inquiries', '/service-requests', '/products', '/product/'];
   const shouldHideWhatsApp = hiddenWhatsAppRoutes.some((route) => pathname?.startsWith(route));
 
   if (shouldHideWhatsApp) {
@@ -142,7 +142,7 @@ export default function FloatingChat({ isOpen: externalOpen, onOpenChange }: Flo
   };
 
   return (
-    <div className="fixed right-4 bottom-24 md:bottom-4 z-50 flex flex-col-reverse gap-4">
+    <div className="fixed right-4 bottom-28 md:bottom-6 z-50 flex flex-col-reverse gap-4">
       
       {/* WhatsApp button - Always show on all screen sizes */}
       <a
@@ -153,8 +153,8 @@ export default function FloatingChat({ isOpen: externalOpen, onOpenChange }: Flo
         aria-label="واتساب"
       >
         <FaWhatsapp className="w-6 h-6 text-white" />
-        <span className="absolute right-full mr-2 bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-          تواصل معنا عبر واتساب
+        <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[11px] font-medium text-gray-700 whitespace-nowrap">
+          للدعم والاستفسارات
         </span>
       </a>
 
