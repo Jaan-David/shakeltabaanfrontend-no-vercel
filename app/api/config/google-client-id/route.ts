@@ -1,9 +1,26 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { applyRateLimit, getRequestIp } from "@/lib/server/rateLimit";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const ip = getRequestIp(request.headers);
+  const limit = await applyRateLimit(`google-client-id:${ip}`, 30, 60_000);
+
+  if (!limit.success) {
+    return NextResponse.json(
+      { message: "Too many requests" },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(limit.retryAfterSeconds),
+          "Cache-Control": "public, max-age=60, s-maxage=60, stale-while-revalidate=120",
+        },
+      }
+    );
+  }
+
   const clientId =
     process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() ||
     process.env.GOOGLE_CLIENT_ID?.trim() ||
@@ -15,7 +32,7 @@ export async function GET() {
       {
         status: 500,
         headers: {
-          "Cache-Control": "no-store",
+          "Cache-Control": "public, max-age=60, s-maxage=60, stale-while-revalidate=120",
         },
       }
     );
@@ -25,7 +42,7 @@ export async function GET() {
     { clientId },
     {
       headers: {
-        "Cache-Control": "no-store",
+        "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
       },
     }
   );

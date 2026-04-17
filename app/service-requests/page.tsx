@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useCallback, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { Loader2, Upload, X } from 'lucide-react';
 import Alert from '@/components/UI/Alert/alert';
@@ -14,10 +14,6 @@ import InquiryFilters from '../inquiries/components/InquiryFilters';
 import InquiryStatusBadge from '../inquiries/components/InquiryStatusBadge';
 import ServiceHowItWorksSteps from './components/ServiceHowItWorksSteps';
 import ServiceRequestCard from './components/ServiceRequestCard';
-
-// Disable prerendering for service requests page to avoid build-time auth/client issues
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
 
 const API_IMAGE_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || Api)
   .replace(/\/app\/v1\/?$/, '')
@@ -52,6 +48,14 @@ export default function ServiceRequestsPage() {
 
 function ServiceRequestsPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pageFromQuery = Number(searchParams?.get('page') || 1);
+  const limitFromQuery = Number(searchParams?.get('limit') || 100);
+  const page = Number.isFinite(pageFromQuery) && pageFromQuery > 0 ? pageFromQuery : 1;
+  const limit =
+    Number.isFinite(limitFromQuery) && limitFromQuery > 0 && limitFromQuery <= 100
+      ? limitFromQuery
+      : 100;
   
   const [requests, setRequests] = useState<Inquiry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -117,8 +121,8 @@ function ServiceRequestsPageContent() {
     try {
       const statusParam = activeStatus === 'all' ? undefined : activeStatus;
       const result = await inquiryService.getInquiries({ 
-        page: 1, 
-        limit: 100,
+        page,
+        limit,
         type: 'service_request',
         status: statusParam
       });
@@ -133,7 +137,7 @@ function ServiceRequestsPageContent() {
       console.error('Error fetching service requests:', error);
     }
     setIsLoading(false);
-  }, [activeStatus]);
+  }, [activeStatus, limit, page]);
 
   // Fetch requests on mount and when filters change
   useEffect(() => {

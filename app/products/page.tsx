@@ -3,9 +3,7 @@ import { Suspense } from "react";
 import ProductsPage from "@/_pages/ProductsPage/ProductsPage";
 import { canonicalBaseUrl, generateSEO } from "@/config/seo.config";
 
-// Force dynamic rendering to avoid ISR 401 errors during build
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 3600;
 
 const getSiteUrl = () =>
   process.env.NEXT_PUBLIC_SITE_URL

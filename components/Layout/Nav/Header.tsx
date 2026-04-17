@@ -224,7 +224,7 @@ function Header({
       }
     };
 
-    if (user) {
+    if (user && !isNotificationsOpen) {
       fetchUnreadCount();
       intervalId = setInterval(() => {
         if (isMounted) {
@@ -237,7 +237,7 @@ function Header({
       isMounted = false;
       if (intervalId) clearInterval(intervalId);
     };
-  }, [user]);
+  }, [user, isNotificationsOpen]);
 
   // Listen for storage changes and custom events
   useEffect(() => {

@@ -4,8 +4,6 @@ import HomePage from "@/_pages/HomePage/HomePage";
 import style from "./page.module.css";
 import { canonicalBaseUrl, generateSEO, seoConfig } from "@/config/seo.config";
 
-export const dynamic = "force-dynamic";
-
 const getSiteUrl = () =>
   process.env.NEXT_PUBLIC_SITE_URL
     ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/+$/, "")

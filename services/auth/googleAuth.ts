@@ -252,7 +252,7 @@ export const getGoogleClientId = async (): Promise<string> => {
       try {
         const response = await fetch("/api/config/google-client-id", {
           method: "GET",
-          cache: "no-store",
+          cache: "force-cache",
         });
 
         const payload = await parseJsonSafe<GoogleClientIdApiResponse>(response);

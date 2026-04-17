@@ -1,12 +1,11 @@
 "use client";
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import PartnerCard from './PartnerCard';
 import { organizationService, Organization } from '@/services/api/organizations';
+import useApiQuery from '@/hooks/useApiQuery';
 import { Api } from '@/services/api/endpoints';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from './PartnersSection.module.css';
-
-export const dynamic = 'force-dynamic';
 
 interface Partner {
   id: string;
@@ -41,12 +40,22 @@ const normalizeApiImage = (path?: string | null): string => {
 };
 
 export default function PartnersSection() {
-  const [partners, setPartners] = useState<Partner[]>([]);
-  const [loading, setLoading] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  const {
+    data: organizations = [],
+    isLoading: loading,
+  } = useApiQuery<Organization[]>('organizations:list', {
+    fetcher: async () => organizationService.getOrganizations(),
+    swr: {
+      dedupingInterval: 10 * 60 * 1000,
+      revalidateIfStale: false,
+      shouldRetryOnError: false,
+    },
+  });
 
   const getTypeLabel = (organization: Organization): Partner['typeLabel'] => {
     const name = (organization.name || '').toLowerCase();
@@ -65,41 +74,24 @@ export default function PartnersSection() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Fetch organizations
-  useEffect(() => {
-    const fetchOrganizations = async () => {
-      try {
-        setLoading(true);
-        const data = await organizationService.getOrganizations();
-
-        const mappedPartners: Partner[] = data
-          .filter((org: Organization) => {
-            // Exclude ala5las organization
-            return org.name?.toLowerCase() !== 'ala5cvlas';
-          })
-          .map((org: Organization, index: number) => {
-            const rawPhoto = org.photo || '';
-            const logo = rawPhoto ? normalizeApiImage(rawPhoto) : '/acessts/placeholder.svg';
-            return {
-              id: org.organizationId || org.id || org._id || String(index),
-              organizationId: org.organizationId,
-              name: org.name,
-              logo,
-              location: org.location,
-              typeLabel: getTypeLabel(org),
-            };
-          });
-        setPartners(mappedPartners);
-      } catch (error) {
-        console.error('Error loading organizations:', error);
-        setPartners([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrganizations();
-  }, []);
+  const partners: Partner[] = useMemo(
+    () =>
+      organizations
+        .filter((org: Organization) => org.name?.toLowerCase() !== 'ala5cvlas')
+        .map((org: Organization, index: number) => {
+          const rawPhoto = org.photo || '';
+          const logo = rawPhoto ? normalizeApiImage(rawPhoto) : '/acessts/placeholder.svg';
+          return {
+            id: org.organizationId || org.id || org._id || String(index),
+            organizationId: org.organizationId,
+            name: org.name,
+            logo,
+            location: org.location,
+            typeLabel: getTypeLabel(org),
+          };
+        }),
+    [organizations]
+  );
 
   // Check scroll position
   const checkScroll = () => {

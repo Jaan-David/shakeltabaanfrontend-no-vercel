@@ -3,10 +3,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getPrimaryMedia, getProductMediaList } from "@/utils/media";
+import useApiQuery from "@/hooks/useApiQuery";
+import useDebouncedValue from "@/hooks/useDebouncedValue";
 import {
   productService,
   type Product as ApiProduct,
-  type ProductFilters,
 } from "@/services/api/products";
 import ProductsHeader from "./components/ProductsHeader";
 import FilterSidebar from "./components/FilterSidebar";
@@ -79,10 +80,7 @@ export default function ProductsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const isInitializedRef = useRef(false);
-
-  const [products, setProducts] = useState<ApiProduct[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const lastQueryStringRef = useRef("");
 
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
@@ -92,6 +90,24 @@ export default function ProductsPage() {
   const [withInstallation, setWithInstallation] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("relevance");
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const debouncedSearch = useDebouncedValue(search, 350);
+
+  const {
+    data: productsResponse,
+    error: productsError,
+    isLoading,
+  } = useApiQuery(`products:list:${DEFAULT_LIMIT}`, {
+    fetcher: async () => productService.getProducts({ limit: DEFAULT_LIMIT }),
+    swr: {
+      dedupingInterval: 5 * 60 * 1000,
+      revalidateIfStale: false,
+      shouldRetryOnError: false,
+    },
+  });
+
+  const products = productsResponse?.data || [];
+  const hasProductsError =
+    Boolean(productsError) || productsResponse?.status === "error";
 
   useEffect(() => {
     if (isInitializedRef.current) return;
@@ -104,27 +120,10 @@ export default function ProductsPage() {
     setHasOffer(params.get("offer") === "1");
     setWithInstallation(params.get("installation") === "1");
     setSortBy(getSafeSort(params.get("sort")));
+    lastQueryStringRef.current = params.toString();
 
     isInitializedRef.current = true;
   }, [searchParams]);
-
-  const fetchProducts = useCallback(async (filters: ProductFilters) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const response = await productService.getProducts(filters);
-      setProducts(response?.data || []);
-    } catch {
-      setError("تعذر تحميل المنتجات حالياً");
-      setProducts([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchProducts({ limit: DEFAULT_LIMIT });
-  }, [fetchProducts]);
 
   const categories = useMemo(() => {
     const values = products
@@ -165,7 +164,7 @@ export default function ProductsPage() {
 
       const params = new URLSearchParams();
 
-      if (search.trim()) params.set("q", search.trim());
+      if (debouncedSearch.trim()) params.set("q", debouncedSearch.trim());
       if (category !== "all") params.set("category", category);
       if (organization !== "all") params.set("organization", organization);
       if (ratingMin !== 0) params.set("rating", String(ratingMin));
@@ -174,6 +173,9 @@ export default function ProductsPage() {
       if (sortBy !== "relevance") params.set("sort", sortBy);
 
       const queryString = params.toString();
+      if (queryString === lastQueryStringRef.current) return;
+
+      lastQueryStringRef.current = queryString;
       router.replace(queryString ? `/products?${queryString}` : "/products", {
         scroll: false,
       });
@@ -185,7 +187,7 @@ export default function ProductsPage() {
       organization,
       ratingMin,
       router,
-      search,
+      debouncedSearch,
       sortBy,
     ]
   );
@@ -198,7 +200,7 @@ export default function ProductsPage() {
     withInstallation,
     organization,
     ratingMin,
-    search,
+    debouncedSearch,
     sortBy,
     updateQueryParams,
   ]);
@@ -363,9 +365,9 @@ export default function ProductsPage() {
                 <div className="inline-block h-10 w-10 animate-spin rounded-full border-b-2 border-blue-600"></div>
                 <p className="mt-3 text-slate-600">جاري تحميل المنتجات...</p>
               </div>
-            ) : error ? (
+            ) : hasProductsError ? (
               <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-rose-700">
-                {error}
+                تعذر تحميل المنتجات حالياً
               </div>
             ) : sortedProducts.length === 0 ? (
               <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-600 shadow-sm">

@@ -1,10 +1,6 @@
 'use client';
 
-// Disable prerendering for inquiries page to avoid build-time auth/client issues
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
-
-import { Suspense, useState, useEffect, useCallback } from 'react';
+import { Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -57,6 +53,13 @@ function InquiriesPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const marbleType = searchParams?.get('marbleType') ?? '';
+  const pageFromQuery = Number(searchParams?.get('page') || 1);
+  const limitFromQuery = Number(searchParams?.get('limit') || 100);
+  const page = Number.isFinite(pageFromQuery) && pageFromQuery > 0 ? pageFromQuery : 1;
+  const limit =
+    Number.isFinite(limitFromQuery) && limitFromQuery > 0 && limitFromQuery <= 100
+      ? limitFromQuery
+      : 100;
   
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,6 +72,7 @@ function InquiriesPageContent() {
   const [images, setImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitTimestampsRef = useRef<number[]>([]);
   
   // Alerts
   const [successMessage, setSuccessMessage] = useState('');
@@ -131,8 +135,8 @@ function InquiriesPageContent() {
     try {
       const statusParam = activeStatus === 'all' ? undefined : activeStatus;
       const result = await inquiryService.getInquiries({ 
-        page: 1, 
-        limit: 100,
+        page,
+        limit,
         type: 'normal',
         status: statusParam
       });
@@ -142,7 +146,7 @@ function InquiriesPageContent() {
       console.error('Error fetching inquiries:', error);
     }
     setIsLoading(false);
-  }, [activeStatus]);
+  }, [activeStatus, limit, page]);
 
   // Fetch inquiries on mount and when filters change
   useEffect(() => {
@@ -155,6 +159,21 @@ function InquiriesPageContent() {
 
   async function handleCreateInquiry(e: React.FormEvent) {
     e.preventDefault();
+
+    const now = Date.now();
+    const windowMs = 60_000;
+    const maxAttemptsPerWindow = 3;
+
+    submitTimestampsRef.current = submitTimestampsRef.current.filter(
+      (timestamp) => now - timestamp < windowMs
+    );
+
+    if (submitTimestampsRef.current.length >= maxAttemptsPerWindow) {
+      setErrorMessage('تم إرسال محاولات كثيرة خلال دقيقة. يرجى الانتظار قليلاً ثم المحاولة مرة أخرى.');
+      return;
+    }
+
+    submitTimestampsRef.current.push(now);
     
     if (!description.trim() || description.length < 10 || description.length > 1000) {
       setErrorMessage('الوصف يجب أن يكون بين 10 و 1000 حرف');

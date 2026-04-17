@@ -18,8 +18,6 @@ const PartnersSection = dynamicImport(
   { ssr: false }
 );
 
-export const dynamic = 'force-dynamic';
-
 export default function HomeContent() {
   const router = useRouter();
   
