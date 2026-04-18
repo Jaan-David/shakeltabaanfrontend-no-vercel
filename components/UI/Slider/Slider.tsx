@@ -72,7 +72,7 @@ const Slider: React.FC<SliderProps> = ({
   }, [len]);
 
   const goTo = useCallback(
-    (idx: number) => setCurrent((prev) => clampIndex(idx, len)),
+    (idx: number) => setCurrent(() => clampIndex(idx, len)),
     [len]
   );
 

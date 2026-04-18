@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { Loader2, Upload, X } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 import Alert from '@/components/UI/Alert/alert';
 import AlertHandler from '@/services/Utils/alertHandler';
 import { isUserAuthenticated } from '@/services/auth/login';

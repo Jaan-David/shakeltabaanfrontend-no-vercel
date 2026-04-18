@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useKeenSlider } from "keen-slider/react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Product as ApiProduct,
   productService,
@@ -36,7 +37,7 @@ const RelatedProducts: React.FC<{ currentProductId?: string }> = ({
     const slider = instanceRef.current;
     if (!slider) return;
     timerRef.current = setInterval(() => slider.next(), 2500);
-  }, []);
+  }, [instanceRef]);
 
   const stop = useCallback(() => {
     if (timerRef.current) {
@@ -151,11 +152,14 @@ const RelatedProducts: React.FC<{ currentProductId?: string }> = ({
                   className="block h-full rounded-2xl border border-slate-200 bg-white p-2 shadow-sm transition hover:shadow-md"
                 >
                   <div className="relative mb-3 aspect-[4/3] overflow-hidden rounded-xl bg-slate-100">
-                    <img
+                    <Image
                       src={getPrimaryImage(product)}
                       alt={product.name || "منتج"}
-                      className="h-full w-full object-cover"
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 1280px) 25vw, 16vw"
+                      className="object-cover"
                       loading="lazy"
+                      unoptimized
                     />
                   </div>
 

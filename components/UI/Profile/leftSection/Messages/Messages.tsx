@@ -17,11 +17,8 @@ export type MessageComponentProps = {
 const MessageComponent: React.FC<MessageComponentProps> = ({
   message,
   timestamp,
-  isCurrentUser = false,
-  senderName,
   response,
   responseTimestamp,
-  responseSenderName,
 }) => {
   return (
     <div className={styles.chatContainer}>

@@ -83,11 +83,6 @@ const formatPriceRange = (
   )} ${range.currency}`;
 };
 
-const renderLimitedList = (items?: string[], limit = 3) => {
-  if (!items || items.length === 0) return null;
-  return items.slice(0, limit);
-};
-
 interface ExpandableCategoryCardProps {
   id: string;
   title: string;
@@ -367,14 +362,6 @@ function MarbleInfoContent() {
     } finally {
       setLoadingDetails(false);
     }
-  };
-
-  const handleCategoryClick = (category: MarbleCategory) => {
-    setSelectedCategory(category);
-    setTypeQuery("");
-    setUseQuery("");
-    setShowCategories(false);
-    fetchCategoryDetails(category.key);
   };
 
   const handleClearFilters = () => {

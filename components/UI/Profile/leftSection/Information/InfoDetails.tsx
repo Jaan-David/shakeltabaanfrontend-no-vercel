@@ -181,7 +181,7 @@ const AccountForm: React.FC<InfoDetailsProps> = ({firstName , lastName , email ,
     }
   };
 
-  const handleIconClick = (_field: string) => {
+  const handleIconClick = () => {
     //console.log(`Icon clicked for ${field}`);
     // Add any icon click logic here
   };
@@ -210,7 +210,7 @@ const AccountForm: React.FC<InfoDetailsProps> = ({firstName , lastName , email ,
                 value={formData.firstName}
                 onChange={handleInputChange('firstName')}
                 icon={<UserIcon />}
-                onIconClick={() => handleIconClick('firstName')}
+                onIconClick={handleIconClick}
                 error={!!errors.firstName}
                 readOnly={!edit}
                 className={styles.input}
@@ -227,7 +227,7 @@ const AccountForm: React.FC<InfoDetailsProps> = ({firstName , lastName , email ,
                 value={formData.lastName}
                 onChange={handleInputChange('lastName')}
                 icon={<UserIcon />}
-                onIconClick={() => handleIconClick('lastName')}
+                onIconClick={handleIconClick}
                 error={!!errors.lastName}
                 readOnly={!edit}
                 className={styles.input}
@@ -244,7 +244,7 @@ const AccountForm: React.FC<InfoDetailsProps> = ({firstName , lastName , email ,
                 value={formData.email}
                 onChange={handleInputChange('email')}
                 icon={<MailIcon />}
-                onIconClick={() => handleIconClick('email')}
+                onIconClick={handleIconClick}
                 error={!!errors.email}
                 readOnly={!edit}
                 className={styles.input}
@@ -261,7 +261,7 @@ const AccountForm: React.FC<InfoDetailsProps> = ({firstName , lastName , email ,
                 value={formData.phone}
                 onChange={handleInputChange('phone')}
                 icon={<PhoneIcon />}
-                onIconClick={() => handleIconClick('phone')}
+                onIconClick={handleIconClick}
                 error={!!errors.phone}
                 readOnly={!edit}
                 className={styles.input}
