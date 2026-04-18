@@ -11,6 +11,7 @@ import AlertHandler from '@/services/Utils/alertHandler';
 import { isAuthenticated } from '@/utils/auth';
 import { useRouter } from 'next/navigation';
 import ordersOrgService from '@/services/api/ordersOrg';
+import { trackMetaEvent } from '@/components/analytics/metaPixel';
 
 type CartItem = {
   id: string;            // Cart item ID
@@ -241,7 +242,24 @@ const CartPage = () => {
         });
         return;
       }
+
+      trackMetaEvent('InitiateCheckout', {
+        content_type: 'product',
+        num_items: cartItems.length,
+        value: Number(totalPrice || 0),
+        currency: 'EGP',
+      });
+
       await ordersOrgService.createMultiOrgOrder();
+
+      trackMetaEvent('Purchase', {
+        content_type: 'product',
+        content_ids: cartItems.map((item) => String(item.productId || item.id)),
+        num_items: cartItems.length,
+        value: Number(totalPrice || 0),
+        currency: 'EGP',
+      });
+
       AlertHandler.success('تم إنشاء الطلب بنجاح');
       router.push('/profile?tab=orders');
     } catch (e: any) {

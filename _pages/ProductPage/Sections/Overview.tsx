@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { isAuthenticated } from "@/utils/auth";
 import Alert from "@/components/UI/Alert/alert";
 import { buildProductBadgesByCategory, getCategoryContentById } from "@/lib/categoryContentMap";
+import { trackMetaEvent } from "@/components/analytics/metaPixel";
 
 // Import the FavoritesContext directly but mark it as client-side only
 let FavoritesContext: any;
@@ -546,6 +547,15 @@ const Overview: React.FC<Props> = ({
         productId: String(id),
         itemQty: quantityToSend,
         unitType: unitTypeToSend
+      });
+
+      trackMetaEvent("AddToCart", {
+        content_ids: [String(id)],
+        content_name: title,
+        content_type: "product",
+        value: Number(resolvedPricing.current) * Number(quantityToSend || 1),
+        currency: "EGP",
+        quantity: Number(quantityToSend || 1),
       });
       
       await cartService.getCart();

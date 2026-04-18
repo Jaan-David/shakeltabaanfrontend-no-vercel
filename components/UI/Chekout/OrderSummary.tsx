@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import { orderService, CreateOrderData} from '@/services/checkout/order';
 import { getAuthToken } from '@/services/auth/login';
 import profileOrderService from '@/services/profile/orders';
+import { trackMetaEvent } from '@/components/analytics/metaPixel';
 
 interface Address {
     id: number;
@@ -128,6 +129,14 @@ const Summary: React.FC<SummaryInter> = ({
 
             // Create order
             const response = await orderService.createOrder(orderData);
+
+            trackMetaEvent('Purchase', {
+                content_type: 'product',
+                num_items: numberItems,
+                value: Number(Total + delivery),
+                currency: 'EGP',
+                order_id: response.data.orderId,
+            });
             
             //console.log('✅ Order created successfully:', response);
 
