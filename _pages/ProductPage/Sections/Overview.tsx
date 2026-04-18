@@ -543,17 +543,28 @@ const Overview: React.FC<Props> = ({
         quantity: quantityToSend
       }));
 
-      await cartService.addToCart({
+      const addToCartResult = await cartService.addToCart({
         productId: String(id),
         itemQty: quantityToSend,
         unitType: unitTypeToSend
       });
 
+      if (!addToCartResult) {
+        return;
+      }
+
+      const unitPriceForMeta = Number(
+        resolvedPricing.price ?? displayedPrice ?? price ?? 0
+      );
+      const safeUnitPriceForMeta = Number.isFinite(unitPriceForMeta)
+        ? unitPriceForMeta
+        : 0;
+
       trackMetaEvent("AddToCart", {
         content_ids: [String(id)],
         content_name: title,
         content_type: "product",
-        value: Number(resolvedPricing.current) * Number(quantityToSend || 1),
+        value: safeUnitPriceForMeta * Number(quantityToSend || 1),
         currency: "EGP",
         quantity: Number(quantityToSend || 1),
       });
