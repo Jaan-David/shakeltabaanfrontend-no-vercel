@@ -157,6 +157,14 @@ export default function ProductsPage() {
     return Array.from(collected);
   }, [products]);
 
+  const handleSearchChange = useCallback((value: string) => {
+    setSearch(value);
+
+    if (value.trim()) {
+      setCategory("all");
+    }
+  }, []);
+
 
   const updateQueryParams = useCallback(
     () => {
@@ -303,7 +311,7 @@ export default function ProductsPage() {
           resultCount={sortedProducts.length}
           hasOffer={hasOffer}
           sortBy={sortBy}
-          onSearchChange={setSearch}
+          onSearchChange={handleSearchChange}
           onClearSearch={() => setSearch("")}
           onHasOfferChange={setHasOffer}
           onSortChange={setSortBy}
@@ -321,7 +329,7 @@ export default function ProductsPage() {
               categories={categories}
               organizations={organizations}
               resultCount={sortedProducts.length}
-              onSearchChange={setSearch}
+              onSearchChange={handleSearchChange}
               onCategoryChange={setCategory}
               onOrganizationChange={setOrganization}
               onRatingChange={setRatingMin}
