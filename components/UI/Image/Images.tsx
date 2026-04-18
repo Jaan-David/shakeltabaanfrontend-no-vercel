@@ -37,15 +37,6 @@ interface MediaProps extends ImageProps {
 const HEIC_REGEX = /\.(heic|heif)(\?|#|$)/i;
 const VIDEO_REGEX = /\.(mp4|mov|m4v|webm|ogv|ogg)(\?|#|$)/i;
 
-const ALLOWED_PROXY_HOSTS = new Set([
-  "shakeltabaanstorage.blob.core.windows.net",
-]);
-
-const isAllowedProxyHost = (hostname: string) => {
-  if (ALLOWED_PROXY_HOSTS.has(hostname)) return true;
-  return hostname.endsWith(".blob.core.windows.net");
-};
-
 const LOCAL_PUBLIC_PREFIXES = [
   "/acessts/",
   "/categories/",
@@ -81,16 +72,6 @@ const resolveMediaSrc = (src: string | StaticImageData, fallbackSrc: string) => 
     return trimmed;
   }
   if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-    try {
-      const url = new URL(trimmed);
-      if (
-        isAllowedProxyHost(url.hostname)
-      ) {
-        return `/api/media?url=${encodeURIComponent(trimmed)}`;
-      }
-    } catch {
-      return encodeUrlSafely(trimmed);
-    }
     return encodeUrlSafely(trimmed);
   }
   if (trimmed.startsWith("/api/media?")) {

@@ -1,8 +1,9 @@
 import axios from 'axios';
-import { getApiBaseUrl } from './baseUrl';
+import { getApiBaseUrl, getDirectApiBaseUrl } from './baseUrl';
 
 // Fallback to local backend if env is not set
 const BASE_URL = getApiBaseUrl();
+const DIRECT_BASE_URL = getDirectApiBaseUrl();
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -28,8 +29,14 @@ const isPublicEndpoint = (url?: string): boolean => {
   return PUBLIC_ENDPOINTS.some(endpoint => url.startsWith(endpoint));
 };
 
+const isGetMethod = (method?: string): boolean => (method || 'get').toLowerCase() === 'get';
+
 // Enhanced request interceptor with timeout and error handling
 apiClient.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined' && isGetMethod(config.method) && isPublicEndpoint(config.url)) {
+    config.baseURL = DIRECT_BASE_URL;
+  }
+
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('auth_token');
     if (token) {

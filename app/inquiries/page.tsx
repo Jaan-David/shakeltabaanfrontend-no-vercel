@@ -54,12 +54,12 @@ function InquiriesPageContent() {
   const searchParams = useSearchParams();
   const marbleType = searchParams?.get('marbleType') ?? '';
   const pageFromQuery = Number(searchParams?.get('page') || 1);
-  const limitFromQuery = Number(searchParams?.get('limit') || 100);
+  const limitFromQuery = Number(searchParams?.get('limit') || 20);
   const page = Number.isFinite(pageFromQuery) && pageFromQuery > 0 ? pageFromQuery : 1;
   const limit =
     Number.isFinite(limitFromQuery) && limitFromQuery > 0 && limitFromQuery <= 100
       ? limitFromQuery
-      : 100;
+      : 20;
   
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [isLoading, setIsLoading] = useState(true);

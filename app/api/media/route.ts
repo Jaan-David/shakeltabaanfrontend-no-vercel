@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { applyRateLimit, getRequestIp } from "@/lib/server/rateLimit";
 
 const configuredHosts = (process.env.MEDIA_PROXY_ALLOWED_HOSTS || "")
@@ -47,39 +47,11 @@ export async function GET(request: NextRequest) {
     return new Response("Host not allowed", { status: 403 });
   }
 
-  const rangeHeader = request.headers.get("range");
-
-  const upstream = await fetch(target.toString(), {
-    headers: {
-      Accept: "*/*",
-      ...(rangeHeader ? { Range: rangeHeader } : {}),
-    },
-    cache: "force-cache",
-    next: {
-      revalidate: 3600,
-    },
-  });
-
-  if (!upstream.ok) {
-    return new Response("Upstream error", { status: upstream.status });
-  }
-
-  const contentType = upstream.headers.get("content-type") || "application/octet-stream";
-  const cacheControl =
-    upstream.headers.get("cache-control") ||
-    "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400";
-  const contentRange = upstream.headers.get("content-range");
-  const acceptRanges = upstream.headers.get("accept-ranges") || "bytes";
-  const contentLength = upstream.headers.get("content-length");
-
-  return new Response(upstream.body, {
-    status: upstream.status,
-    headers: {
-      "Content-Type": contentType,
-      "Cache-Control": cacheControl,
-      ...(contentRange ? { "Content-Range": contentRange } : {}),
-      ...(acceptRanges ? { "Accept-Ranges": acceptRanges } : {}),
-      ...(contentLength ? { "Content-Length": contentLength } : {}),
-    },
-  });
+  // Redirect directly to CDN to avoid routing large media through serverless functions.
+  const redirect = NextResponse.redirect(target.toString(), 307);
+  redirect.headers.set(
+    "Cache-Control",
+    "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400"
+  );
+  return redirect;
 }

@@ -2,8 +2,11 @@ import { Api } from './endpoints';
 
 const normalizeBaseUrl = (baseUrl: string): string => baseUrl.replace(/\/+$/, '');
 
+export const getDirectApiBaseUrl = (): string => normalizeBaseUrl(Api);
+
 export const getApiBaseUrl = (): string => {
-  // Client-side: use relative proxy path
+  // Client-side: keep proxy for protected/authenticated requests.
+  // Public GET endpoints are selectively routed direct to origin in api client interceptor.
   if (typeof window !== 'undefined') {
     return '/api/proxy';
   }
