@@ -20,21 +20,29 @@ export function trackMetaEvent(eventName: string, params?: MetaEventParams): boo
   if (typeof window === "undefined") return false;
   if (typeof window.fbq !== "function") return false;
 
+  const trimmedEventName = eventName.trim();
+  if (!trimmedEventName) {
+    if (isDebugEnabled() && typeof window.console?.warn === "function") {
+      window.console.warn("[Meta Pixel] Skipped event with empty name", { params });
+    }
+    return false;
+  }
+
   try {
     if (params && Object.keys(params).length > 0) {
-      window.fbq("track", eventName, params);
+      window.fbq("track", trimmedEventName, params);
     } else {
-      window.fbq("track", eventName);
+      window.fbq("track", trimmedEventName);
     }
 
     if (isDebugEnabled() && typeof window.console?.debug === "function") {
-      window.console.debug("[Meta Pixel] Event fired", { eventName, params });
+      window.console.debug("[Meta Pixel] Event fired", { eventName: trimmedEventName, params });
     }
 
     return true;
   } catch (error) {
     if (isDebugEnabled() && typeof window.console?.warn === "function") {
-      window.console.warn("[Meta Pixel] Failed to fire event", { eventName, params, error });
+      window.console.warn("[Meta Pixel] Failed to fire event", { eventName: trimmedEventName, params, error });
     }
     return false;
   }
