@@ -38,6 +38,106 @@ const resolveInquiryImage = (value?: string | null): string | null => {
   return encodeURI(`${API_IMAGE_BASE_URL}/${cleaned}`);
 };
 
+type InquiryFormErrors = Partial<{
+  description: string;
+  materialType: string;
+  quantity: string;
+  address: string;
+  images: string;
+}>;
+
+const emptyInquiryReplies = (inquiry?: Inquiry | null) => (Array.isArray(inquiry?.reply) ? inquiry.reply : []);
+
+const formatOptionalText = (value?: string | null, fallback = 'غير محدد') => value?.trim() || fallback;
+
+const formatOptionalQuantity = (value?: number) => {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) return 'غير محدد';
+  return new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 2 }).format(value);
+};
+
+const formatBooleanValue = (value?: boolean) => {
+  if (value === true) return 'نعم';
+  if (value === false) return 'لا';
+  return 'غير محدد';
+};
+
+const getCtaButtonState = (description: string) => {
+  const trimmed = description.trim();
+  const isEmpty = trimmed.length === 0;
+  const isValid = trimmed.length >= 10 && trimmed.length <= 1000;
+  
+  if (isEmpty) {
+    return {
+      text: 'ابدأ الطلب',
+      disabled: true,
+      variant: 'start' as const,
+    };
+  }
+  
+  if (!isValid) {
+    return {
+      text: 'كمل الطلب',
+      disabled: false,
+      variant: 'progress' as const,
+    };
+  }
+  
+  return {
+    text: 'إرسال الطلب',
+    disabled: false,
+    variant: 'ready' as const,
+  };
+};
+
+const normalizeInquiryFormFields = (
+  values: {
+    description: string;
+    materialType: string;
+    quantity: string;
+    address: string;
+    images: File[];
+  }
+) => {
+  const errors: InquiryFormErrors = {};
+  const description = values.description.trim();
+  const materialType = values.materialType.trim();
+  const address = values.address.trim();
+  const quantityText = values.quantity.trim();
+  const parsedQuantity = quantityText ? Number(quantityText) : undefined;
+
+  if (description.length < 10 || description.length > 1000) {
+    errors.description = 'الوصف يجب أن يكون بين 10 و 1000 حرف';
+  }
+
+  if (materialType.length > 200) {
+    errors.materialType = 'نوع المادة يجب ألا يتجاوز 200 حرف';
+  }
+
+  if (quantityText) {
+    if (!Number.isFinite(parsedQuantity) || parsedQuantity === undefined || parsedQuantity <= 0) {
+      errors.quantity = 'الكمية يجب أن تكون رقمًا أكبر من 0';
+    }
+  }
+
+  if (address.length > 500) {
+    errors.address = 'العنوان يجب ألا يتجاوز 500 حرف';
+  }
+
+  if (values.images.length > 5) {
+    errors.images = 'يمكن رفع 5 صور كحد أقصى';
+  }
+
+  return {
+    errors,
+    payload: {
+      description,
+      materialType: materialType || undefined,
+      quantity: typeof parsedQuantity === 'number' && Number.isFinite(parsedQuantity) ? parsedQuantity : undefined,
+      address: address || undefined,
+    },
+  };
+};
+
 export default function ServiceRequestsPage() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-white pb-16 px-4 rtl">جاري التحميل...</div>}>
@@ -62,12 +162,27 @@ function ServiceRequestsPageContent() {
   const [activeTab, setActiveTab] = useState<'list' | 'create'>('list');
   const [activeStatus, setActiveStatus] = useState<'all' | 'active' | 'accepted' | 'ended'>('all');
   const [selectedRequest, setSelectedRequest] = useState<Inquiry | null>(null);
+  const [imageViewer, setImageViewer] = useState<{ src: string; alt: string } | null>(null);
   
   // Create Service Request Form
   const [description, setDescription] = useState('');
+  const [materialType, setMaterialType] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const [installationRequired, setInstallationRequired] = useState(false);
+  const [address, setAddress] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formErrors, setFormErrors] = useState<InquiryFormErrors>({});
+  
+  // Progressive Section Activation
+  const [sectionEngaged, setSectionEngaged] = useState({
+    basic: true, // Section 1 always starts engaged
+    material: false,
+    installation: false,
+    attachments: false,
+  });
+  const [isDragOver, setIsDragOver] = useState(false);
   
   // Alerts
   const [successMessage, setSuccessMessage] = useState('');
@@ -116,6 +231,40 @@ function ServiceRequestsPageContent() {
     return { message: rawMessage };
   };
 
+  // Determine which sections are currently active
+  const isSectionActive = (section: keyof typeof sectionEngaged) => {
+    const order = ['basic', 'material', 'installation', 'attachments'];
+    const currentIndex = order.indexOf(section);
+    
+    // A section is active if it's been engaged, or if all previous sections have been engaged
+    if (sectionEngaged[section]) return true;
+    
+    // Check if all previous sections are engaged
+    for (let i = 0; i < currentIndex; i++) {
+      if (!sectionEngaged[order[i] as keyof typeof sectionEngaged]) {
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
+  const getSectionClasses = (section: keyof typeof sectionEngaged) => {
+    const isActive = isSectionActive(section);
+    const baseClasses = 'rounded-2xl border border-slate-200 bg-slate-50/80 p-4 md:p-5 transition-all duration-300';
+    
+    if (isActive) {
+      return `${baseClasses} opacity-100 pointer-events-auto`;
+    }
+    
+    return `${baseClasses} opacity-50 pointer-events-none`;
+  };
+
+  const updateRequestLocally = useCallback((updatedRequest: Inquiry) => {
+    setRequests((current) => current.map((item) => (item._id === updatedRequest._id ? updatedRequest : item)));
+    setSelectedRequest((current) => (current?._id === updatedRequest._id ? updatedRequest : current));
+  }, []);
+
   const fetchRequests = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -154,7 +303,23 @@ function ServiceRequestsPageContent() {
     const trimmedDescription = description.trim();
     const minDescriptionLength = 10;
     if (!trimmedDescription || trimmedDescription.length < minDescriptionLength || trimmedDescription.length > 1000) {
-      setErrorMessage('الوصف يجب أن يكون بين 10 و 1000 حرف');
+      setFormErrors((current) => ({ ...current, description: 'الوصف يجب أن يكون بين 10 و 1000 حرف' }));
+      setErrorMessage('يرجى مراجعة الحقول المحددة في النموذج');
+      return;
+    }
+
+    const validation = normalizeInquiryFormFields({
+      description,
+      materialType,
+      quantity,
+      address,
+      images,
+    });
+
+    setFormErrors(validation.errors);
+
+    if (Object.keys(validation.errors).length > 0) {
+      setErrorMessage('يرجى مراجعة الحقول المحددة في النموذج');
       return;
     }
 
@@ -163,13 +328,22 @@ function ServiceRequestsPageContent() {
     try {
       await inquiryService.createInquiry({
         type: 'service_request',
-        description: trimmedDescription,
+        description: validation.payload.description,
+        materialType: validation.payload.materialType,
+        quantity: validation.payload.quantity,
+        installationRequired,
+        address: validation.payload.address,
         images,
       });
       
       setSuccessMessage('تم إنشاء طلب الخدمة بنجاح! سنرسل لك العروض قريباً');
       setDescription('');
+      setMaterialType('');
+      setQuantity('');
+      setInstallationRequired(false);
+      setAddress('');
       setImages([]);
+      setFormErrors({});
       
       // Refresh requests list
       setTimeout(() => {
@@ -200,11 +374,12 @@ function ServiceRequestsPageContent() {
 
   async function handleAcceptReply(request: Inquiry, reply: InquiryReply) {
     try {
-      await inquiryService.acceptReply(request._id, reply._id);
+      const response = await inquiryService.acceptReply(request._id, reply._id);
       setSuccessMessage('تم قبول العرض بنجاح');
-      setSelectedRequest(null);
+      if (response.inquiry) {
+        updateRequestLocally(response.inquiry);
+      }
       setActiveTab('list');
-      setActiveStatus('accepted');
       fetchRequests();
     } catch (error: unknown) {
       setErrorMessage(getErrorMessage(error, 'فشل في قبول العرض'));
@@ -214,11 +389,12 @@ function ServiceRequestsPageContent() {
 
   async function handleRejectReply(request: Inquiry) {
     try {
-      await inquiryService.rejectReply(request._id);
+      const response = await inquiryService.rejectReply(request._id);
       setSuccessMessage('تم رفض العرض');
-      setSelectedRequest(null);
+      if (response.inquiry) {
+        updateRequestLocally(response.inquiry);
+      }
       setActiveTab('list');
-      setActiveStatus('active');
       fetchRequests();
     } catch (error: unknown) {
       setErrorMessage(getErrorMessage(error, 'فشل في رفض العرض'));
@@ -228,15 +404,41 @@ function ServiceRequestsPageContent() {
 
   async function handleEndRequest(request: Inquiry) {
     try {
-      await inquiryService.endInquiry(request._id);
+      const response = await inquiryService.endInquiry(request._id);
       setSuccessMessage('تم إغلاق الطلب بنجاح');
+      if (response.inquiry) {
+        updateRequestLocally(response.inquiry);
+      }
       fetchRequests();
-      setSelectedRequest(null);
     } catch (error: unknown) {
       setErrorMessage(getErrorMessage(error, 'فشل في إغلاق الطلب'));
       console.error('Error ending request:', error);
     }
   }
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+
+    const incomingFiles = Array.from(e.target.files);
+    setImages((current) => {
+      const merged = [...current, ...incomingFiles].slice(0, 5);
+      if (current.length + incomingFiles.length > 5) {
+        setFormErrors((currentErrors) => ({
+          ...currentErrors,
+          images: 'يمكن رفع 5 صور كحد أقصى',
+        }));
+      } else {
+        setFormErrors((currentErrors) => {
+          const nextErrors = { ...currentErrors };
+          delete nextErrors.images;
+          return nextErrors;
+        });
+      }
+      return merged;
+    });
+
+    e.target.value = '';
+  };
 
   async function handleDeleteRequest(requestId: string) {
     if (confirm('هل أنت متأكد من حذف هذا الطلب؟')) {
@@ -251,14 +453,6 @@ function ServiceRequestsPageContent() {
       }
     }
   }
-
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      setImages(prev => [...prev, ...files].slice(0, 5));
-      e.target.value = '';
-    }
-  };
 
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
@@ -370,89 +564,228 @@ function ServiceRequestsPageContent() {
 
         {/* Create Tab */}
         {activeTab === 'create' && (
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
-            <h2 className="mb-6 text-2xl font-bold text-slate-900">إنشاء طلب خدمة جديد</h2>
-            
-            <form onSubmit={handleCreateRequest} className="space-y-6">
-              {/* Description */}
+          <form onSubmit={handleCreateRequest} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
-                <label htmlFor="description" className="mb-2 block text-sm font-semibold text-slate-700">
-                  وصف الخدمة المطلوبة <span className="text-rose-500">*</span>
-                </label>
-                <textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={6}
-                  maxLength={1000}
-                  placeholder="اشرح تفاصيل الخدمة المطلوبة بدقة... مثل: المساحة، المنطقة، نوع الرخام، المواصفات، الموعد المتوقع، إلخ"
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                  required
-                />
-                <div className="mt-1 flex justify-between text-xs text-slate-500">
-                  <span>من 10 إلى 1000 حرف</span>
-                  <span>{description.length} / 1000</span>
-                </div>
+                <h2 className="text-2xl font-bold text-slate-900">أضف طلب خدمة</h2>
               </div>
+              <button
+                type="button"
+                onClick={() => setActiveTab('list')}
+                className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-blue-200 hover:text-blue-700"
+              >
+                عودة للقائمة
+              </button>
+            </div>
 
-              {/* Images */}
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-700">
-                  الصور (اختياري - حتى 5 صور)
-                </label>
-                <div className="space-y-3">
-                  <input
-                    type="file"
-                    accept="image/*,.heic,.heif,.webp"
-                    multiple
-                    onChange={handleImageSelect}
-                    className="hidden"
-                    id="service-image-upload"
+            <div className="space-y-5">
+              <section className={getSectionClasses('basic')}>
+                <div className="mb-4">
+                  <h3 className="text-lg font-bold text-slate-900">معلومات أساسية</h3>
+                  <p className="mt-1 text-sm text-slate-500">الوصف مطلوب لبدء الطلب والرد عليه بشكل صحيح.</p>
+                </div>
+                <div className="space-y-2">
+                  <label className="block font-semibold text-slate-800">وصف الخدمة *</label>
+                  <textarea
+                    value={description}
+                    onChange={(e) => {
+                      setDescription(e.target.value);
+                      setFormErrors((current) => ({ ...current, description: undefined }));
+                    }}
+                    onFocus={() => setSectionEngaged((prev) => ({ ...prev, basic: true }))}
+                    onBlur={() => {
+                      if (description.trim().length > 0) {
+                        setSectionEngaged((prev) => ({ ...prev, material: true }));
+                      }
+                    }}
+                    rows={8}
+                    maxLength={1000}
+                    placeholder="مثال: احتاج لصيانة الرخام والتلميع، المساحة حوالي 200 متر...&#10;أو: تركيب جديد مع الإزالة والتنظيف"
+                    className="w-full rounded-2xl border-2 border-blue-200 bg-blue-50/40 px-5 py-4 text-base text-slate-900 transition placeholder:text-slate-500 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
                   />
-                  <label
-                    htmlFor="service-image-upload"
-                    className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-slate-700 transition hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700"
-                  >
-                    <Upload className="h-5 w-5" />
-                    <span className="text-sm font-semibold">اختر الصور</span>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className={formErrors.description ? 'text-rose-600' : 'text-slate-500'}>{formErrors.description || 'من 10 إلى 1000 حرف'}</span>
+                    <span className={description.length > 1000 ? 'text-rose-600' : 'text-slate-500'}>{description.length} / 1000</span>
+                  </div>
+                </div>
+              </section>
+
+              <section className={getSectionClasses('material')}>
+                <div className="mb-4">
+                  <h3 className="text-lg font-bold text-slate-900">تفاصيل المادة والكمية</h3>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="block font-semibold text-slate-800">نوع المادة</label>
+                    <input
+                      value={materialType}
+                      onChange={(e) => {
+                        setMaterialType(e.target.value);
+                        setFormErrors((current) => ({ ...current, materialType: undefined }));
+                      }}
+                      onFocus={() => setSectionEngaged((prev) => ({ ...prev, material: true }))}
+                      onBlur={() => {
+                        if (materialType.trim().length > 0 || quantity.trim().length > 0) {
+                          setSectionEngaged((prev) => ({ ...prev, installation: true }));
+                        }
+                      }}
+                      placeholder="مثال: رخام، جرانيت..."
+                      maxLength={200}
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 transition focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+                    />
+                    <p className={`text-xs ${formErrors.materialType ? 'text-rose-600' : 'text-slate-500'}`}>{formErrors.materialType || 'حتى 200 حرف'}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block font-semibold text-slate-800">الكمية</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="any"
+                      inputMode="decimal"
+                      value={quantity}
+                      onChange={(e) => {
+                        setQuantity(e.target.value);
+                        setFormErrors((current) => ({ ...current, quantity: undefined }));
+                      }}
+                      onFocus={() => setSectionEngaged((prev) => ({ ...prev, material: true }))}
+                      onBlur={() => {
+                        if (materialType.trim().length > 0 || quantity.trim().length > 0) {
+                          setSectionEngaged((prev) => ({ ...prev, installation: true }));
+                        }
+                      }}
+                      placeholder="رقم موجب يقبل الكسور"
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 transition focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+                    />
+                    <p className={`text-xs ${formErrors.quantity ? 'text-rose-600' : 'text-slate-500'}`}>{formErrors.quantity || 'أكبر من 0 ويسمح بالكسور'}</p>
+                  </div>
+                </div>
+              </section>
+
+              <section className={getSectionClasses('installation')}>
+                <div className="mb-4">
+                  <h3 className="text-lg font-bold text-slate-900">متطلبات التركيب والعنوان</h3>
+                </div>
+                <div className="grid gap-4 md:grid-cols-[auto,1fr] md:items-start">
+                  <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800">
+                    <input
+                      type="checkbox"
+                      checked={installationRequired}
+                      onChange={(e) => setInstallationRequired(e.target.checked)}
+                      onFocus={() => setSectionEngaged((prev) => ({ ...prev, installation: true }))}
+                      onBlur={() => {
+                        if (installationRequired || address.trim().length > 0) {
+                          setSectionEngaged((prev) => ({ ...prev, attachments: true }));
+                        }
+                      }}
+                      className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm font-medium">هل تحتاج تركيبًا؟</span>
                   </label>
-                  
-                  {images.length > 0 && (
-                    <div className="grid grid-cols-3 gap-3 md:grid-cols-5">
-                      {images.map((image, index) => (
-                        <div key={index} className="relative aspect-square">
+
+                  <div className="space-y-2">
+                    <label className="block font-semibold text-slate-800">العنوان</label>
+                    <textarea
+                      value={address}
+                      onChange={(e) => {
+                        setAddress(e.target.value);
+                        setFormErrors((current) => ({ ...current, address: undefined }));
+                      }}
+                      onFocus={() => setSectionEngaged((prev) => ({ ...prev, installation: true }))}
+                      onBlur={() => {
+                        if (address.trim().length > 0 || installationRequired) {
+                          setSectionEngaged((prev) => ({ ...prev, attachments: true }));
+                        }
+                      }}
+                      rows={3}
+                      maxLength={500}
+                      placeholder="اكتب العنوان أو موقع التنفيذ"
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 transition focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+                    />
+                    <p className={`text-xs ${formErrors.address ? 'text-rose-600' : 'text-slate-500'}`}>{formErrors.address || 'حتى 500 حرف'}</p>
+                  </div>
+                </div>
+              </section>
+
+              <section className={getSectionClasses('attachments')}>
+                <div className="mb-4">
+                  <h3 className="text-lg font-bold text-slate-900">المرفقات</h3>
+                  <p className="mt-1 text-sm text-slate-500">يمكن رفع حتى 5 صور، مع معاينة واضحة قبل الإرسال.</p>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*,.heic,.heif,.webp"
+                  multiple
+                  onChange={handleImageSelect}
+                  onFocus={() => setSectionEngaged((prev) => ({ ...prev, attachments: true }))}
+                  className="hidden"
+                  id="service-image-upload"
+                />
+                <label
+                  htmlFor="service-image-upload"
+                  className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-4 py-8 text-center transition ${
+                    isDragOver
+                      ? 'border-blue-500 bg-blue-100/50 shadow-md'
+                      : 'border-slate-300 bg-white hover:border-blue-500 hover:bg-blue-50'
+                  }`}
+                  onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                  onDragLeave={() => setIsDragOver(false)}
+                  onDrop={(e) => { e.preventDefault(); setIsDragOver(false); }}
+                >
+                  <Upload className="h-5 w-5 text-slate-500" />
+                  <span className="text-sm font-semibold text-slate-700">اختر الصور أو اسحبها هنا</span>
+                  <span className="text-xs text-slate-500">HEIC, HEIF, WebP, JPEG, PNG</span>
+                </label>
+                <p className={`mt-3 text-xs ${formErrors.images ? 'text-rose-600' : 'text-slate-500'}`}>
+                  {formErrors.images || `${images.length} / 5 صور`}
+                </p>
+
+                {images.length > 0 && (
+                  <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-5">
+                    {images.map((image, index) => (
+                      <div key={`${image.name}-${index}`} className="space-y-2">
+                        <button
+                          type="button"
+                          onClick={() => setImageViewer({ src: previewUrls[index] || '/acessts/NoImage.jpg', alt: image.name })}
+                          className="relative block aspect-square w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-100"
+                        >
                           <Image
                             src={previewUrls[index] || '/acessts/NoImage.jpg'}
-                            alt={`صورة ${index + 1}`}
+                            alt={image.name}
                             fill
-                            sizes="(max-width: 768px) 33vw, 20vw"
-                            className="rounded-xl object-cover"
+                            sizes="(max-width: 768px) 50vw, 20vw"
+                            className="object-cover transition duration-300 hover:scale-105"
                             unoptimized
                           />
+                        </button>
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="min-w-0 flex-1 truncate text-xs text-slate-600">{image.name}</p>
                           <button
                             type="button"
                             onClick={() => removeImage(index)}
-                            className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white shadow-md transition hover:bg-rose-600"
+                            className="rounded-full bg-rose-500 px-2 py-1 text-[10px] font-semibold text-white transition hover:bg-rose-600"
                           >
-                            <X className="h-4 w-4" />
+                            حذف
                           </button>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
 
-              {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="w-full rounded-2xl bg-blue-600 py-3 text-base font-semibold text-white shadow-md transition hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed"
+                disabled={isSubmitting || getCtaButtonState(description).disabled}
+                className={`inline-flex w-full items-center justify-center rounded-2xl px-8 py-4 text-base font-bold text-white shadow-lg transition ${
+                  getCtaButtonState(description).disabled
+                    ? 'cursor-not-allowed bg-slate-300 shadow-slate-200/50'
+                    : 'bg-gradient-to-r from-blue-600 to-cyan-600 shadow-blue-200/50 hover:from-blue-700 hover:to-cyan-700'
+                }`}
               >
-                {isSubmitting ? 'جاري الإرسال...' : 'إرسال طلب الخدمة'}
+                {isSubmitting ? 'جاري الإرسال...' : getCtaButtonState(description).text}
               </button>
-            </form>
-          </div>
+            </div>
+          </form>
         )}
       </div>
 
@@ -470,7 +803,7 @@ function ServiceRequestsPageContent() {
       {/* Request Details Modal */}
       {selectedRequest && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200 px-6 py-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold text-slate-900">تفاصيل طلب الخدمة</h3>
@@ -485,72 +818,99 @@ function ServiceRequestsPageContent() {
 
             <div className="p-6 space-y-6">
               {/* Status and Info */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <InquiryStatusBadge status={selectedRequest.status} />
-                  <span className="text-sm text-slate-500">
+              <div className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 md:grid-cols-2">
+                <div className="space-y-4 md:col-span-2">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h4 className="text-xl font-bold text-slate-900">{formatOptionalText(selectedRequest.name, 'طلب خدمة')}</h4>
+                    <InquiryStatusBadge status={selectedRequest.status} />
+                  </div>
+                  <p className="whitespace-pre-wrap rounded-2xl border border-slate-200 bg-slate-50 p-4 text-slate-700">{selectedRequest.description}</p>
+                </div>
+
+                <div className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">نوع المادة</p>
+                  <p className="text-sm font-medium text-slate-900">{formatOptionalText(selectedRequest.materialType)}</p>
+                </div>
+                <div className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">الكمية</p>
+                  <p className="text-sm font-medium text-slate-900">{formatOptionalQuantity(selectedRequest.quantity)}</p>
+                </div>
+                <div className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">التركيب مطلوب</p>
+                  <p className="text-sm font-medium text-slate-900">{formatBooleanValue(selectedRequest.installationRequired)}</p>
+                </div>
+                <div className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">العنوان</p>
+                  <p className="text-sm font-medium text-slate-900">{formatOptionalText(selectedRequest.address)}</p>
+                </div>
+
+                <div className="md:col-span-2 space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">التاريخ</p>
+                  <p className="text-sm font-medium text-slate-900">
                     {new Date(selectedRequest.createdAt).toLocaleDateString('ar-EG', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric'
                     })}
-                  </span>
+                  </p>
                 </div>
-              </div>
-
-              {/* Description */}
-              <div className="rounded-xl bg-white border border-slate-200 p-4">
-                <h4 className="mb-2 text-sm font-semibold text-slate-700">وصف الخدمة</h4>
-                <p className="whitespace-pre-wrap text-sm leading-7 text-slate-600">
-                  {selectedRequest.description}
-                </p>
               </div>
 
               {/* Images */}
-              {selectedRequest.imageList && selectedRequest.imageList.length > 0 && (
-                <div className="rounded-xl bg-white border border-slate-200 p-4">
-                  <h4 className="mb-3 text-sm font-semibold text-slate-700">الصور المرفقة</h4>
-                  <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-                    {selectedRequest.imageList.map((img, index) => (
-                      <div key={index} className="relative aspect-square">
-                        <Image
-                          src={resolveInquiryImage(img) || '/acessts/NoImage.jpg'}
-                          alt={`صورة ${index + 1}`}
-                          fill
-                          sizes="(max-width: 768px) 50vw, 33vw"
-                          className="rounded-lg object-cover"
-                          unoptimized
-                        />
-                      </div>
-                    ))}
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <h4 className="mb-3 text-sm font-semibold text-slate-700">الصور المرفقة</h4>
+                {selectedRequest.imageList && selectedRequest.imageList.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                    {selectedRequest.imageList.map((img, index) => {
+                      const resolved = resolveInquiryImage(img) || '/acessts/NoImage.jpg';
+                      return (
+                        <button
+                          key={`${img}-${index}`}
+                          type="button"
+                          onClick={() => setImageViewer({ src: resolved, alt: `صورة ${index + 1}` })}
+                          className="relative aspect-square overflow-hidden rounded-2xl border border-slate-200 bg-slate-100"
+                        >
+                          <Image
+                            src={resolved}
+                            alt={`صورة ${index + 1}`}
+                            fill
+                            sizes="(max-width: 768px) 50vw, 25vw"
+                            className="object-cover transition duration-300 hover:scale-105"
+                            unoptimized
+                          />
+                        </button>
+                      );
+                    })}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <p className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center text-sm text-slate-500">لا توجد صور</p>
+                )}
+              </div>
 
               {/* Replies/Offers */}
-              <div className="rounded-xl bg-white border border-slate-200 p-4">
+              <div className="rounded-2xl bg-white border border-slate-200 p-4">
                 <h4 className="mb-3 text-sm font-semibold text-slate-700">
-                  العروض المستلمة ({selectedRequest.reply.length})
+                  العروض المستلمة ({emptyInquiryReplies(selectedRequest).length})
                 </h4>
                 
-                {selectedRequest.reply.length === 0 ? (
+                {emptyInquiryReplies(selectedRequest).length === 0 ? (
                   <p className="text-center py-6 text-sm text-slate-500">
                     لا توجد عروض حتى الآن. سنخطرك عند استلام عروض جديدة.
                   </p>
                 ) : (
                   <div className="space-y-3">
-                    {selectedRequest.reply.map((reply) => (
+                    {emptyInquiryReplies(selectedRequest).map((reply) => (
                       <div
                         key={reply._id}
-                        className={`rounded-lg border p-4 ${
+                        className={`rounded-2xl border p-4 ${
                           reply.status === 'accepted'
-                            ? 'border-emerald-200 bg-emerald-50'
+                            ? 'border-emerald-200 bg-emerald-50/70'
                             : reply.status === 'rejected'
-                            ? 'border-slate-200 bg-slate-50'
-                            : 'border-slate-200 bg-white'
+                            ? 'border-rose-200 bg-rose-50/70'
+                            : 'border-slate-200 bg-slate-50'
                         }`}
                       >
-                        <div className="flex items-start justify-between gap-3 mb-3">
+                        <div className="mb-3 flex items-start justify-between gap-3">
                           <div className="flex-1">
                             <p className="text-sm font-semibold text-slate-900">عرض من مقدم خدمة</p>
                             <p className="text-xs text-slate-500 mt-1">
@@ -568,7 +928,37 @@ function ServiceRequestsPageContent() {
                             </span>
                           )}
                         </div>
-                        <p className="text-sm leading-6 text-slate-700 mb-3">{reply.text}</p>
+                        <p className="text-sm leading-6 text-slate-700 mb-3 whitespace-pre-wrap">{reply.text}</p>
+
+                        {Array.isArray(reply.imageList) && reply.imageList.length > 0 ? (
+                          <div className="mb-4 space-y-3">
+                            <p className="text-sm font-semibold text-slate-700">صور الرد</p>
+                            <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory">
+                              {reply.imageList.map((img, index) => {
+                                const resolved = resolveInquiryImage(img) || '/acessts/NoImage.jpg';
+                                return (
+                                  <button
+                                    key={`${img}-${index}`}
+                                    type="button"
+                                    onClick={() => setImageViewer({ src: resolved, alt: `صورة الرد ${index + 1}` })}
+                                    className="relative h-28 w-28 flex-none snap-start overflow-hidden rounded-2xl border border-slate-200 bg-white"
+                                  >
+                                    <Image
+                                      src={resolved}
+                                      alt={`صورة الرد ${index + 1}`}
+                                      fill
+                                      sizes="112px"
+                                      className="object-cover transition duration-300 hover:scale-105"
+                                      unoptimized
+                                    />
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="mb-4 text-sm text-slate-500">لا توجد صور</p>
+                        )}
                         
                         {reply.status === 'pending' && selectedRequest.status === 'active' && (
                           <button
@@ -611,6 +1001,28 @@ function ServiceRequestsPageContent() {
                 </button>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {imageViewer && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4" onClick={() => setImageViewer(null)}>
+          <div className="relative max-h-[90vh] max-w-4xl overflow-hidden rounded-3xl bg-white p-3 shadow-2xl" onClick={(event) => event.stopPropagation()}>
+            <button
+              type="button"
+              onClick={() => setImageViewer(null)}
+              className="absolute right-4 top-4 z-10 rounded-full bg-black/60 px-3 py-2 text-sm font-semibold text-white"
+            >
+              إغلاق
+            </button>
+            <Image
+              src={imageViewer.src}
+              alt={imageViewer.alt}
+              width={1200}
+              height={900}
+              className="h-auto max-h-[85vh] w-auto max-w-full rounded-2xl object-contain"
+              unoptimized
+            />
           </div>
         </div>
       )}

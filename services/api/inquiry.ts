@@ -15,9 +15,13 @@ export interface Inquiry {
   description: string;
   phoneNumber: string;
   email: string;
+  materialType?: string;
+  quantity?: number;
+  installationRequired?: boolean;
+  address?: string;
   imageList?: string[];
   status: 'active' | 'accepted' | 'ended';
-  reply: InquiryReply[];
+  reply?: InquiryReply[];
   acceptedReplyId: string | null;
   createdAt: string;
   updatedAt: string;
@@ -28,6 +32,7 @@ export interface InquiryReply {
   organizationId: string;
   createdBy: string;
   text: string;
+  imageList?: string[];
   status: 'pending' | 'accepted' | 'rejected';
   createdAt: string;
 }
@@ -38,11 +43,19 @@ export interface CreateInquiryData {
   description: string;
   phoneNumber?: string;
   email?: string;
+  materialType?: string;
+  quantity?: number;
+  installationRequired?: boolean;
+  address?: string;
   images?: File[];
 }
 
 export interface UpdateInquiryData {
   description?: string;
+  materialType?: string;
+  quantity?: number;
+  installationRequired?: boolean;
+  address?: string;
   images?: File[];
 }
 
@@ -109,6 +122,12 @@ export const inquiryService = {
       formData.append('description', data.description);
       if (data.phoneNumber) formData.append('phoneNumber', data.phoneNumber);
       if (data.email) formData.append('email', data.email);
+      if (data.materialType) formData.append('materialType', data.materialType);
+      if (typeof data.quantity === 'number') formData.append('quantity', String(data.quantity));
+      if (typeof data.installationRequired === 'boolean') {
+        formData.append('installationRequired', String(data.installationRequired));
+      }
+      if (data.address) formData.append('address', data.address);
       
       if (data.images && data.images.length > 0) {
         for (const image of data.images) {
@@ -169,7 +188,13 @@ export const inquiryService = {
     try {
       const formData = new FormData();
       
-      if (data.description) formData.append('description', data.description);
+      if (data.description !== undefined) formData.append('description', data.description);
+      if (data.materialType !== undefined) formData.append('materialType', data.materialType);
+      if (typeof data.quantity === 'number') formData.append('quantity', String(data.quantity));
+      if (typeof data.installationRequired === 'boolean') {
+        formData.append('installationRequired', String(data.installationRequired));
+      }
+      if (data.address !== undefined) formData.append('address', data.address);
       
       if (data.images && data.images.length > 0) {
         for (const image of data.images) {

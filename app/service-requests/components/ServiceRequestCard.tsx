@@ -36,11 +36,18 @@ interface ServiceRequestCardProps {
 export default function ServiceRequestCard({ request, onViewDetails, onViewOffers }: ServiceRequestCardProps) {
   const firstLine = request.description?.trim().split('\n')[0];
   const title = firstLine || "طلب خدمة";
-  const hasOffers = request.reply.length > 0;
-  const offerCount = request.reply.length;
+  const replies = Array.isArray(request.reply) ? request.reply : [];
+  const hasOffers = replies.length > 0;
+  const offerCount = replies.length;
   const previewImage = resolveInquiryImage(request.imageList?.[0]);
   const [previewError, setPreviewError] = useState(false);
   const previewSrc = previewError ? "/acessts/NoImage.jpg" : previewImage;
+  const details = [
+    request.materialType?.trim() || "غير محدد",
+    typeof request.quantity === "number" ? `الكمية: ${request.quantity}` : null,
+    typeof request.installationRequired === "boolean" ? `التركيب: ${request.installationRequired ? "نعم" : "لا"}` : null,
+    request.address?.trim() ? request.address.trim() : null,
+  ].filter(Boolean) as string[];
 
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md md:p-6">
@@ -59,6 +66,13 @@ export default function ServiceRequestCard({ request, onViewDetails, onViewOffer
             <span className={hasOffers ? "text-emerald-600" : "text-slate-400"}>
               {hasOffers ? "تم استلام عروض" : "بانتظار عروض من مقدمي الخدمة"}
             </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {details.slice(0, 4).map((detail) => (
+              <span key={detail} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
+                {detail}
+              </span>
+            ))}
           </div>
         </div>
 

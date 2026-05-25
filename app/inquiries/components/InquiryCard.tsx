@@ -35,11 +35,18 @@ interface InquiryCardProps {
 
 export default function InquiryCard({ inquiry, onViewDetails, onViewOffers }: InquiryCardProps) {
   const title = inquiry.name?.trim() || "طلب خاص";
-  const hasOffers = inquiry.reply.length > 0;
-  const offerCount = inquiry.reply.length;
+  const replies = Array.isArray(inquiry.reply) ? inquiry.reply : [];
+  const hasOffers = replies.length > 0;
+  const offerCount = replies.length;
   const previewImage = resolveInquiryImage(inquiry.imageList?.[0]);
   const [previewError, setPreviewError] = useState(false);
   const previewSrc = previewError ? "/acessts/NoImage.jpg" : previewImage;
+  const details = [
+    inquiry.materialType?.trim() || "غير محدد",
+    typeof inquiry.quantity === "number" ? `الكمية: ${inquiry.quantity}` : null,
+    typeof inquiry.installationRequired === "boolean" ? `التركيب: ${inquiry.installationRequired ? "نعم" : "لا"}` : null,
+    inquiry.address?.trim() ? inquiry.address.trim() : null,
+  ].filter(Boolean) as string[];
 
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md md:p-6">
@@ -58,6 +65,13 @@ export default function InquiryCard({ inquiry, onViewDetails, onViewOffers }: In
             <span className={hasOffers ? "text-emerald-600" : "text-slate-400"}>
               {hasOffers ? "تم استلام عروض" : "بانتظار عروض الموردين"}
             </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {details.slice(0, 4).map((detail) => (
+              <span key={detail} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
+                {detail}
+              </span>
+            ))}
           </div>
         </div>
 
