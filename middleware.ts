@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const CANONICAL_DOMAIN = 'www.shkelteaban.com';
+const CANONICAL_DOMAIN = 'shakeltabaanfrontend-no-vercel.vercel.app';
 const PROTOCOL = 'https';
 
 export function middleware(request: NextRequest) {

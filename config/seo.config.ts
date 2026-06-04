@@ -3,7 +3,7 @@
 const normalizeBaseUrl = (value: string) => value.replace(/\/+$/, '');
 
 export const canonicalBaseUrl = normalizeBaseUrl(
-  process.env.NEXT_PUBLIC_SITE_URL || 'https://www.shkelteaban.com'
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://shakeltabaanfrontend-no-vercel.vercel.app'
 );
 
 export const seoConfig = {

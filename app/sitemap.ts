@@ -14,7 +14,7 @@ type ApiEntity = {
   updatedAt?: string;
 };
 
-const BASE_URL = (process.env.NEXT_PUBLIC_BASE_URL || "https://www.shkelteaban.com").replace(
+const BASE_URL = (process.env.NEXT_PUBLIC_BASE_URL || "https://shakeltabaanfrontend-no-vercel.vercel.app").replace(
   /^http:\/\//,
   "https://"
 );
