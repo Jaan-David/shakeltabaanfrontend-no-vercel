@@ -69,7 +69,7 @@ export default function AboutMarblePage() {
             headline: "أنواع الرخام في مصر | شق التعبان",
             description:
               "تعرف على أنواع الرخام في مصر ومميزاته واستخداماته مع مقارنة الرخام والجرانيت ونصائح اختيار الرخام من شق التعبان.",
-            url: "https://shakeltabaanfrontend-no-vercel.vercel.app/about-marble",
+            url: "https://www.shkelteaban.com/about-marble",
             inLanguage: "ar",
           }),
         }}

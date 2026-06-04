@@ -33,7 +33,7 @@ type AltTextOptions = {
 };
 
 const getBaseUrl = () =>
-  process.env.NEXT_PUBLIC_BASE_URL || "https://shakeltabaanfrontend-no-vercel.vercel.app";
+  process.env.NEXT_PUBLIC_BASE_URL || "https://www.shkelteaban.com";
 
 export const buildOrganizationKeywords = (name?: string, location?: string) => {
   const keywords = [
